@@ -31,7 +31,7 @@ interface RequeryRepository<T, ID>: PagingAndSortingRepository<T, ID>, QueryByEx
 
     fun deleteAllInBatch()
 
-    fun getOne(id: ID): T
+    fun getOne(id: ID): T?
 
     override fun <S: T> findAll(example: Example<S>): Iterable<S>
 

@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.repository.support
 
+import com.coupang.kotlinx.data.requery.models.RequeryEntity
 import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.core.RequeryOperations
 import com.coupang.springframework.data.requery.repository.RequeryRepository
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Repository
+import java.io.Serializable
 import java.util.*
 
 /**
@@ -18,12 +20,13 @@ import java.util.*
  * @since 18. 5. 29
  */
 @Repository
-open class SimpleRequeryRepository<T, ID>(private val requeryOperations: RequeryOperations,
-                                          private val domainClass: Class<T>): RequeryRepository<T, ID> {
+open class SimpleRequeryRepository<T: RequeryEntity<ID>, ID: Serializable>(
+    private val operations: RequeryOperations,
+    private val entityType: Class<T>): RequeryRepository<T, ID> {
 
     companion object: KLogging()
 
-    //private val exampleConverter = RequeryExampleConverter(requeryOperations.converter.mappingContext)
+    //private val exampleConverter = RequeryExampleConverter(operations.converter.mappingContext)
 
 
     override fun findAll(): Iterable<T> {
@@ -55,15 +58,19 @@ open class SimpleRequeryRepository<T, ID>(private val requeryOperations: Requery
     }
 
     override fun <S: T> saveAll(entities: Iterable<S>): Iterable<S> {
-        TODO("not implemented")
+        return entities.map {
+            operations.upsert(it)
+        }
     }
 
     override fun <S: T> upsert(entity: S): S {
-        TODO("not implemented")
+        return operations.upsert(entity)
     }
 
     override fun <S: T> upsertAll(entities: Iterable<S>): Iterable<S> {
-        TODO("not implemented")
+        return entities.map {
+            operations.upsert(it)
+        }
     }
 
     override fun deleteInBatch(entities: Iterable<T>) {
@@ -74,28 +81,28 @@ open class SimpleRequeryRepository<T, ID>(private val requeryOperations: Requery
         TODO("not implemented")
     }
 
-    override fun getOne(id: ID): T {
-        TODO("not implemented")
+    override fun getOne(id: ID): T? {
+        return operations.findById(entityType, id)
     }
 
     override fun <S: T> save(entity: S): S {
-        TODO("not implemented")
+        return operations.save(entity)
     }
 
     override fun deleteById(id: ID) {
-        TODO("not implemented")
+        operations.deleteById(id)
     }
 
-    override fun deleteAll(entities: MutableIterable<T>?) {
-        TODO("not implemented")
+    override fun deleteAll(entities: MutableIterable<T>) {
+        operations.dataStore.delete(entities)
     }
 
     override fun deleteAll() {
-        TODO("not implemented")
+        operations.deleteAll(entityType)
     }
 
     override fun count(): Long {
-        TODO("not implemented")
+        return operations.count(entityType)
     }
 
     override fun <S: T> count(example: Example<S>?): Long {
@@ -107,7 +114,7 @@ open class SimpleRequeryRepository<T, ID>(private val requeryOperations: Requery
     }
 
     override fun findById(id: ID): Optional<T> {
-        TODO("not implemented")
+        return Optional.ofNullable(operations.findById(entityType, id))
     }
 
     override fun delete(entity: T) {
