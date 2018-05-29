@@ -34,7 +34,7 @@ apply plugin: 'kotlin-noarg'
 // for Java apt
 apply plugin: "net.ltgt.apt"
 
-apply plugin: 'org.jetbrains.dokka'
+// apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'idea'
 
 apply plugin: 'maven'
@@ -74,49 +74,109 @@ group = 'com.coupang'
 version = '0.0.1-SNAPSHOT'
 
 repositories {
+    maven {
+        credentials {
+            username "$nexusUser"
+            password "$nexusPassword"
+        }
+        url "http://nexus.coupang.net/content/groups/public"
+    }
     mavenLocal()
     mavenCentral()
     jcenter()
+    maven { url "https://jitpack.io" }
+    maven { url "https://repo.spring.io/release" }
+    maven { url "http://repo.spring.io/milestone/" }
+    // spring-kotlin-coroutine
+    maven { url "https://dl.bintray.com/konrad-kaminski/maven" }
 }
 
 dependencyManagement {
     imports {
         mavenBom "org.springframework.boot:spring-boot-dependencies:$spring_boot_version"
     }
+
+    dependencies {
+        
+        dependency "com.coupang.kotlinx:kotlinx-logging:$coupang_kotlinx_version"
+        dependency "com.coupang.kotlinx:kotlinx-core:$coupang_kotlinx_version"
+        dependency "com.coupang.kotlinx:kotlinx-io:$coupang_kotlinx_version"
+        dependency "com.coupang.kotlinx:kotlinx-data:$coupang_kotlinx_version"
+        dependency "com.coupang.kotlinx:kotlinx-data-requery:$coupang_kotlinx_version"
+
+        dependency "io.requery:requery:$requery_version"
+        dependency "io.requery:requery-kotlin:$requery_version"
+        dependency "io.requery:requery-processor:$requery_version"
+
+        dependency "org.slf4j:slf4j-api:1.7.25"
+        dependency "ch.qos.logback:logback-classic:1.2.3"
+
+        // JSR-310 Backport for JDK 7 / JDK 6
+        dependency "org.threeten:threetenbp:1.3.6"
+
+        dependency "com.zaxxer:HikariCP:3.1.0"
+
+
+        dependency "javax.annotation:javax.annotation-api:1.3.2"
+        dependency "javax.interceptor:javax.interceptor-api:1.2.2"
+        dependency "javax.persistence:persistence-api:1.0.2"
+        dependency "javax.validation:validation-api:2.0.1.Final"
+        dependency "org.eclipse.persistence:javax.persistence:2.2.0"
+        
+        dependency "org.javassist:javassist:3.22.0-GA"
+
+        dependency "org.assertj:assertj-core:3.10.0"
+        dependency "org.mockito:mockito-core:2.18.3"
+        dependency "com.nhaarman:mockito-kotlin:1.5.0"
+    }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$kotlinx_coroutines_version"
 
-    compile "org.springframework.data:spring-data-commons:2.0.7.RELEASE"
+    implementation "com.coupang.kotlinx:kotlinx-data-requery"
 
-    compile "io.requery:requery:$requery_version"
-    compile "io.requery:requery-kotlin:$requery_version"
+    // spring framework
+    implementation "org.springframework:spring-beans"
+    implementation "org.springframework:spring-context"
+    implementation "org.springframework:spring-expression"
+    implementation "org.springframework:spring-tx"
+    implementation "org.springframework.data:spring-data-commons"
 
-    kapt "io.requery:requery-processor:$requery_version"
-    kaptTest "io.requery:requery-processor:$requery_version"
+    implementation "io.requery:requery"
+    implementation "io.requery:requery-kotlin"
 
-    compile "org.slf4j:slf4j-api:1.7.25"
-    testCompile "ch.qos.logback:logback-classic:1.2.3"
-    testCompile "io.github.microutils:kotlin-logging:1.4.6"
+    kapt "io.requery:requery-processor"
+    kaptTest "io.requery:requery-processor"
 
-    testCompile "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
+    implementation "org.threeten:threetenbp"
+
+    implementation "org.slf4j:slf4j-api"
+    testImplementation "ch.qos.logback:logback-classic"
+
+    implementation "javax.annotation:javax.annotation-api"
+    implementation "javax.interceptor:javax.interceptor-api"
+    implementation "javax.validation:validation-api"
+    implementation "org.eclipse.persistence:javax.persistence"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
     testRuntime "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
 
-    testCompile "org.assertj:assertj-core:3.9.1"
-    testCompile "org.mockito:mockito-core:2.18.3"
-    testCompile "com.nhaarman:mockito-kotlin:1.5.0"
+    testCompile "org.assertj:assertj-core"
+    testCompile "org.mockito:mockito-core"
+    testCompile "com.nhaarman:mockito-kotlin"
 
     // Only needed to run tests in an (IntelliJ) IDE(A) that bundles an older version
     testRuntime "org.junit.platform:junit-platform-launcher:$junit_platform_version"
     testRuntime "org.junit.platform:junit-platform-console-standalone:$junit_platform_version"
 
     // To avoid compiler warnings about @API annotations in JUnit code
-    testCompileOnly "org.apiguardian:apiguardian-api:1.0.0"
+    // testCompileOnly "org.apiguardian:apiguardian-api:1.0.0"
 
-    testCompile "org.springframework.boot:spring-boot-starter-jdbc:$spring_boot_version"
-    testCompile "org.springframework.boot:spring-boot-starter-test:$spring_boot_version"
+    testImplementation "org.springframework.boot:spring-boot-starter-jdbc"
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -133,6 +193,7 @@ compileKotlin {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs = ["-Xjsr305=strict", "-Xenable-jvm-default"]
         javaParameters = true
         apiVersion = "1.2"
         languageVersion = "1.2"
@@ -156,17 +217,17 @@ test {
     // systemProperty 'java.util.logging.manager', 'ch.qos.logback.classic.Logger'
 }
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/dokka"
-    jdkVersion = 8
-    //reportNotDocumented = false
-}
+//dokka {
+//    outputFormat = 'html'
+//    outputDirectory = "$buildDir/dokka"
+//    jdkVersion = 8
+//    //reportNotDocumented = false
+//}
 
-task dokkaJar(type: Jar, dependsOn: dokka) {
-    classifier = 'javadoc'
-    from dokka.outputDirectory
-}
+//task dokkaJar(type: Jar, dependsOn: dokka) {
+//    classifier = 'javadoc'
+//    from dokka.outputDirectory
+//}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -175,7 +236,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 artifacts {
     archives sourcesJar
-    archives dokkaJar
+//    archives dokkaJar
 }
 
 configurations {
@@ -208,7 +269,7 @@ publishing {
         bintrayJava(MavenPublication) {
             from components.java
             artifact sourcesJar
-            artifact dokkaJar
+//            artifact dokkaJar
 
             groupId "${project.group}"
             artifactId "${project.name}"

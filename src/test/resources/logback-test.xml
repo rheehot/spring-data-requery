@@ -7,9 +7,10 @@
         </encoder>
     </appender>
 
+    <logger name="com.coupang.springframework.data.requery" level="TRACE"/>
     <logger name="org.springframework.data" level="error"/>
 
-    <root level="error">
+    <root level="INFO">
         <appender-ref ref="console"/>
     </root>
 

@@ -1,1 +1,1 @@
-http\://www.springframework.org/schema/data/jpa = org.springframework.data.jpa.repository.config.JpaRepositoryNameSpaceHandler
+http\://www.springframework.org/schema/data/requery = com.coupang.springframework.data.requery.repository.config.JpaRepositoryNameSpaceHandler
