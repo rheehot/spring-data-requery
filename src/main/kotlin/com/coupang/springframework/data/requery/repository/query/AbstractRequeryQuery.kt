@@ -17,7 +17,7 @@ abstract class AbstractRequeryQuery(private val method: RequeryQueryMethod,
 
     override fun getQueryMethod(): QueryMethod = method
 
-    override fun execute(parameters: Array<out Any>?): Any {
+    override fun execute(parameters: Array<out Any>): Any {
         TODO("not implemented")
     }
 

@@ -17,11 +17,11 @@ open class RequeryParameters(private val method: Method)
 
     companion object: KLogging()
 
-    override fun createFrom(parameters: MutableList<RequeryParameter>?): RequeryParameters {
+    open override fun createFrom(parameters: MutableList<RequeryParameter>): RequeryParameters {
         TODO("not implemented")
     }
 
-    override fun createParameter(parameter: MethodParameter?): RequeryParameter {
+    open override fun createParameter(parameter: MethodParameter): RequeryParameter {
         TODO("not implemented")
     }
 

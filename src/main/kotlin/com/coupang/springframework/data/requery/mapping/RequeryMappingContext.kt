@@ -14,24 +14,24 @@ import org.springframework.data.util.TypeInformation
  * @author debop@coupang.com
  * @since 18. 5. 29
  */
-class RequeryMappingContext
+open class RequeryMappingContext
     : AbstractMappingContext<DefaultRequeryPersistentEntity<*>, RequeryPersistentProperty>(),
       ApplicationContextAware {
 
     private var fieldNamingStrategy: FieldNamingStrategy? = null
     private var applicationContext: ApplicationContext? = null
 
-    override fun <T: Any?> createPersistentEntity(typeInformation: TypeInformation<T>?): DefaultRequeryPersistentEntity<*> {
+    open override fun <T: Any?> createPersistentEntity(typeInformation: TypeInformation<T>): DefaultRequeryPersistentEntity<*> {
         TODO("not implemented")
     }
 
-    override fun createPersistentProperty(property: Property?,
-                                          owner: DefaultRequeryPersistentEntity<*>?,
-                                          simpleTypeHolder: SimpleTypeHolder?): RequeryPersistentProperty {
+    open override fun createPersistentProperty(property: Property,
+                                               owner: DefaultRequeryPersistentEntity<*>,
+                                               simpleTypeHolder: SimpleTypeHolder): RequeryPersistentProperty {
         TODO("not implemented")
     }
 
-    override fun setApplicationContext(applicationContext: ApplicationContext?) {
+    open override fun setApplicationContext(applicationContext: ApplicationContext) {
         TODO("not implemented")
     }
 

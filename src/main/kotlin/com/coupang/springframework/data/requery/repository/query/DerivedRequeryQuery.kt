@@ -8,8 +8,8 @@ import com.coupang.springframework.data.requery.core.RequeryOperations
  * @author debop@coupang.com
  * @since 18. 5. 29
  */
-class DerivedRequeryQuery(method: RequeryQueryMethod,
-                          requeryOp: RequeryOperations): AbstractRequeryQuery(method, requeryOp) {
+open class DerivedRequeryQuery(method: RequeryQueryMethod,
+                               requeryOp: RequeryOperations): AbstractRequeryQuery(method, requeryOp) {
 
 
 }

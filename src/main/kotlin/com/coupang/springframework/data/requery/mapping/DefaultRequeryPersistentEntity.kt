@@ -9,6 +9,8 @@ import org.springframework.data.util.TypeInformation
  * @author debop@coupang.com
  * @since 18. 5. 29
  */
-class DefaultRequeryPersistentEntity<T>(private val information: TypeInformation<T>)
+open class DefaultRequeryPersistentEntity<T>(private val information: TypeInformation<T>)
     : BasicPersistentEntity<T, RequeryPersistentProperty>(information) {
+
+
 }

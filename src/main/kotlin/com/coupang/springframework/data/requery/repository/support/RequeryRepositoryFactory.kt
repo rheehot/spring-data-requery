@@ -13,18 +13,18 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
  * @author debop@coupang.com
  * @since 18. 5. 29
  */
-class RequeryRepositoryFactory(private val entityDataStore: EntityDataStore<Persistable>): RepositoryFactorySupport() {
+open class RequeryRepositoryFactory(private val entityDataStore: EntityDataStore<Persistable>): RepositoryFactorySupport() {
 
 
-    override fun <T: Any?, ID: Any?> getEntityInformation(domainClass: Class<T>?): EntityInformation<T, ID> {
+    open override fun <T: Any?, ID: Any?> getEntityInformation(domainClass: Class<T>): EntityInformation<T, ID> {
         TODO("not implemented")
     }
 
-    override fun getTargetRepository(metadata: RepositoryInformation): RequeryRepositoryImplementation<*, *> {
+    open override fun getTargetRepository(metadata: RepositoryInformation): RequeryRepositoryImplementation<*, *> {
         TODO("not implemented")
     }
 
-    override fun getRepositoryBaseClass(metadata: RepositoryMetadata?): Class<*> {
+    open override fun getRepositoryBaseClass(metadata: RepositoryMetadata): Class<*> {
         TODO("not implemented")
     }
 }
