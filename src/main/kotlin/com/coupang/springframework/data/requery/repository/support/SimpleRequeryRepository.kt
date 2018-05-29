@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.repository.support
 
 import com.coupang.kotlinx.logging.KLogging
-import com.coupang.springframework.data.requery.RequeryOperations
+import com.coupang.springframework.data.requery.core.RequeryOperations
 import com.coupang.springframework.data.requery.repository.RequeryRepository
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.Page

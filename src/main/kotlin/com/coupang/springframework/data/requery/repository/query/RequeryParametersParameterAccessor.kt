@@ -11,4 +11,12 @@ import org.springframework.data.repository.query.ParametersParameterAccessor
 class RequeryParametersParameterAccessor(private val method: RequeryQueryMethod,
                                          private val values: Array<Any?>)
     : ParametersParameterAccessor(method.parameters, values), RequeryParameterAccessor {
+
+    override fun getParameters(): RequeryParameters {
+        TODO("not implemented")
+    }
+
+    override fun getBindVars(): Map<String, Any?> {
+        TODO("not implemented")
+    }
 }

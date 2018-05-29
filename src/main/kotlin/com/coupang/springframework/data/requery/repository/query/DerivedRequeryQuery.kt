@@ -1,6 +1,6 @@
 package com.coupang.springframework.data.requery.repository.query
 
-import com.coupang.springframework.data.requery.RequeryOperations
+import com.coupang.springframework.data.requery.core.RequeryOperations
 
 /**
  * DerivedRequeryQuery
