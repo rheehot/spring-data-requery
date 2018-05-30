@@ -48,7 +48,7 @@ abstract class AbstractRequeryConfiguration {
             }
     }
 
-    @Bean
+    @Bean(destroyMethod = "close")
     fun requeryEntityDataStore(): EntityDataStore<Persistable> {
         return EntityDataStore<Persistable>(requeryConfiguration()).apply {
             log.info { "Create EntityDataStore instance." }

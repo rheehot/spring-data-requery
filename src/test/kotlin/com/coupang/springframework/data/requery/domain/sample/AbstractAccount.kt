@@ -7,19 +7,18 @@ import io.requery.Generated
 import io.requery.Key
 
 /**
- * AbstractPerson
- *
- * @author debop@coupang.com
+ * com.coupang.springframework.data.requery.domain.sample.AbstractAccount
+ * @author debop
  * @since 18. 5. 30
  */
-@Entity(copyable = true, cacheable = true)
-abstract class AbstractPerson: AbstractPersistable<Long>() {
+@Entity
+abstract class AbstractAccount: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
     abstract override val id: Long?
 
-    @get:Column(name = "person_name", length = 48)
-    abstract var name: String?
 
+    @get:Column(name = "account_name", length = 48)
+    abstract var name: String?
 }
