@@ -9,9 +9,9 @@ import io.requery.sql.EntityDataStore
  * @author debop@coupang.com
  * @since 18. 5. 29
  */
-open class DefaultRequeryContext(dataStores: Set<EntityDataStore<*>>): RequeryContext {
+open class DefaultRequeryContext(private val dataStore: EntityDataStore<*>): RequeryContext {
 
     override fun getEntityDataStoreByManagedType(manaedType: Class<*>): EntityDataStore<*> {
-        TODO("not implemented")
+        return dataStore
     }
 }

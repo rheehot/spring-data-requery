@@ -13,5 +13,7 @@ import org.springframework.data.repository.NoRepositoryBean
 @NoRepositoryBean
 interface RequeryRepositoryImplementation<T, ID>: RequeryRepository<T, ID>, RequerySelectionExecutor<T> {
 
+    // JPA에만 있다
+    // fun setRepositoryMethodMetadata(crudMethodMetadata:CrudMethodMetadata)
 
 }

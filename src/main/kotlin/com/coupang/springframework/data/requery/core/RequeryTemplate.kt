@@ -2,7 +2,6 @@ package com.coupang.springframework.data.requery.core
 
 import com.coupang.kotlinx.data.requery.models.RequeryEntity
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
-import com.coupang.springframework.data.requery.mapping.RequeryMappingContext
 import io.requery.Persistable
 import io.requery.kotlin.`in`
 import io.requery.kotlin.eq
@@ -10,13 +9,12 @@ import io.requery.sql.EntityDataStore
 import java.io.Serializable
 
 /**
- * RequeryTemplate
+ * [RequeryOperations]를 구현하여, Requery를 이용한 Database DML 작업을 수행합니다.
  *
  * @author debop@coupang.com
  * @since 18. 5. 29
  */
-open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>,
-                           private val context: RequeryMappingContext): RequeryOperations {
+open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>): RequeryOperations {
 
     override fun <T: AbstractPersistable<ID>, ID: Serializable> findById(entityType: Class<T>, id: ID): T? {
         return dataStore.findByKey(entityType, id)

@@ -1,5 +1,7 @@
 package com.coupang.springframework.data.requery
 
+import com.coupang.kotlinx.logging.KLogging
+
 /**
  * com.coupang.springframework.data.requery.AbstractSpringDataRequeryTest
  * @author debop
@@ -7,4 +9,6 @@ package com.coupang.springframework.data.requery
  */
 abstract class AbstractSpringDataRequeryTest {
 
+    companion object: KLogging()
+    
 }

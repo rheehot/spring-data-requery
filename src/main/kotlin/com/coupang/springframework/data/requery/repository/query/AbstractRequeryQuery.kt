@@ -21,8 +21,4 @@ abstract class AbstractRequeryQuery(private val method: RequeryQueryMethod,
         TODO("not implemented")
     }
 
-    protected fun createQuery(accessor: RequeryParameterAccessor,
-                              bindVars: Map<String, Any?>): String {
-        TODO("not implemented")
-    }
 }

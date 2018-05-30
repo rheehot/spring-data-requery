@@ -21,18 +21,22 @@ open class RequeryMappingContext
     private var fieldNamingStrategy: FieldNamingStrategy? = null
     private var applicationContext: ApplicationContext? = null
 
-    open override fun <T: Any?> createPersistentEntity(typeInformation: TypeInformation<T>): DefaultRequeryPersistentEntity<*> {
+    override fun <T: Any?> createPersistentEntity(typeInformation: TypeInformation<T>): DefaultRequeryPersistentEntity<*> {
         TODO("not implemented")
     }
 
-    open override fun createPersistentProperty(property: Property,
-                                               owner: DefaultRequeryPersistentEntity<*>,
-                                               simpleTypeHolder: SimpleTypeHolder): RequeryPersistentProperty {
+    override fun createPersistentProperty(property: Property,
+                                          owner: DefaultRequeryPersistentEntity<*>,
+                                          simpleTypeHolder: SimpleTypeHolder): RequeryPersistentProperty {
         TODO("not implemented")
     }
 
-    open override fun setApplicationContext(applicationContext: ApplicationContext) {
-        TODO("not implemented")
+    override fun setApplicationContext(applicationContext: ApplicationContext) {
+        this.applicationContext = applicationContext
+    }
+
+    fun setFieldNamingStrategy(fieldNamingStrategy: FieldNamingStrategy) {
+        this.fieldNamingStrategy = fieldNamingStrategy
     }
 
 }
