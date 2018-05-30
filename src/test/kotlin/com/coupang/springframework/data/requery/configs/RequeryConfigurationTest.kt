@@ -3,7 +3,6 @@ package com.coupang.springframework.data.requery.configs
 import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.AbstractSpringDataRequeryTest
 import com.coupang.springframework.data.requery.core.RequeryOperations
-import com.coupang.springframework.data.requery.domain.sample.Person
 import io.requery.Persistable
 import io.requery.sql.EntityDataStore
 import org.assertj.core.api.Assertions.assertThat
@@ -35,10 +34,9 @@ class RequeryConfigurationTest: AbstractSpringDataRequeryTest() {
     }
 
     @Test
-    fun `open database`() {
-        val person = Person().apply { name = "person" }
-        dataStore.insert(person)
-        log.debug { "person.id=${person.id}" }
-        assertThat(person.id).isNotNull()
+    fun `inject requery repository`() {
+
+        // TODO: 구현 해야 함
+
     }
 }
