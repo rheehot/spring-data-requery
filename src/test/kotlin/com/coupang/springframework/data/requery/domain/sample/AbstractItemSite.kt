@@ -3,6 +3,7 @@ package com.coupang.springframework.data.requery.domain.sample
 import io.requery.Entity
 import io.requery.Key
 import io.requery.ManyToOne
+import io.requery.Persistable
 
 /**
  * Many To Many 를 담당하는 Join table 을 이렇게 entity로 만들 필요없이 Item과 Site 간의 ManyToMany를 지정하는 것이 편하다.
@@ -12,15 +13,13 @@ import io.requery.ManyToOne
  * @since 18. 5. 30
  */
 @Entity
-abstract class AbstractItemSite @JvmOverloads constructor(aItem: AbstractItem? = null,
-                                                          aSite: AbstractSite? = null) {
+abstract class AbstractItemSite: Persistable {
+    @get:Key
+    @get:ManyToOne
+    abstract var item: AbstractItem?
 
     @get:Key
     @get:ManyToOne
-    val item: AbstractItem? = aItem
-
-    @get:Key
-    @get:ManyToOne
-    val site: AbstractSite? = aSite
+    abstract var site: AbstractSite?
 
 }
