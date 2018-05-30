@@ -17,9 +17,10 @@ abstract class AbstractItemSite @JvmOverloads constructor(aItem: AbstractItem? =
 
     @get:Key
     @get:ManyToOne
-    var item: AbstractItem? = aItem
+    val item: AbstractItem? = aItem
 
     @get:Key
     @get:ManyToOne
-    var site: AbstractSite? = aSite
+    val site: AbstractSite? = aSite
+
 }
