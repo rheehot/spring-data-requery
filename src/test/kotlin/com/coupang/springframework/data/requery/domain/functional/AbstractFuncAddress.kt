@@ -32,6 +32,6 @@ abstract class AbstractFuncAddress: AbstractPersistable<Long>() {
     @get:OneToOne(cascade = [CascadeAction.SAVE, CascadeAction.DELETE])
     abstract var person: AbstractFuncPerson?
 
-    @get:Convert(AddressTypeConverter::class)
+    @get:Convert(AddressTypeStringConverter::class)
     abstract var type: AddressType
 }
