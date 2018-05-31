@@ -113,7 +113,7 @@ class SimpleRequeryRepository<T, ID>(
     }
 
     override fun deleteById(id: ID) {
-        operations.deleteById(id)
+        TODO("not implemented")
     }
 
     override fun deleteAll(entities: MutableIterable<T>) {

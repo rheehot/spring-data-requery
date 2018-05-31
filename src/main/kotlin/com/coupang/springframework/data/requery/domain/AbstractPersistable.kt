@@ -1,15 +1,21 @@
 package com.coupang.springframework.data.requery.domain
 
+import com.coupang.kotlinx.objectx.AbstractValueObject
+import com.coupang.kotlinx.objectx.ToStringBuilder
 import io.requery.Superclass
+import io.requery.Transient
 import java.util.*
 
 /**
- * com.coupang.springframework.data.requery.domain.AbstractPersistable
+ * Requery Entity의 최상위 추상화 클래스입니다.
+ *
+ * 이 클래스를 상속받은 클래스는 반드시 hashCode() 를 재정의해주셔야 합니다.
+ *
  * @author debop
  * @since 18. 5. 23
  */
 @Superclass
-abstract class AbstractPersistable<ID>: io.requery.Persistable {
+abstract class AbstractPersistable<ID>: AbstractValueObject(), io.requery.Persistable {
 
     abstract val id: ID?
 
@@ -17,20 +23,23 @@ abstract class AbstractPersistable<ID>: io.requery.Persistable {
     fun isNew(): Boolean = id == null
 
     override fun equals(other: Any?): Boolean {
-        if(null == other) return false
         if(this === other) return true
 
         return when(other) {
-            is AbstractPersistable<*> -> Objects.equals(id, other.id)
+            is AbstractPersistable<*> ->
+                if(isNew() && other.isNew()) hashCode() == other.hashCode()
+                else Objects.equals(id, other.id)
             else                      -> false
         }
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
+        return id?.hashCode() ?: System.identityHashCode(this)
     }
 
-    override fun toString(): String {
-        return "Entity of type ${this.javaClass.name} with id=$id"
+    @Transient
+    override fun buildStringHelper(): ToStringBuilder {
+        return super.buildStringHelper()
+            .add("id", id)
     }
 }

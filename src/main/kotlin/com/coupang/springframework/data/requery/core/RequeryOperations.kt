@@ -15,7 +15,7 @@ interface RequeryOperations {
 
     val dataStore: EntityDataStore<io.requery.Persistable>
 
-    fun <T: AbstractPersistable<ID>, ID: Serializable> findById(entityType: Class<T>, id: ID): T?
+    fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T?
 
     fun <T: AbstractPersistable<ID>, ID: Serializable> findAllById(entityType: Class<T>, ids: Iterable<ID>): Iterable<T>
 
@@ -41,11 +41,15 @@ interface RequeryOperations {
 
     fun <T: Persistable> delete(entity: T)
 
-    fun <ID: Serializable> deleteById(id: ID): Int
-
     fun <T: Persistable> deleteAll(entities: Iterable<T>)
 
     fun <T: Persistable> deleteAll(entityType: Class<T>): Long
 
     fun <T: Persistable> count(entityType: Class<T>): Long
+
+
+    // TODO: 구현 필요 
+    //    fun <T:Persistable> refresh(entity:T)
+    //    fun <T:Persistable> refresh(entities:Iterable<T>)
+    //    fun <T:Persistable> refreshAll(entity:T)
 }

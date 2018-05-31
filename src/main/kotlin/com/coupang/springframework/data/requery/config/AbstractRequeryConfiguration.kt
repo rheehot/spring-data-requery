@@ -40,7 +40,7 @@ abstract class AbstractRequeryConfiguration {
         return ConfigurationBuilder(dataSource, getEntityModel())
             .useDefaultLogging()
             .setStatementCacheSize(1024)
-            .setBatchUpdateSize(500)
+            .setBatchUpdateSize(100)
             .addStatementListener(LogbackListener<Persistable>())
             .build()
             .apply {

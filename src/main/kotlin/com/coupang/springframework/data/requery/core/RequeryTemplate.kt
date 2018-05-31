@@ -4,7 +4,6 @@ import com.coupang.kotlinx.data.requery.models.RequeryEntity
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.Persistable
 import io.requery.kotlin.`in`
-import io.requery.kotlin.eq
 import io.requery.sql.EntityDataStore
 import java.io.Serializable
 
@@ -16,7 +15,7 @@ import java.io.Serializable
  */
 open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>): RequeryOperations {
 
-    override fun <T: AbstractPersistable<ID>, ID: Serializable> findById(entityType: Class<T>, id: ID): T? {
+    override fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T? {
         return dataStore.findByKey(entityType, id)
     }
 
@@ -69,10 +68,6 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
 
     override fun <T: Persistable> delete(entity: T) {
         dataStore.delete(entity)
-    }
-
-    override fun <ID: Serializable> deleteById(id: ID): Int {
-        return dataStore.delete().where(RequeryEntity<ID>::id.eq(id)).get().value()
     }
 
     override fun <T: Persistable> deleteAll(entities: Iterable<T>) {
