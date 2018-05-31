@@ -20,7 +20,10 @@ abstract class AbstractFuncGroup: AbstractPersistable<Long>() {
     @get:Generated
     abstract override val id: Long?
 
+    @get:Column
     abstract var name: String
+
+    @get:Column
     abstract var description: String?
 
     @get:Convert(GroupTypeStringConverter::class)
@@ -44,7 +47,7 @@ abstract class AbstractFuncGroup: AbstractPersistable<Long>() {
     abstract var createdAt: LocalDateTime?
 
     @get:Transient
-    abstract var temporaryName: String?
+    var temporaryName: String? = null
 
     @PreInsert
     fun onPreInsert() {

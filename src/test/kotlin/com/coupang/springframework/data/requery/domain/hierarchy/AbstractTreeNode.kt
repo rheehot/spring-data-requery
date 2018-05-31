@@ -29,7 +29,7 @@ abstract class AbstractTreeNode: AbstractPersistable<Long>() {
     @get:OneToMany(mappedBy = "parent", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     abstract val children: MutableSet<AbstractTreeNode>
 
-    @get:OneToMany(mappedBy = "node", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
+    @get:OneToMany(mappedBy = "node")
     abstract val attributes: MutableSet<AbstractNodeAttribute>
 
     fun addChild(child: AbstractTreeNode) {

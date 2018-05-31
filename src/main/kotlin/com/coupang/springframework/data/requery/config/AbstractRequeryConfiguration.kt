@@ -5,6 +5,7 @@ import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.core.RequeryTemplate
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext
 import io.requery.Persistable
+import io.requery.cache.EmptyEntityCache
 import io.requery.meta.EntityModel
 import io.requery.sql.ConfigurationBuilder
 import io.requery.sql.EntityDataStore
@@ -35,10 +36,13 @@ abstract class AbstractRequeryConfiguration {
 
     abstract fun getEntityModel(): EntityModel
 
+    abstract fun getTableCreationMode(): TableCreationMode
+
     @Bean
     fun requeryConfiguration(): io.requery.sql.Configuration {
         return ConfigurationBuilder(dataSource, getEntityModel())
             .useDefaultLogging()
+            .setEntityCache(EmptyEntityCache())
             .setStatementCacheSize(1024)
             .setBatchUpdateSize(100)
             .addStatementListener(LogbackListener<Persistable>())
@@ -80,8 +84,8 @@ abstract class AbstractRequeryConfiguration {
         val schema = SchemaModifier(requeryConfiguration())
 
         try {
-            log.debug { schema.createTablesString(TableCreationMode.CREATE_NOT_EXISTS) }
-            schema.createTables(TableCreationMode.CREATE_NOT_EXISTS)
+            log.debug { schema.createTablesString(getTableCreationMode()) }
+            schema.createTables(getTableCreationMode())
             log.info { "Success to setup database schema!!!" }
         } catch(ignored: Exception) {
             log.error(ignored) { "Fail to setup database schema !!!" }

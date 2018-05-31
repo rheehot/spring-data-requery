@@ -15,16 +15,19 @@ abstract class AbstractNodeAttribute: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
+    @get:Column(name = "attr_id")
     abstract override val id: Long?
 
 
+    @get:Column(name = "attr_name")
     abstract var name: String?
 
+    @get:Column(name = "attr_value")
     abstract var value: String?
 
 
-    @get:ManyToOne(cascade = [CascadeAction.SAVE, CascadeAction.DELETE])
-    @get:ForeignKey(referencedColumn = "nodeId")
+    @get:ManyToOne
+    @get:ForeignKey
     abstract var node: AbstractTreeNode?
 
     override fun hashCode(): Int {

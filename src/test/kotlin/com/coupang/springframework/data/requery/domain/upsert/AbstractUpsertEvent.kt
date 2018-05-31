@@ -27,7 +27,7 @@ abstract class AbstractUpsertEvent: AbstractPersistable<UUID>() {
     abstract var place: AbstractUpsertPlace?
 
     @get:JsonProperty("_tags")
-    @get:JunctionTable(name = "Upsert_Event_Tags")
+    @get:JunctionTable
     @get:ManyToMany(cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     abstract val tags: MutableSet<AbstractUpsertTag>
 

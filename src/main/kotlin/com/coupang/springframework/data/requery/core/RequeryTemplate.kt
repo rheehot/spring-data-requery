@@ -1,11 +1,8 @@
 package com.coupang.springframework.data.requery.core
 
-import com.coupang.kotlinx.data.requery.models.RequeryEntity
-import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.Persistable
-import io.requery.kotlin.`in`
+import io.requery.meta.Attribute
 import io.requery.sql.EntityDataStore
-import java.io.Serializable
 
 /**
  * [RequeryOperations]를 구현하여, Requery를 이용한 Database DML 작업을 수행합니다.
@@ -19,19 +16,24 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         return dataStore.findByKey(entityType, id)
     }
 
-    override fun <T: AbstractPersistable<ID>, ID: Serializable> findAllById(entityType: Class<T>, ids: Iterable<ID>): Iterable<T> {
-        return dataStore.select(entityType)
-            .where(RequeryEntity<ID>::id.`in`(ids.toList()))
-            .get()
-            .toList()
-    }
-
     override fun <T: Persistable> findAll(entityType: Class<T>): Iterable<T> {
         return dataStore.select(entityType).get().toList()
     }
 
-    override fun <T: AbstractPersistable<ID>, ID: Serializable> existsById(entityType: Class<T>, id: ID): Boolean {
-        return dataStore.findByKey(entityType, id) != null
+    override fun <T: Persistable> refresh(entity: T): T {
+        return dataStore.refresh(entity)
+    }
+
+    override fun <T: Persistable> refresh(entity: T, vararg attributes: Attribute<*, *>): T {
+        return dataStore.refresh(entity, *attributes)
+    }
+
+    override fun <T: Persistable> refresh(entities: Iterable<T>, vararg attributes: Attribute<*, *>): Iterable<T> {
+        return dataStore.refresh(entities, *attributes)
+    }
+
+    override fun <T: Persistable> refreshAll(entity: T): T {
+        return dataStore.refreshAll(entity)
     }
 
     override fun <T: Persistable> save(entity: T): T {

@@ -29,9 +29,11 @@ abstract class AbstractFuncAddress: AbstractPersistable<Long>() {
 
     abstract var city: String?
 
-    @get:OneToOne(cascade = [CascadeAction.SAVE, CascadeAction.DELETE])
-    abstract var person: AbstractFuncPerson?
+    //    @get:OneToOne(cascade = [CascadeAction.SAVE, CascadeAction.DELETE])
+    //    abstract var person: AbstractFuncPerson?
 
     @get:Convert(AddressTypeStringConverter::class)
     abstract var type: AddressType
+
+
 }

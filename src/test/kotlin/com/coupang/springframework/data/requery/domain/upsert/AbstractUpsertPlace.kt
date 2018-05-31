@@ -12,6 +12,7 @@ abstract class AbstractUpsertPlace: AbstractPersistable<String>() {
     @get:Key
     abstract override var id: String?
 
+    @get:Column
     abstract var name: String
 
     @get:OneToMany(mappedBy = "place", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])

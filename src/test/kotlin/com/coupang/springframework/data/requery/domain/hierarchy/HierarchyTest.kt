@@ -86,7 +86,7 @@ class HierarchyTest: AbstractDomainTest() {
     }
 
     @Test
-    fun `insert 3 generation hiearchy nodes`() {
+    fun `insert 3 generation hiearchy nodes and delete child`() {
         val root = treeNodeOf("root")
 
         val child1 = treeNodeOf("child1", root)
@@ -107,6 +107,16 @@ class HierarchyTest: AbstractDomainTest() {
 
         assertThat(loadedRoot).isEqualTo(root)
         assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
+
+        val childLoaded = requeryTemplate.findById(TreeNode::class.java, child1.id)!!
+        assertThat(childLoaded.children).hasSize(2).containsOnly(grandChild11, grandChild12)
+
+        // child delete
+        requeryTemplate.delete(childLoaded)
+
+        // HINT: child가 삭제된 후에는 parent를 refresh 해야 child가 삭제되었음을 안다 (그 전에 parent 에서 child를 제거해되 된다)
+        requeryTemplate.refresh(loadedRoot)
+        assertThat(loadedRoot.children).hasSize(1).containsOnly(child2)
 
         // cascade delete
         requeryTemplate.delete(loadedRoot)

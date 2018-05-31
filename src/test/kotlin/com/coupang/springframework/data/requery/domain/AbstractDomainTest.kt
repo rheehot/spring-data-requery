@@ -11,6 +11,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -23,7 +24,9 @@ import javax.inject.Inject
 @SpringBootTest(classes = [RequeryTestConfiguration::class])
 abstract class AbstractDomainTest: AbstractSpringDataRequeryTest() {
 
-    companion object: KLogging()
+    companion object: KLogging() {
+        val rnd = Random(System.currentTimeMillis())
+    }
 
 
     @Inject lateinit var dataStore: EntityDataStore<Persistable>

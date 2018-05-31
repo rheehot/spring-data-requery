@@ -1,9 +1,8 @@
 package com.coupang.springframework.data.requery.core
 
-import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.Persistable
+import io.requery.meta.Attribute
 import io.requery.sql.EntityDataStore
-import java.io.Serializable
 
 /**
  * RequeryOperations
@@ -17,11 +16,15 @@ interface RequeryOperations {
 
     fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T?
 
-    fun <T: AbstractPersistable<ID>, ID: Serializable> findAllById(entityType: Class<T>, ids: Iterable<ID>): Iterable<T>
-
     fun <T: Persistable> findAll(entityType: Class<T>): Iterable<T>
 
-    fun <T: AbstractPersistable<ID>, ID: Serializable> existsById(entityType: Class<T>, id: ID): Boolean
+    fun <T: Persistable> refresh(entity: T): T
+
+    fun <T: Persistable> refresh(entity: T, vararg attributes: Attribute<*, *>): T
+
+    fun <T: Persistable> refresh(entities: Iterable<T>, vararg attributes: Attribute<*, *>): Iterable<T>
+
+    fun <T: Persistable> refreshAll(entity: T): T
 
     fun <T: Persistable> save(entity: T): T
 
@@ -47,9 +50,4 @@ interface RequeryOperations {
 
     fun <T: Persistable> count(entityType: Class<T>): Long
 
-
-    // TODO: 구현 필요 
-    //    fun <T:Persistable> refresh(entity:T)
-    //    fun <T:Persistable> refresh(entities:Iterable<T>)
-    //    fun <T:Persistable> refreshAll(entity:T)
 }

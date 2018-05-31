@@ -5,6 +5,8 @@ import com.coupang.springframework.data.requery.core.RequeryOperations
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import com.coupang.springframework.data.requery.util.paging
 import com.coupang.springframework.data.requery.util.toRequeryOrder
+import io.requery.kotlin.`in`
+import io.requery.kotlin.eq
 import io.requery.query.Result
 import io.requery.query.Selection
 import org.springframework.data.domain.Page
@@ -47,7 +49,15 @@ class SimpleRequeryRepository<T, ID>(
     }
 
     override fun count(selection: Selection<Result<T>>): Long {
-        TODO("not implemented")
+        // return selection.get().count().toLong()
+
+        return operations.dataStore
+            .count(entityType)
+            .where()
+            .exists(selection)
+            .get()
+            .value()
+            .toLong()
     }
 
     companion object: KLogging()
@@ -81,7 +91,11 @@ class SimpleRequeryRepository<T, ID>(
     //    }
 
     override fun findAllById(ids: Iterable<ID>): Iterable<T> {
-        return operations.findAllById(entityType, ids)
+        return operations.dataStore
+            .select(entityType)
+            .where(AbstractPersistable<ID>::id.`in`(ids.toList()))
+            .get()
+            .toList()
     }
 
     override fun <S: T> saveAll(entities: Iterable<S>): Iterable<S> {
@@ -113,7 +127,10 @@ class SimpleRequeryRepository<T, ID>(
     }
 
     override fun deleteById(id: ID) {
-        TODO("not implemented")
+        operations.dataStore
+            .delete(entityType)
+            .where(AbstractPersistable<ID>::id.eq(id))
+            .get()
     }
 
     override fun deleteAll(entities: MutableIterable<T>) {
@@ -133,7 +150,11 @@ class SimpleRequeryRepository<T, ID>(
     //    }
 
     override fun existsById(id: ID): Boolean {
-        return operations.findById(entityType, id) != null
+        return operations.dataStore
+            .count(entityType)
+            .where(AbstractPersistable<ID>::id.eq(id))
+            .get()
+            .value() == 1
     }
 
     override fun findById(id: ID): Optional<T> {

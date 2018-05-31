@@ -26,6 +26,8 @@ abstract class AbstractTimeEvent: AbstractPersistable<UUID>() {
     @get:Convert(LocalDateTimeConverter::class)
     abstract var localDateTime: LocalDateTime
 
+    // BUG: LocalTime 은 milliseconds 값을 가지는데, java.sql.Time 은 seconds 까지 밖에 표현하지 못한다 (DB마다 다르다)
+    @get:Column(name = "local_time")
     @get:Convert(LocalTimeConverter::class)
     abstract var localTime: LocalTime
 

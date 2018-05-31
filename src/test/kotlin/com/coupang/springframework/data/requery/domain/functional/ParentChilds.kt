@@ -9,8 +9,10 @@ abstract class AbstractFuncParent: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    @get:Column("parentId")
     abstract override val id: Long?
+
+    @get:Column
+    abstract var name: String?
 
     @get:ManyToOne(cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.RESTRICT)
@@ -22,7 +24,6 @@ abstract class AbstractFuncParent: AbstractPersistable<Long>() {
 abstract class AbstractFuncParentNoCascade: AbstractPersistable<Long>() {
     @get:Key
     @get:Generated
-    @get:Column("parentId")
     abstract override val id: Long?
 
     @get:OneToOne(cascade = [CascadeAction.NONE])
@@ -48,6 +49,7 @@ abstract class AbstractFuncChild: AbstractPersistable<Long>() {
     @get:Generated
     abstract override val id: Long?
 
+    @get:Column
     abstract var name: String?
 }
 
@@ -55,7 +57,8 @@ abstract class AbstractFuncChild: AbstractPersistable<Long>() {
 abstract class AbstractFuncChildOneToOneNoCascade: AbstractPersistable<Long>() {
 
     @get:Key
-    abstract override var id: Long?
+    @get:Generated
+    abstract override val id: Long?
 
     @get:Column
     abstract var attribute: String?
@@ -65,7 +68,8 @@ abstract class AbstractFuncChildOneToOneNoCascade: AbstractPersistable<Long>() {
 abstract class AbstractFuncChildOneToManyNoCascade: AbstractPersistable<Long>() {
 
     @get:Key
-    abstract override var id: Long?
+    @get:Generated
+    abstract override val id: Long?
 
     @get:Column
     abstract var attribute: String?
@@ -79,7 +83,8 @@ abstract class AbstractFuncChildOneToManyNoCascade: AbstractPersistable<Long>() 
 abstract class AbstractFuncChildManyToOneNoCascade: AbstractPersistable<Long>() {
 
     @get:Key
-    abstract override var id: Long?
+    @get:Generated
+    abstract override val id: Long?
 
     @get:Column
     abstract var attribute: String?
@@ -89,7 +94,8 @@ abstract class AbstractFuncChildManyToOneNoCascade: AbstractPersistable<Long>() 
 abstract class AbstractFuncChildManyToManyNoCascade: AbstractPersistable<Long>() {
 
     @get:Key
-    abstract override var id: Long?
+    @get:Generated
+    abstract override val id: Long?
 
     @get:Column
     abstract var attribute: String?
