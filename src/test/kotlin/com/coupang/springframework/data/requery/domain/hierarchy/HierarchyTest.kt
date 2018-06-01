@@ -46,27 +46,27 @@ class HierarchyTest: AbstractDomainTest() {
 
     @Before
     fun `cleanup tree node`() {
-        requeryTmpl.deleteAll(NodeAttribute::class.java)
-        requeryTmpl.deleteAll(TreeNode::class.java)
+        requeryTemplate.deleteAll(NodeAttribute::class.java)
+        requeryTemplate.deleteAll(TreeNode::class.java)
 
-        assertThat(requeryTmpl.count(TreeNode::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTmpl.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTemplate.count(TreeNode::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTemplate.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
     }
 
     @Test
     fun `insert root node only`() {
 
         val root = treeNodeOf("root")
-        requeryTmpl.insert(root)
+        requeryTemplate.insert(root)
         assertThat(root.id).isGreaterThan(0)
 
-        val loadedRoot = requeryTmpl.findById(TreeNode::class.java, root.id)!!
+        val loadedRoot = requeryTemplate.findById(TreeNode::class.java, root.id)!!
 
         assertThat(loadedRoot).isEqualTo(root)
 
-        requeryTmpl.delete(loadedRoot)
-        assertThat(requeryTmpl.count(TreeNode::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTmpl.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
+        requeryTemplate.delete(loadedRoot)
+        assertThat(requeryTemplate.count(TreeNode::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTemplate.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -77,22 +77,22 @@ class HierarchyTest: AbstractDomainTest() {
         val child1 = treeNodeOf("child1", root)
         val child2 = treeNodeOf("child2", root)
 
-        requeryTmpl.insert(root)
-        requeryTmpl.refreshAll(root)
+        requeryTemplate.insert(root)
+        requeryTemplate.refreshAll(root)
         assertThat(root.id).isGreaterThan(0)
         assertThat(child1.id).isGreaterThan(0)
         assertThat(child2.id).isGreaterThan(0)
 
-        val loadedRoot = requeryTmpl.findById(TreeNode::class.java, root.id)!!
+        val loadedRoot = requeryTemplate.findById(TreeNode::class.java, root.id)!!
 
         assertThat(loadedRoot).isEqualTo(root)
         assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
 
         // cascade delete
-        requeryTmpl.delete(loadedRoot)
+        requeryTemplate.delete(loadedRoot)
 
-        assertThat(requeryTmpl.count(TreeNode::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTmpl.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTemplate.count(TreeNode::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTemplate.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -108,30 +108,30 @@ class HierarchyTest: AbstractDomainTest() {
         val grandChild21 = treeNodeOf("grandChild21", child2)
 
 
-        requeryTmpl.insert(root)
+        requeryTemplate.insert(root)
         assertThat(root.id).isGreaterThan(0)
         assertThat(child1.id).isGreaterThan(0)
         assertThat(child2.id).isGreaterThan(0)
 
-        val loadedRoot = requeryTmpl.findById(TreeNode::class.java, root.id)!!
+        val loadedRoot = requeryTemplate.findById(TreeNode::class.java, root.id)!!
 
         assertThat(loadedRoot).isEqualTo(root)
         assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
 
-        val childLoaded = requeryTmpl.findById(TreeNode::class.java, child1.id)!!
+        val childLoaded = requeryTemplate.findById(TreeNode::class.java, child1.id)!!
         assertThat(childLoaded.children).hasSize(2).containsOnly(grandChild11, grandChild12)
 
         // child delete
-        requeryTmpl.delete(childLoaded)
+        requeryTemplate.delete(childLoaded)
 
         // HINT: child가 삭제된 후에는 parent를 refresh 해야 child가 삭제되었음을 안다 (그 전에 parent 에서 child를 제거해되 된다)
-        requeryTmpl.refreshAll(loadedRoot)
+        requeryTemplate.refreshAll(loadedRoot)
         assertThat(loadedRoot.children).hasSize(1).containsOnly(child2)
 
         // cascade delete
-        requeryTmpl.delete(loadedRoot)
+        requeryTemplate.delete(loadedRoot)
 
-        assertThat(requeryTmpl.count(TreeNode::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTmpl.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTemplate.count(TreeNode::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTemplate.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
     }
 }

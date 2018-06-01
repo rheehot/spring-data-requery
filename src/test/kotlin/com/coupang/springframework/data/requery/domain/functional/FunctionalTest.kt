@@ -20,12 +20,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-/**
- * FunctionalTest
- *
- * @author debop@coupang.com
- * @since 18. 6. 1
- */
 class FunctionalTest: AbstractDomainTest() {
 
     companion object: KLogging() {
@@ -74,9 +68,9 @@ class FunctionalTest: AbstractDomainTest() {
     fun `custom converter`() {
         val phone = RandomData.randomPhone()
 
-        requeryTmpl.insert(phone)
+        requeryTemplate.insert(phone)
 
-        val loaded = requeryTmpl.dataStore
+        val loaded = requeryTemplate.dataStore
             .select(FuncPhone::class.java)
             .where(FuncPhone.EXTENSIONS.eq(phone.extensions))
             .get()
@@ -89,13 +83,13 @@ class FunctionalTest: AbstractDomainTest() {
     fun `select by id`() {
         val person = randomPerson()
 
-        requeryTmpl.insert(person)
+        requeryTemplate.insert(person)
         assertThat(person.id).isGreaterThan(0)
 
-        val loaded = requeryTmpl.findById(FuncPerson::class.java, person.id)!!
+        val loaded = requeryTemplate.findById(FuncPerson::class.java, person.id)!!
         assertThat(loaded).isEqualTo(person)
 
-        val loaded2 = requeryTmpl.dataStore
+        val loaded2 = requeryTemplate.dataStore
             .select(FuncPerson::class.java)
             .where(FuncPerson.ID eq person.id)
             .get()
@@ -108,38 +102,38 @@ class FunctionalTest: AbstractDomainTest() {
     fun `insert with default value`() {
         val person = randomPerson()
 
-        requeryTmpl.insert(person)
+        requeryTemplate.insert(person)
         assertThat(person.id).isGreaterThan(0)
 
-        val loaded = requeryTmpl.findById(FuncPerson::class.java, person.id)!!
+        val loaded = requeryTemplate.findById(FuncPerson::class.java, person.id)!!
         assertThat(loaded).isEqualTo(person)
         assertThat(loaded.description).isEqualTo("empty")
     }
 
     @Test
     fun `insert select null key reference`() {
-        requeryTmpl.deleteAll(FuncPerson::class.java)
+        requeryTemplate.deleteAll(FuncPerson::class.java)
 
         val person = randomPerson()
 
-        requeryTmpl.insert(person)
+        requeryTemplate.insert(person)
         assertThat(person.id).isGreaterThan(0)
         assertThat(person.address).isNull()
 
-        val address = requeryTmpl.dataStore.select(FuncPerson::class.java).get().first().address
+        val address = requeryTemplate.dataStore.select(FuncPerson::class.java).get().first().address
         assertThat(address).isNull()
     }
 
     @Test
     fun `insert many people with transaction`() {
-        requeryTmpl.runInTransaction {
+        requeryTemplate.runInTransaction {
 
             for(i in 0 until COUNT) {
                 val person = randomPerson()
                 insert(person)
             }
 
-            val personCount = requeryTmpl.count(FuncPerson::class.java).get().value()
+            val personCount = requeryTemplate.count(FuncPerson::class.java).get().value()
             assertThat(personCount).isEqualTo(COUNT)
         }
     }
@@ -149,9 +143,9 @@ class FunctionalTest: AbstractDomainTest() {
         val people = List(COUNT) { randomPerson() }
 
         // Batch 방식으로 저장한다.
-        requeryTmpl.insertAll(people)
+        requeryTemplate.insertAll(people)
 
-        val personCount = requeryTmpl.count(FuncPerson::class.java).get().value()
+        val personCount = requeryTemplate.count(FuncPerson::class.java).get().value()
         assertThat(personCount).isEqualTo(COUNT)
     }
 
@@ -169,7 +163,7 @@ class FunctionalTest: AbstractDomainTest() {
             for(i in 0 until COUNT) {
                 executor.submit {
                     val person = randomPerson()
-                    requeryTmpl.insert(person)
+                    requeryTemplate.insert(person)
                     assertThat(person.id).isGreaterThan(0)
                     map[person.id!!] = person
                     latch.countDown()
@@ -178,7 +172,7 @@ class FunctionalTest: AbstractDomainTest() {
             assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue()
 
             map.forEach { id, person ->
-                val loaded = requeryTmpl.findById(FuncPerson::class.java, id)!!
+                val loaded = requeryTemplate.findById(FuncPerson::class.java, id)!!
                 assertThat(loaded).isEqualTo(person)
             }
         } finally {
@@ -213,7 +207,7 @@ class FunctionalTest: AbstractDomainTest() {
     @Test
     fun `insert empty entity`() {
         val phone = FuncPhone()
-        requeryTmpl.insert(phone)
+        requeryTemplate.insert(phone)
         assertThat(phone.id).isNotNull()
     }
 
@@ -226,10 +220,10 @@ class FunctionalTest: AbstractDomainTest() {
         val derivedPhone = DerivedPhone().apply {
             phoneNumber = "555-5555"
         }
-        requeryTmpl.insert(derivedPhone)
+        requeryTemplate.insert(derivedPhone)
         assertThat(derivedPhone.id).isNotNull()
 
-        val loaded = requeryTmpl.findById(FuncPhone::class.java, derivedPhone.id)
+        val loaded = requeryTemplate.findById(FuncPhone::class.java, derivedPhone.id)
         assertThat(loaded).isNotNull
 
         // NOTE: 하지만 FuncPhone 을 DerivedPhone으로 casting 은 하지 못한다 !!!
@@ -607,5 +601,315 @@ class FunctionalTest: AbstractDomainTest() {
 
         val people = requeryKtTmpl.dataStore.select(FuncPerson::class).get().toList()
         assertThat(people).hasSize(1)
+    }
+
+    @Test
+    fun `delete cascade one to one`() {
+        val address = RandomData.randomAddress()
+        requeryKtTmpl.insert(address)
+
+        assertThat(address.id).isNotNull()
+        val addressId = address.id!!
+
+        val person = randomPerson()
+        person.address = address
+
+        requeryKtTmpl.insert(person)
+        requeryKtTmpl.delete(person)
+
+        assertThat(address.person).isNull()
+        assertThat(requeryKtTmpl.findById(FuncAddress::class, addressId)).isNull()
+    }
+
+    @Test
+    fun `delete one`() {
+        val person = randomPerson()
+
+        requeryKtTmpl.insert(person)
+        assertThat(person.id).isNotNull()
+
+        requeryKtTmpl.delete(person)
+
+        assertThat(requeryKtTmpl.findById(FuncPerson::class, person.id)).isNull()
+    }
+
+    @Test
+    fun `delete cascade remove one to many`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = RandomData.randomPhone().apply { owner = person }
+        val phone2 = RandomData.randomPhone().apply { owner = person }
+
+        requeryKtTmpl.insert(phone1)
+        requeryKtTmpl.insert(phone2)
+        requeryKtTmpl.refresh(person)
+
+        assertThat(person.phoneNumberList).containsOnly(phone1, phone2)
+
+        requeryKtTmpl.delete(phone1)
+        assertThat(person.phoneNumberList).containsOnly(phone2)
+    }
+
+    @Test
+    fun `delete cascade one to many`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = RandomData.randomPhone().apply { owner = person }
+        requeryKtTmpl.insert(phone1)
+        val phoneId = phone1.id
+
+        assertThat(person.phoneNumbers).hasSize(1)
+        requeryKtTmpl.delete(person)
+
+        assertThat(requeryKtTmpl.findById(FuncPhone::class, phoneId)).isNull()
+    }
+
+    @Test
+    fun `delete one to many result`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = RandomData.randomPhone().apply { owner = person }
+        val phone2 = RandomData.randomPhone().apply { owner = person }
+        requeryKtTmpl.insertAll(listOf(phone1, phone2))
+        requeryKtTmpl.refresh(person)
+
+        assertThat(person.phoneNumbers.toList()).hasSize(2)
+
+        requeryKtTmpl.deleteAll(person.phoneNumbers)
+
+        assertThat(requeryKtTmpl.count(FuncPhone::class).get().value()).isEqualTo(0)
+    }
+
+    @Test
+    fun `insert one to many`() {
+
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = RandomData.randomPhone().apply { owner = person }
+        val phone2 = RandomData.randomPhone().apply { owner = person }
+        requeryKtTmpl.insertAll(listOf(phone1, phone2))
+
+        val set = person.phoneNumbers.toSet()
+        assertThat(set).hasSize(2).containsOnly(phone1, phone2)
+    }
+
+    @Test
+    fun `insert one to many inverse update`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = RandomData.randomPhone()
+        val phone2 = RandomData.randomPhone()
+        person.phoneNumbers.add(phone1)
+        person.phoneNumbers.add(phone2)
+
+        requeryKtTmpl.update(person)
+
+        val set = person.phoneNumbers.toSet()
+        assertThat(set).hasSize(2).containsOnly(phone1, phone2)
+        assertThat(phone1.owner).isEqualTo(person)
+        assertThat(phone2.owner).isEqualTo(person)
+    }
+
+    @Test
+    fun `insert one to many inverse`() {
+        val person = randomPerson()
+        val phone1 = RandomData.randomPhone()
+        val phone2 = RandomData.randomPhone()
+        phone1.owner = person
+        person.phoneNumbers.add(phone1)
+        person.phoneNumbers.add(phone2)
+
+        requeryKtTmpl.insert(person)
+
+        val set = person.phoneNumbers.toSet()
+        assertThat(set).hasSize(2).containsOnly(phone1, phone2)
+        assertThat(phone1.owner).isEqualTo(person)
+        assertThat(phone2.owner).isEqualTo(person)
+    }
+
+    @Test
+    fun `insert one to many inverse through set`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = RandomData.randomPhone()
+        val phone2 = RandomData.randomPhone()
+
+        person.phoneNumbers.add(phone1)
+        person.phoneNumbers.add(phone2)
+        requeryKtTmpl.update(person)
+
+        assertThat(person.phoneNumbers).hasSize(2).containsOnly(phone1, phone2)
+    }
+
+    @Test
+    fun `insert one to many insert`() {
+        val person = randomPerson()
+        val phone1 = RandomData.randomPhone()
+        val phone2 = RandomData.randomPhone()
+        person.phoneNumbers.add(phone1)
+        person.phoneNumbers.add(phone2)
+
+        requeryKtTmpl.insert(person)
+
+        val set = person.phoneNumbers.toSet()
+        assertThat(set).hasSize(2).containsOnly(phone1, phone2)
+
+        assertThat(requeryKtTmpl.select(FuncPhone::class).get().toList().size).isEqualTo(2)
+        assertThat(requeryKtTmpl.count(FuncPhone::class).get().value()).isEqualTo(2)
+    }
+
+    @Test
+    fun `insert one to many insert through list`() {
+        val person = randomPerson()
+        val phone1 = RandomData.randomPhone()
+        val phone2 = RandomData.randomPhone()
+        person.phoneNumbers.add(phone1)
+        person.phoneNumbers.add(phone2)
+
+        requeryKtTmpl.insert(person)
+
+        val set = person.phoneNumberList.toSet()
+        assertThat(set).hasSize(2).containsOnly(phone1, phone2)
+    }
+
+    @Test
+    fun `many to one refresh`() {
+        val person = randomPerson()
+        val phone1 = RandomData.randomPhone()
+        val phone2 = RandomData.randomPhone()
+        person.phoneNumbers.add(phone1)
+        person.phoneNumbers.add(phone2)
+
+        requeryKtTmpl.insert(person)
+
+        assertThat(phone1.owner).isEqualTo(person)
+        assertThat(phone2.owner).isEqualTo(person)
+
+        requeryKtTmpl.refresh(phone1, FuncPhone.OWNER)
+        requeryKtTmpl.refresh(phone2, FuncPhone.OWNER)
+    }
+
+    @Test
+    fun `insert many to many`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+        assertThat(person.groups.toList()).isEmpty()
+
+        val addedGroups = mutableListOf<FuncGroup>()
+
+        requeryKtTmpl.withTransaction {
+            for(i in 0 until 10) {
+                val group = FuncGroup().apply {
+                    name = "Group$i"
+                    description = "Some description"
+                    type = GroupType.PRIVATE
+                }
+                insert(group)
+                person.groups.add(group)
+                addedGroups += group
+            }
+            update(person)
+        }
+
+        requeryKtTmpl.refresh(person, FuncPerson.GROUPS)
+        addedGroups.forEach { group ->
+            assertThat(group.members.toList()).contains(person)
+        }
+    }
+
+    @Test
+    fun `insert many to many self referencing`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val addedPeople = mutableListOf<FuncPerson>()
+
+        for(i in 0 until 10) {
+            val p = randomPerson()
+            person.friends.add(p)
+            addedPeople += p
+        }
+
+        requeryKtTmpl.update(person)
+
+        assertThat(person.friends).containsAll(addedPeople)
+        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(11)
+    }
+
+    @Test
+    fun `iterate insert many`() {
+        val person = randomPerson()
+        assertThat(person.groups).isEmpty()
+
+        val toAdd = mutableSetOf<FuncGroup>()
+
+        for(i in 0 until 10) {
+            val group = FuncGroup().apply { name = "Group$i" }
+            person.groups.add(group)
+            toAdd += group
+        }
+
+        var count = 0
+        person.groups.forEach {
+            assertThat(toAdd.contains(it)).isTrue()
+            count++
+        }
+        assertThat(count).isEqualTo(10)
+        requeryKtTmpl.insert(person)
+    }
+
+    @Test
+    fun `delete many to many`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val groups = mutableSetOf<FuncGroup>()
+
+        requeryKtTmpl.withTransaction {
+            for(i in 0 until 10) {
+                val group = FuncGroup().apply { "DeleteGroup$i" }
+                insert(group)
+                person.groups.add(group)
+                groups += group
+            }
+            update(person)
+        }
+        groups.forEach {
+            person.groups.remove(it)
+        }
+        requeryKtTmpl.update(person)
+        assertThat(person.groups.toList()).isEmpty()
+
+        // many to many 관계를 끊은 것이므로 group 은 삭제되지 않는다.
+        assertThat(requeryKtTmpl.count(FuncGroup::class).get().value()).isEqualTo(10)
+    }
+
+    @Test
+    fun `many to many order by`() {
+        val group = FuncGroup().apply { name = "Group" }
+        requeryKtTmpl.insert(group)
+
+        for(i in 3 downTo 0) {
+            val person = randomPerson()
+            person.name = (65 + i).toChar().toString()
+            requeryKtTmpl.insert(person)
+            group.owners.add(person)
+        }
+        requeryKtTmpl.update(group)
+        requeryKtTmpl.refresh(group, FuncGroup.OWNERS)
+
+        val owners = group.owners.toList()
+
+        assertThat(owners).hasSize(4)
+        assertThat(owners[0].name).isEqualTo("A")
+        assertThat(owners[1].name).isEqualTo("B")
+        assertThat(owners[2].name).isEqualTo("C")
+        assertThat(owners[3].name).isEqualTo("D")
     }
 }

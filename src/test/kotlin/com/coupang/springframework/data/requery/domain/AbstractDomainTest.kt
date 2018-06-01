@@ -32,15 +32,15 @@ abstract class AbstractDomainTest: AbstractSpringDataRequeryTest() {
 
 
     @Inject lateinit var dataStore: EntityDataStore<Persistable>
-    @Inject lateinit var ktDataStore: KotlinEntityDataStore<Persistable>
-    @Inject lateinit var requeryTmpl: RequeryTemplate
+    @Inject lateinit var kotlinDataStore: KotlinEntityDataStore<Persistable>
+    @Inject lateinit var requeryTemplate: RequeryTemplate
     @Inject lateinit var requeryKtTmpl: RequeryKotlinTemplate
 
     @Test
     fun `context loading`() {
         assertThat(dataStore).isNotNull
-        assertThat(ktDataStore).isNotNull
-        assertThat(requeryTmpl).isNotNull
+        assertThat(kotlinDataStore).isNotNull
+        assertThat(requeryTemplate).isNotNull
         assertThat(requeryKtTmpl).isNotNull
     }
 

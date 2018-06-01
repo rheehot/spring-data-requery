@@ -75,6 +75,18 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         return dataStore.insert(entities)
     }
 
+    override fun <T: Persistable> insertInto(entityType: Class<T>): Insertion<out Result<Tuple>> {
+        return dataStore.insert(entityType)
+    }
+
+    override fun <T: Persistable> insertInto(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): InsertInto<out Result<Tuple>> {
+        return dataStore.insert(entityType, *attributes)
+    }
+
+    override fun <T: Persistable> update(entityType: Class<T>): Update<out Scalar<Int>> {
+        return dataStore.update(entityType)
+    }
+
     override fun <T: Persistable> update(entity: T): T {
         return dataStore.update(entity)
     }

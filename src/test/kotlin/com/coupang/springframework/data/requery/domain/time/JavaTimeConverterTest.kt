@@ -26,9 +26,9 @@ class JavaTimeConverterTest: AbstractDomainTest() {
             name = "event"
         }
 
-        requeryTmpl.insert(event)
+        requeryTemplate.insert(event)
 
-        val loaded = requeryTmpl.findById(TimeEvent::class.java, eventId)!!
+        val loaded = requeryTemplate.findById(TimeEvent::class.java, eventId)!!
 
         assertThat(loaded.id).isEqualTo(eventId)
         assertThat(loaded.name).isEqualTo(event.name)
