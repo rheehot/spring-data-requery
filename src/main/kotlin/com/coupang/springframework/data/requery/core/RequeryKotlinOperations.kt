@@ -2,7 +2,10 @@ package com.coupang.springframework.data.requery.core
 
 import io.requery.Persistable
 import io.requery.TransactionIsolation
+import io.requery.kotlin.QueryableAttribute
+import io.requery.kotlin.Selection
 import io.requery.meta.Attribute
+import io.requery.query.Result
 import io.requery.sql.KotlinEntityDataStore
 import kotlin.reflect.KClass
 
@@ -15,6 +18,10 @@ import kotlin.reflect.KClass
 interface RequeryKotlinOperations {
 
     val dataStore: KotlinEntityDataStore<Persistable>
+
+    fun <T: Persistable> select(entityType: KClass<T>): Selection<out Result<T>>
+
+    fun <T: Persistable> select(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): Selection<out Result<T>>
 
     fun <T: Persistable, ID> findById(entityType: KClass<T>, id: ID): T?
 

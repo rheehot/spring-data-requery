@@ -2,7 +2,10 @@ package com.coupang.springframework.data.requery.core
 
 import io.requery.Persistable
 import io.requery.TransactionIsolation
+import io.requery.kotlin.QueryableAttribute
+import io.requery.kotlin.Selection
 import io.requery.meta.Attribute
+import io.requery.query.Result
 import io.requery.sql.KotlinEntityDataStore
 import kotlin.reflect.KClass
 
@@ -13,6 +16,14 @@ import kotlin.reflect.KClass
  * @since 18. 6. 1
  */
 class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persistable>): RequeryKotlinOperations {
+
+    override fun <T: Persistable> select(entityType: KClass<T>): Selection<Result<T>> {
+        return dataStore.select(entityType)
+    }
+
+    override fun <T: Persistable> select(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): Selection<Result<T>> {
+        return dataStore.select(entityType, *attributes)
+    }
 
     override fun <T: Persistable, ID> findById(entityType: KClass<T>, id: ID): T? {
         return dataStore.findByKey(entityType, id)

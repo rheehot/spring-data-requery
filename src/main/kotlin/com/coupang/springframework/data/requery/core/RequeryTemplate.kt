@@ -3,6 +3,9 @@ package com.coupang.springframework.data.requery.core
 import io.requery.Persistable
 import io.requery.TransactionIsolation
 import io.requery.meta.Attribute
+import io.requery.meta.QueryAttribute
+import io.requery.query.Result
+import io.requery.query.Selection
 import io.requery.sql.EntityDataStore
 
 /**
@@ -12,6 +15,15 @@ import io.requery.sql.EntityDataStore
  * @since 18. 5. 29
  */
 open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>): RequeryOperations {
+
+    override fun <T: Persistable> select(entityType: Class<T>): Selection<out Result<T>> {
+        return dataStore.select(entityType)
+    }
+
+    override fun <T: Persistable> select(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): Selection<out Result<T>> {
+        return dataStore.select(entityType, *attributes)
+    }
+
 
     override fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T? {
         return dataStore.findByKey(entityType, id)

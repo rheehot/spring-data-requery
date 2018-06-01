@@ -3,6 +3,9 @@ package com.coupang.springframework.data.requery.core
 import io.requery.Persistable
 import io.requery.TransactionIsolation
 import io.requery.meta.Attribute
+import io.requery.meta.QueryAttribute
+import io.requery.query.Result
+import io.requery.query.Selection
 import io.requery.sql.EntityDataStore
 
 /**
@@ -14,6 +17,10 @@ import io.requery.sql.EntityDataStore
 interface RequeryOperations {
 
     val dataStore: EntityDataStore<Persistable>
+
+    fun <T: Persistable> select(entityType: Class<T>): Selection<out Result<T>>
+
+    fun <T: Persistable> select(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): Selection<out Result<T>>
 
     fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T?
 
