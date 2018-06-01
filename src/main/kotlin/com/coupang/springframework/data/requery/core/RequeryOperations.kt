@@ -65,6 +65,10 @@ interface RequeryOperations {
 
     fun <T: Persistable> count(entityType: Class<T>): Selection<out Scalar<Int>>
 
+    fun raw(query: String, vararg parameters: Any?): Result<out Tuple>
+
+    fun <T: Persistable> raw(entityType: Class<T>, query: String, vararg parameters: Any?): Result<out T>
+
     fun <T> runInTransaction(block: RequeryOperations.() -> T): T
 
     fun <T> runInTransaction(isolation: TransactionIsolation, block: RequeryOperations.() -> T): T

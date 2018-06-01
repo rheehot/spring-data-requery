@@ -14,25 +14,24 @@ abstract class AbstractFuncParent: AbstractPersistable<Long>() {
     @get:Column
     abstract var name: String?
 
-    @get:ManyToOne(cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
+    @get:ManyToOne(cascade = [CascadeAction.DELETE])
     @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.RESTRICT)
     abstract var child: AbstractFuncChild?
 
 }
 
-@Entity
-abstract class AbstractFuncParentNoCascade: AbstractPersistable<Long>() {
+@Entity(cacheable = false)
+abstract class AbstractFuncParentNoCascade: Persistable {
     @get:Key
-    @get:Generated
-    abstract override val id: Long?
+    abstract var id: Long?
 
     @get:OneToOne(cascade = [CascadeAction.NONE])
     @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.RESTRICT)
-    abstract var oneToOne: AbstractFuncChildOneToOneNoCascade?
+    abstract var oneToOne: AbstractFuncChildOneToOneNoCascade
 
-    @get:ManyToOne
+    @get:ManyToOne(cascade = [CascadeAction.NONE])
     @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.RESTRICT)
-    abstract var manyToOne: AbstractFuncChildManyToOneNoCascade?
+    abstract var manyToOne: AbstractFuncChildManyToOneNoCascade
 
     @get:OneToMany(cascade = [CascadeAction.NONE])
     abstract val oneToMany: MutableList<AbstractFuncChildOneToManyNoCascade>
@@ -43,59 +42,54 @@ abstract class AbstractFuncParentNoCascade: AbstractPersistable<Long>() {
 }
 
 @Entity
-abstract class AbstractFuncChild: AbstractPersistable<Long>() {
+abstract class AbstractFuncChild: Persistable {
 
     @get:Key
-    @get:Generated
-    abstract override val id: Long?
+    abstract var id: Long?
 
     @get:Column
     abstract var name: String?
 }
 
-@Entity
-abstract class AbstractFuncChildOneToOneNoCascade: AbstractPersistable<Long>() {
+@Entity(cacheable = false)
+abstract class AbstractFuncChildOneToOneNoCascade: Persistable {
 
     @get:Key
-    @get:Generated
-    abstract override val id: Long?
+    abstract var id: Long?
 
     @get:Column
     abstract var attribute: String?
 }
 
-@Entity
-abstract class AbstractFuncChildOneToManyNoCascade: AbstractPersistable<Long>() {
+@Entity(cacheable = false)
+abstract class AbstractFuncChildOneToManyNoCascade: Persistable {
 
     @get:Key
-    @get:Generated
-    abstract override val id: Long?
+    abstract var id: Long?
 
     @get:Column
     abstract var attribute: String?
 
     @get:ManyToOne(cascade = [CascadeAction.NONE])
     @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.RESTRICT)
-    abstract var parent: AbstractFuncParentNoCascade?
+    abstract var parent: AbstractFuncParentNoCascade
 }
 
-@Entity
-abstract class AbstractFuncChildManyToOneNoCascade: AbstractPersistable<Long>() {
+@Entity(cacheable = false)
+abstract class AbstractFuncChildManyToOneNoCascade: Persistable {
 
     @get:Key
-    @get:Generated
-    abstract override val id: Long?
+    abstract var id: Long?
 
     @get:Column
     abstract var attribute: String?
 }
 
-@Entity
-abstract class AbstractFuncChildManyToManyNoCascade: AbstractPersistable<Long>() {
+@Entity(cacheable = false)
+abstract class AbstractFuncChildManyToManyNoCascade: Persistable {
 
     @get:Key
-    @get:Generated
-    abstract override val id: Long?
+    abstract var id: Long?
 
     @get:Column
     abstract var attribute: String?

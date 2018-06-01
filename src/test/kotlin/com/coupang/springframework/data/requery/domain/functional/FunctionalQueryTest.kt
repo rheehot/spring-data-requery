@@ -6,15 +6,19 @@ import com.coupang.springframework.data.requery.domain.functional.RandomData.ran
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPerson
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPersons
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPhone
+import io.requery.PersistenceException
 import io.requery.query.NamedNumericExpression
 import io.requery.query.Result
 import io.requery.query.function.Case
 import io.requery.query.function.Coalesce
 import io.requery.query.function.Count
+import io.requery.sql.StatementExecutionException
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -734,11 +738,118 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query raw`() {
+        with(requeryTemplate) {
+            val count = 5
+            val people = List(count) { insert(randomPerson()) }
 
+            val resultIds = mutableListOf<Long>()
+
+            raw("select * from FuncPerson").use { result ->
+                val rows = result.toList()
+                assertThat(rows).hasSize(count)
+
+                rows.forEachIndexed { index, row ->
+                    val name = row.get<String>("name")
+                    assertThat(name).isEqualTo(people[index].name)
+                    val id = row.get<Long>("personId")
+                    assertThat(id).isEqualTo(people[index].id)
+                    resultIds.add(id)
+                }
+            }
+
+            raw("select * from FuncPerson WHERE personId in ?", resultIds).use { result ->
+                val rows = result.toList()
+                val ids = rows.map { it.get<Long>("personId") }
+                assertThat(ids).isEqualTo(resultIds)
+            }
+
+            raw("select count(*) from FuncPerson").use { result ->
+                val number = result.first().get<Number>(0).toInt()
+                assertThat(number).isEqualTo(count)
+            }
+
+            raw("select * from FuncPerson WHERE personId = ?", people[0]).use { result ->
+                assertThat(result.first().get<Long>("personId")).isEqualTo(people[0].id)
+            }
+        }
     }
 
     @Test
     fun `query raw entities`() {
+        with(requeryTemplate) {
+            val count = 5
+            val people = List(count) { insert(randomPerson()) }
 
+            val resultIds = mutableListOf<Long>()
+
+            raw(FuncPerson::class.java, "select * from FuncPerson").use { result ->
+                val rows = result.toList()
+                assertThat(rows).hasSize(count)
+
+                rows.forEachIndexed { index, row ->
+                    val name = row.name
+                    assertThat(name).isEqualTo(people[index].name)
+                    val id = row.id
+                    assertThat(id).isEqualTo(people[index].id)
+                    resultIds.add(id!!)
+                }
+            }
+
+            raw(FuncPerson::class.java, "select * from FuncPerson WHERE personId in ?", resultIds).use { result ->
+                val rows = result.toList()
+                val ids = rows.map { it.id }
+                assertThat(ids).isEqualTo(resultIds)
+            }
+
+            raw(FuncPerson::class.java, "select * from FuncPerson WHERE personId = ?", people[0]).use { result ->
+                assertThat(result.first().id).isEqualTo(people[0].id)
+            }
+        }
+    }
+
+    @Test
+    fun `query union join on same entities`() {
+        with(requeryTemplate) {
+            val group = FuncGroup().apply { name = "Hello!" }
+            insert(group)
+
+            val person1 = randomPerson().apply { name = "Carol" }
+            person1.groups.add(group)
+            insert(person1)
+
+            val person2 = randomPerson().apply { name = "Bob" }
+            person2.groups.add(group)
+            insert(person2)
+
+            val columns = arrayOf(FuncPerson.NAME.`as`("personName"), FuncGroup.NAME.`as`("groupName"))
+            val rows = select(*columns).where(FuncPerson.ID.eq(person1.id))
+                .union()
+                .select(*columns).where(FuncPerson.ID.eq(person2.id))
+                .orderBy(FuncPerson.NAME.`as`("personName"))
+                .get()
+                .toList()
+
+            assertThat(rows).hasSize(2)
+            assertThat(rows[0].get<String>("personName")).isEqualTo("Bob")
+            assertThat(rows[0].get<String>("groupName")).isEqualTo("Hello!")
+
+            assertThat(rows[1].get<String>("personName")).isEqualTo("Carol")
+            assertThat(rows[1].get<String>("groupName")).isEqualTo("Hello!")
+        }
+    }
+
+    @Test
+    fun `voilate unique constraint`() {
+        assertThatThrownBy {
+            with(requeryTemplate) {
+
+                val uuid = UUID.randomUUID()
+                val p1 = randomPerson().also { it.uuid = uuid }
+                insert(p1)
+
+                val p2 = randomPerson().also { it.uuid = uuid }
+                insert(p2)
+            }
+        }.isInstanceOf(PersistenceException::class.java)
     }
 }

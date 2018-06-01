@@ -111,6 +111,14 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         return dataStore.count(entityType)
     }
 
+    override fun raw(query: String, vararg parameters: Any?): Result<out Tuple> {
+        return dataStore.raw(query, *parameters)
+    }
+
+    override fun <T: Persistable> raw(entityType: Class<T>, query: String, vararg parameters: Any?): Result<out T> {
+        return dataStore.raw(entityType, query, *parameters)
+    }
+
     override fun <T> runInTransaction(block: RequeryOperations.() -> T): T {
         return dataStore.runInTransaction { block.invoke(this) }
     }
