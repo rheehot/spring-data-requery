@@ -673,4 +673,53 @@ class FunctionalTest: AbstractDomainTest() {
 
         assertThat(requeryKtTmpl.findById(FuncPhone::class, phoneId)).isNull()
     }
+
+    @Test
+    fun `delete one to many result`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = randomPhone().apply { owner = person }
+        val phone2 = randomPhone().apply { owner = person }
+        requeryKtTmpl.insertAll(listOf(phone1, phone2))
+        requeryKtTmpl.refresh(person)
+
+        assertThat(person.phoneNumbers.toList()).hasSize(2)
+
+        requeryKtTmpl.deleteAll(person.phoneNumbers)
+
+        assertThat(requeryKtTmpl.count(FuncPhone::class)).isEqualTo(0)
+    }
+
+    @Test
+    fun `insert one to many`() {
+
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = randomPhone().apply { owner = person }
+        val phone2 = randomPhone().apply { owner = person }
+        requeryKtTmpl.insertAll(listOf(phone1, phone2))
+
+        val set = person.phoneNumbers.toSet()
+        assertThat(set).hasSize(2).containsOnly(phone1, phone2)
+    }
+
+    @Test
+    fun `insert one to many inverse update`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = randomPhone()
+        val phone2 = randomPhone()
+        person.phoneNumbers.add(phone1)
+        person.phoneNumbers.add(phone2)
+
+        requeryKtTmpl.update(person)
+
+        val set = person.phoneNumbers.toSet()
+        assertThat(set).hasSize(2).containsOnly(phone1, phone2)
+        assertThat(phone1.owner).isEqualTo(person)
+        assertThat(phone2.owner).isEqualTo(person)
+    }
 }

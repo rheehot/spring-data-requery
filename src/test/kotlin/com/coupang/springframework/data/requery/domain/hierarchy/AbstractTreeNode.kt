@@ -26,6 +26,8 @@ abstract class AbstractTreeNode: AbstractPersistable<Long>() {
     @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.CASCADE)
     abstract var parent: AbstractTreeNode?
 
+    // TODO: association을 MutableResult 로 변경하는 것이 정석이다.
+
     @get:OneToMany(mappedBy = "parent", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     abstract val children: MutableSet<AbstractTreeNode>
 
