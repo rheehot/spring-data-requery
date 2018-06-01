@@ -5,7 +5,10 @@ import io.requery.TransactionIsolation
 import io.requery.kotlin.QueryableAttribute
 import io.requery.kotlin.Selection
 import io.requery.meta.Attribute
+import io.requery.query.Expression
 import io.requery.query.Result
+import io.requery.query.Scalar
+import io.requery.query.Tuple
 import io.requery.sql.KotlinEntityDataStore
 import kotlin.reflect.KClass
 
@@ -22,6 +25,8 @@ interface RequeryKotlinOperations {
     fun <T: Persistable> select(entityType: KClass<T>): Selection<out Result<T>>
 
     fun <T: Persistable> select(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): Selection<out Result<T>>
+
+    fun select(vararg expressions: Expression<*>): Selection<Result<Tuple>>
 
     fun <T: Persistable, ID> findById(entityType: KClass<T>, id: ID): T?
 
@@ -59,7 +64,7 @@ interface RequeryKotlinOperations {
 
     fun <T: Persistable> deleteAll(entityType: KClass<T>): Long
 
-    fun <T: Persistable> count(entityType: KClass<T>): Long
+    fun <T: Persistable> count(entityType: KClass<T>): Selection<Scalar<Int>>
 
     fun <T> withTransaction(block: RequeryKotlinOperations.() -> T): T
 

@@ -49,8 +49,8 @@ class HierarchyTest: AbstractDomainTest() {
         requeryTmpl.deleteAll(NodeAttribute::class.java)
         requeryTmpl.deleteAll(TreeNode::class.java)
 
-        assertThat(requeryTmpl.count(TreeNode::class.java)).isEqualTo(0)
-        assertThat(requeryTmpl.count(NodeAttribute::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(TreeNode::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTmpl.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -65,8 +65,8 @@ class HierarchyTest: AbstractDomainTest() {
         assertThat(loadedRoot).isEqualTo(root)
 
         requeryTmpl.delete(loadedRoot)
-        assertThat(requeryTmpl.count(TreeNode::class.java)).isEqualTo(0)
-        assertThat(requeryTmpl.count(NodeAttribute::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(TreeNode::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTmpl.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -91,8 +91,8 @@ class HierarchyTest: AbstractDomainTest() {
         // cascade delete
         requeryTmpl.delete(loadedRoot)
 
-        assertThat(requeryTmpl.count(TreeNode::class.java)).isEqualTo(0)
-        assertThat(requeryTmpl.count(NodeAttribute::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(TreeNode::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTmpl.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -131,7 +131,7 @@ class HierarchyTest: AbstractDomainTest() {
         // cascade delete
         requeryTmpl.delete(loadedRoot)
 
-        assertThat(requeryTmpl.count(TreeNode::class.java)).isEqualTo(0)
-        assertThat(requeryTmpl.count(NodeAttribute::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(TreeNode::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTmpl.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
     }
 }

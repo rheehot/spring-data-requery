@@ -5,7 +5,10 @@ import io.requery.TransactionIsolation
 import io.requery.kotlin.QueryableAttribute
 import io.requery.kotlin.Selection
 import io.requery.meta.Attribute
+import io.requery.query.Expression
 import io.requery.query.Result
+import io.requery.query.Scalar
+import io.requery.query.Tuple
 import io.requery.sql.KotlinEntityDataStore
 import kotlin.reflect.KClass
 
@@ -23,6 +26,10 @@ class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persis
 
     override fun <T: Persistable> select(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): Selection<Result<T>> {
         return dataStore.select(entityType, *attributes)
+    }
+
+    override fun select(vararg expressions: Expression<*>): Selection<Result<Tuple>> {
+        return dataStore.select(*expressions)
     }
 
     override fun <T: Persistable, ID> findById(entityType: KClass<T>, id: ID): T? {
@@ -94,11 +101,11 @@ class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persis
     }
 
     override fun <T: Persistable> deleteAll(entityType: KClass<T>): Long {
-        return dataStore.delete<T>(entityType).get().value().toLong()
+        return dataStore.delete(entityType).get().value().toLong()
     }
 
-    override fun <T: Persistable> count(entityType: KClass<T>): Long {
-        return dataStore.count(entityType).get().value().toLong()
+    override fun <T: Persistable> count(entityType: KClass<T>): Selection<Scalar<Int>> {
+        return dataStore.count(entityType)
     }
 
     override fun <T> withTransaction(block: RequeryKotlinOperations.() -> T): T {

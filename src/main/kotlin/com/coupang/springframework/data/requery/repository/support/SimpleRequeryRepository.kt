@@ -142,7 +142,7 @@ class SimpleRequeryRepository<T, ID>(
     }
 
     override fun count(): Long {
-        return operations.count(entityType)
+        return operations.count(entityType).get().value().toLong()
     }
 
     //    override fun <S: T> count(example: Example<S>): Long {

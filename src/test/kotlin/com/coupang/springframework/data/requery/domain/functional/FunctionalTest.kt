@@ -139,8 +139,8 @@ class FunctionalTest: AbstractDomainTest() {
                 insert(person)
             }
 
-            val personCount = requeryTmpl.count(FuncPerson::class.java)
-            assertThat(personCount).isEqualTo(COUNT.toLong())
+            val personCount = requeryTmpl.count(FuncPerson::class.java).get().value()
+            assertThat(personCount).isEqualTo(COUNT)
         }
     }
 
@@ -151,8 +151,8 @@ class FunctionalTest: AbstractDomainTest() {
         // Batch 방식으로 저장한다.
         requeryTmpl.insertAll(people)
 
-        val personCount = requeryTmpl.count(FuncPerson::class.java)
-        assertThat(personCount).isEqualTo(COUNT.toLong())
+        val personCount = requeryTmpl.count(FuncPerson::class.java).get().value()
+        assertThat(personCount).isEqualTo(COUNT)
     }
 
     @Test
@@ -344,7 +344,7 @@ class FunctionalTest: AbstractDomainTest() {
             assertThat(loaded).isNull()
         }
 
-        assertThat(requeryKtTmpl.count(FuncAddress::class)).isEqualTo(0)
+        assertThat(requeryKtTmpl.count(FuncAddress::class).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -363,7 +363,7 @@ class FunctionalTest: AbstractDomainTest() {
             val loaded = findByKey(FuncPerson::class, person.id)
             assertThat(loaded).isNull()
         }
-        assertThat(requeryKtTmpl.count(FuncAddress::class)).isEqualTo(0)
+        assertThat(requeryKtTmpl.count(FuncAddress::class).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -386,7 +386,7 @@ class FunctionalTest: AbstractDomainTest() {
             log.info { "Rollback executed." }
         }
 
-        assertThat(requeryKtTmpl.count(FuncPerson::class)).isEqualTo(0)
+        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(0)
     }
 
     @Test

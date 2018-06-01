@@ -4,8 +4,7 @@ import io.requery.Persistable
 import io.requery.TransactionIsolation
 import io.requery.meta.Attribute
 import io.requery.meta.QueryAttribute
-import io.requery.query.Result
-import io.requery.query.Selection
+import io.requery.query.*
 import io.requery.sql.EntityDataStore
 
 /**
@@ -24,6 +23,9 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         return dataStore.select(entityType, *attributes)
     }
 
+    override fun select(vararg expressions: Expression<*>): Selection<out Result<Tuple>> {
+        return dataStore.select(*expressions)
+    }
 
     override fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T? {
         return dataStore.findByKey(entityType, id)
@@ -93,8 +95,8 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         return dataStore.delete<T>(entityType).get().value().toLong()
     }
 
-    override fun <T: Persistable> count(entityType: Class<T>): Long {
-        return dataStore.count(entityType).get().value().toLong()
+    override fun <T: Persistable> count(entityType: Class<T>): Selection<out Scalar<Int>> {
+        return dataStore.count(entityType)
     }
 
     override fun <T> runInTransaction(block: RequeryOperations.() -> T): T {

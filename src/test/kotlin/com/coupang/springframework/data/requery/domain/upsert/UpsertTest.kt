@@ -54,8 +54,8 @@ class UpsertTest: AbstractDomainTest() {
 
         requeryTmpl.insert(event)
 
-        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(1)
-        assertThat(requeryTmpl.count(UpsertTag::class.java)).isEqualTo(2)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java).get().value()).isEqualTo(1)
+        assertThat(requeryTmpl.count(UpsertTag::class.java).get().value()).isEqualTo(2)
 
         val loaded = requeryTmpl.findById(UpsertEvent::class.java, event.id)!!
 
@@ -63,8 +63,8 @@ class UpsertTest: AbstractDomainTest() {
 
         requeryTmpl.delete(loaded)
 
-        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(0)
-        assertThat(requeryTmpl.count(UpsertTag::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertTag::class.java).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -77,13 +77,13 @@ class UpsertTest: AbstractDomainTest() {
 
         requeryTmpl.upsert(event)
 
-        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(1)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java).get().value()).isEqualTo(1)
 
         val loaded = requeryTmpl.findById(UpsertEvent::class.java, event.id)!!
         assertThat(loaded).isEqualTo(event)
 
         requeryTmpl.delete(loaded)
-        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -127,8 +127,8 @@ class UpsertTest: AbstractDomainTest() {
 
         requeryTmpl.upsert(event)
 
-        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(1)
-        assertThat(requeryTmpl.count(UpsertTag::class.java)).isEqualTo(2)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java).get().value()).isEqualTo(1)
+        assertThat(requeryTmpl.count(UpsertTag::class.java).get().value()).isEqualTo(2)
 
         val loaded = requeryTmpl.findById(UpsertEvent::class.java, event.id)!!
 
@@ -136,8 +136,8 @@ class UpsertTest: AbstractDomainTest() {
 
         requeryTmpl.delete(loaded)
 
-        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(0)
-        assertThat(requeryTmpl.count(UpsertTag::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java).get().value()).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertTag::class.java).get().value()).isEqualTo(0)
     }
 
     @Test

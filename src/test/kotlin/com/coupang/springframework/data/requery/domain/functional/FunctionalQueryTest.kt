@@ -3,7 +3,10 @@ package com.coupang.springframework.data.requery.domain.functional
 import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPerson
+import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPersons
+import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPhone
 import io.requery.query.Result
+import io.requery.query.function.Count
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -106,7 +109,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
         requeryKtTmpl.deleteAll(person.phoneNumbers)
 
-        assertThat(requeryKtTmpl.count(FuncPhone::class)).isEqualTo(0)
+        assertThat(requeryKtTmpl.count(FuncPhone::class).get().value()).isEqualTo(0)
     }
 
     @Test
@@ -187,7 +190,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
         assertThat(set).hasSize(2).containsOnly(phone1, phone2)
 
         assertThat(requeryKtTmpl.select(FuncPhone::class).get().toList().size).isEqualTo(2)
-        assertThat(requeryKtTmpl.count(FuncPhone::class)).isEqualTo(2)
+        assertThat(requeryKtTmpl.count(FuncPhone::class).get().value()).isEqualTo(2)
     }
 
     @Test
@@ -265,7 +268,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
         requeryKtTmpl.update(person)
 
         assertThat(person.friends).containsAll(addedPeople)
-        assertThat(requeryKtTmpl.count(FuncPerson::class)).isEqualTo(11)
+        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(11)
     }
 
     @Test
@@ -313,7 +316,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
         assertThat(person.groups.toList()).isEmpty()
 
         // many to many 관계를 끊은 것이므로 group 은 삭제되지 않는다.
-        assertThat(requeryKtTmpl.count(FuncGroup::class)).isEqualTo(10)
+        assertThat(requeryKtTmpl.count(FuncGroup::class).get().value()).isEqualTo(10)
     }
 
     @Test
@@ -440,6 +443,130 @@ class FunctionalQueryTest: AbstractDomainTest() {
                 .get()
 
             assertThat(query2.toList()).hasSize(5)
+        }
+    }
+
+    @Test
+    fun `single query where null`() {
+        val person = randomPerson()
+        person.name = null
+        requeryKtTmpl.insert(person)
+
+        val query = requeryKtTmpl
+            .select(FuncPerson::class)
+            .where(FuncPerson.NAME.isNull())
+            .get()
+
+        assertThat(query.toList()).hasSize(1)
+    }
+
+
+    @Test
+    fun `delete all`() {
+        val name = "someName"
+        List(10) {
+            val person = randomPerson()
+            person.name = name
+            requeryKtTmpl.insert(person)
+        }
+        assertThat(requeryKtTmpl.deleteAll(FuncPerson::class)).isGreaterThan(0)
+        assertThat(requeryKtTmpl.select(FuncPerson::class).get().firstOrNull()).isNull()
+    }
+
+    @Test
+    fun `delete batch`() {
+        val people = List(COUNT) { randomPerson() }
+        requeryKtTmpl.insertAll(people)
+
+        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(COUNT)
+
+        requeryKtTmpl.deleteAll(people)
+        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(0)
+    }
+
+    @Test
+    fun `query by foreign key`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val phone1 = randomPhone()
+        val phone2 = randomPhone()
+        person.phoneNumbers.add(phone1)
+        person.phoneNumbers.add(phone2)
+        requeryKtTmpl.upsert(person)
+
+        assertThat(person.phoneNumberSet).containsOnly(phone1, phone2)
+
+        // by entity
+        val query1 = requeryKtTmpl.select(FuncPhone::class).where(FuncPhone.OWNER.eq(person)).get()
+
+        assertThat(query1.toList()).hasSize(2).containsOnly(phone1, phone2)
+        assertThat(person.phoneNumberList).hasSize(2).containsAll(query1.toList())
+
+        // by id
+        val query2 = requeryKtTmpl.select(FuncPhone::class).where(FuncPhone.OWNER_ID.eq(person.id)).get()
+
+        assertThat(query2.toList()).hasSize(2).containsOnly(phone1, phone2)
+        assertThat(person.phoneNumberList).hasSize(2).containsAll(query2.toList())
+    }
+
+    @Test
+    fun `query by UUID`() {
+        val person = randomPerson()
+        requeryKtTmpl.insert(person)
+
+        val uuid = person.uuid
+        val loaded = requeryKtTmpl.select(FuncPerson::class).where(FuncPerson.UUID.eq(uuid)).get().first()
+        assertThat(loaded).isEqualTo(person)
+    }
+
+    @Test
+    fun `query select distinct`() {
+        repeat(10) {
+            val person = randomPerson().apply { name = (it / 2).toString() }
+            requeryKtTmpl.insert(person)
+        }
+
+        val result = requeryKtTmpl.select(FuncPerson.NAME).distinct().get()
+
+        assertThat(result.toList()).hasSize(5)
+    }
+
+    @Test
+    fun `query select count`() {
+        requeryKtTmpl.insertAll(randomPersons(10))
+
+        // HINT: count 가져오기 : sql 함수를 사용하는구나 !!!
+        //
+        // select count(*) as bb from FuncPerson
+        requeryKtTmpl
+            .select(Count.count(FuncPerson::class.java).`as`("bb"))
+            .get()
+            .use { result ->
+                assertThat(result.first().get<Int>("bb")).isEqualTo(10)
+            }
+
+        requeryKtTmpl
+            .select(Count.count(FuncPerson::class.java))
+            .get()
+            .use { result ->
+                assertThat(result.first().get<Int>(0)).isEqualTo(10)
+            }
+
+        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(10)
+
+        requeryKtTmpl.dataStore.count(FuncPerson::class).get().consume { count ->
+            assertThat(count).isEqualTo(10)
+        }
+    }
+
+    @Test
+    fun `query select count where`() {
+        with(requeryKtTmpl) {
+            insert(randomPerson().apply { name = "countme" })
+            insertAll(randomPersons(9))
+
+            assertThat(count(FuncPerson::class).where(FuncPerson.NAME.eq("countme")).get().value().toInt()).isEqualTo(1)
         }
     }
 }
