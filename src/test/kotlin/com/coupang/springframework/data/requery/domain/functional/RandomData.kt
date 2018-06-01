@@ -20,7 +20,7 @@ object RandomData {
     fun randomPerson(): FuncPerson {
         return FuncPerson().apply {
             name = firstNames[random.nextInt(firstNames.size)] + " " + lastNames[random.nextInt(lastNames.size)]
-            email = name.replace(" ", ".").toLowerCase() + "@example.com"
+            email = name.replace(" ", ".").toLowerCase() + random.nextInt(1000).toString() + "@example.com"
             uuid = UUID.randomUUID()
             homepage = URL("http://www.requery.io")
             birthday = LocalDate.of(1900 + random.nextInt(90), random.nextInt(11) + 1, random.nextInt(20) + 1)
