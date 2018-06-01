@@ -18,7 +18,7 @@ class MappingTest: AbstractDomainTest() {
     @Test
     fun `verify mapping entities`() {
         val person = Person().apply { name = "person" }
-        requeryTemplate.insert(person)
+        requeryTmpl.insert(person)
 
         assertThat(person.id).isNotNull()
     }
@@ -26,7 +26,7 @@ class MappingTest: AbstractDomainTest() {
     @Test
     fun `entity has only id`() {
         val custom = CustomAbstractPersistable()
-        requeryTemplate.insert(custom)
+        requeryTmpl.insert(custom)
 
         assertThat(custom.id).isNotNull()
     }

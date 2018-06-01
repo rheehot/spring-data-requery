@@ -9,20 +9,20 @@ class InheritanceTest: AbstractDomainTest() {
     @Test
     fun `create derived class`() {
         val related = InheritanceRelated().apply { attribute = "attribute" }
-        requeryTemplate.insert(related)
+        requeryTmpl.insert(related)
 
         val derivedA = InheritanceDerivedA().apply { relateds += related; attr = "attr" }
-        requeryTemplate.insert(derivedA)
+        requeryTmpl.insert(derivedA)
 
         val derivedB = InheritanceDerivedB().apply { relateds += related; flag = false }
-        requeryTemplate.insert(derivedB)
+        requeryTmpl.insert(derivedB)
 
 
-        val loadedA = requeryTemplate.findById(InheritanceDerivedA::class.java, derivedA.id)!!
+        val loadedA = requeryTmpl.findById(InheritanceDerivedA::class.java, derivedA.id)!!
         assertThat(loadedA.id).isEqualTo(derivedA.id)
         assertThat(loadedA.relateds.firstOrNull()).isEqualTo(related)
 
-        val loadedB = requeryTemplate.findById(InheritanceDerivedB::class.java, derivedB.id)!!
+        val loadedB = requeryTmpl.findById(InheritanceDerivedB::class.java, derivedB.id)!!
         assertThat(loadedB.id).isEqualTo(derivedB.id)
         assertThat(loadedB.relateds.firstOrNull()).isEqualTo(related)
     }

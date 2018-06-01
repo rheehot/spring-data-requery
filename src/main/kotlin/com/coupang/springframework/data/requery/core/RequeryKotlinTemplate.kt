@@ -3,21 +3,22 @@ package com.coupang.springframework.data.requery.core
 import io.requery.Persistable
 import io.requery.TransactionIsolation
 import io.requery.meta.Attribute
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
+import kotlin.reflect.KClass
 
 /**
- * [RequeryOperations]를 구현하여, Requery를 이용한 Database DML 작업을 수행합니다.
+ * RequeryKotlinTemplate
  *
  * @author debop@coupang.com
- * @since 18. 5. 29
+ * @since 18. 6. 1
  */
-open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>): RequeryOperations {
+class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persistable>): RequeryKotlinOperations {
 
-    override fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T? {
+    override fun <T: Persistable, ID> findById(entityType: KClass<T>, id: ID): T? {
         return dataStore.findByKey(entityType, id)
     }
 
-    override fun <T: Persistable> findAll(entityType: Class<T>): Iterable<T> {
+    override fun <T: Persistable> findAll(entityType: KClass<T>): Iterable<T> {
         return dataStore.select(entityType).get().toList()
     }
 
@@ -35,6 +36,10 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
 
     override fun <T: Persistable> refreshAll(entity: T): T {
         return dataStore.refreshAll(entity)
+    }
+
+    override fun <T: Persistable> refreshAll(entities: Iterable<T>): Iterable<T> {
+        return entities.map { dataStore.refreshAll(it) }
     }
 
     override fun <T: Persistable> save(entity: T): T {
@@ -77,23 +82,23 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         dataStore.delete(entities)
     }
 
-    override fun <T: Persistable> deleteAll(entityType: Class<T>): Long {
+    override fun <T: Persistable> deleteAll(entityType: KClass<T>): Long {
         return dataStore.delete<T>(entityType).get().value().toLong()
     }
 
-    override fun <T: Persistable> count(entityType: Class<T>): Long {
+    override fun <T: Persistable> count(entityType: KClass<T>): Long {
         return dataStore.count(entityType).get().value().toLong()
     }
 
-    override fun <T> runInTransaction(block: RequeryOperations.() -> T): T {
-        return dataStore.runInTransaction { block.invoke(this) }
+    override fun <T> withTransaction(block: RequeryKotlinOperations.() -> T): T {
+        return dataStore.withTransaction { block.invoke(this@RequeryKotlinTemplate) }
     }
 
-    override fun <T> runInTransaction(isolation: TransactionIsolation, block: RequeryOperations.() -> T): T {
-        return dataStore.runInTransaction({ block.invoke(this) }, isolation)
+    override fun <T> withTransaction(isolation: TransactionIsolation, block: RequeryKotlinOperations.() -> T): T {
+        return dataStore.withTransaction(isolation) { block.invoke(this@RequeryKotlinTemplate) }
     }
 
-    override fun <T> withDataStore(block: EntityDataStore<Persistable>.() -> T): T {
+    override fun <T> withDataStore(block: KotlinEntityDataStore<Persistable>.() -> T): T {
         return block.invoke(dataStore)
     }
 }

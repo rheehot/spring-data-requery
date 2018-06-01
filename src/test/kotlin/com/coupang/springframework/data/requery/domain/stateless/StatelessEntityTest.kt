@@ -24,9 +24,9 @@ class StatelessEntityTest: AbstractDomainTest() {
             it.flag2 = false
         }
 
-        requeryTemplate.insert(entity)
+        requeryTmpl.insert(entity)
 
-        val found = requeryTemplate.findById(StatelessEntity::class.java, entity.id)!!
+        val found = requeryTmpl.findById(StatelessEntity::class.java, entity.id)!!
         assertThat(found.id).isEqualTo(entity.id)
     }
 }

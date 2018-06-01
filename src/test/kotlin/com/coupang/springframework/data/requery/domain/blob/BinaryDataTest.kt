@@ -22,9 +22,9 @@ class BinaryDataTest: AbstractDomainTest() {
             picture = bytes
         }
 
-        requeryTemplate.insert(binData)
+        requeryTmpl.insert(binData)
 
-        val loaded = requeryTemplate.findById(BinaryData::class.java, binData.id)!!
+        val loaded = requeryTmpl.findById(BinaryData::class.java, binData.id)!!
         assertThat(loaded.id).isEqualTo(binData.id)
         assertThat(loaded.picture).isNotNull().isEqualTo(bytes)
     }

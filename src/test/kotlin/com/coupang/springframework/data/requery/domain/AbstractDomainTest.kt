@@ -3,9 +3,11 @@ package com.coupang.springframework.data.requery.domain
 import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.AbstractSpringDataRequeryTest
 import com.coupang.springframework.data.requery.configs.RequeryTestConfiguration
+import com.coupang.springframework.data.requery.core.RequeryKotlinTemplate
 import com.coupang.springframework.data.requery.core.RequeryTemplate
 import io.requery.Persistable
 import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,12 +32,16 @@ abstract class AbstractDomainTest: AbstractSpringDataRequeryTest() {
 
 
     @Inject lateinit var dataStore: EntityDataStore<Persistable>
-    @Inject lateinit var requeryTemplate: RequeryTemplate
+    @Inject lateinit var ktDataStore: KotlinEntityDataStore<Persistable>
+    @Inject lateinit var requeryTmpl: RequeryTemplate
+    @Inject lateinit var requeryKtTmpl: RequeryKotlinTemplate
 
     @Test
     fun `context loading`() {
         assertThat(dataStore).isNotNull
-        assertThat(requeryTemplate).isNotNull
+        assertThat(ktDataStore).isNotNull
+        assertThat(requeryTmpl).isNotNull
+        assertThat(requeryKtTmpl).isNotNull
     }
 
 }

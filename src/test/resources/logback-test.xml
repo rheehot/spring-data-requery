@@ -11,9 +11,10 @@
     </appender>
 
     <logger name="com.coupang.springframework.data.requery" level="TRACE"/>
+    <logger name="com.coupang.kotlinx.data.requery" level="DEBUG"/>
 
-    <!--<logger name="io.requery.sql.LoggingListener" level="WARN"/>-->
-    <!--<logger name="requery" level="WARN"/>-->
+    <logger name="io.requery.sql.LoggingListener" level="WARN"/>
+    <logger name="requery" level="WARN"/>
 
     <logger name="org.springframework.data" level="DEBUG"/>
 

@@ -3,21 +3,22 @@ package com.coupang.springframework.data.requery.core
 import io.requery.Persistable
 import io.requery.TransactionIsolation
 import io.requery.meta.Attribute
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
+import kotlin.reflect.KClass
 
 /**
- * RequeryOperations
+ * RequeryKotlinOperations
  *
  * @author debop@coupang.com
- * @since 18. 5. 29
+ * @since 18. 6. 1
  */
-interface RequeryOperations {
+interface RequeryKotlinOperations {
 
-    val dataStore: EntityDataStore<Persistable>
+    val dataStore: KotlinEntityDataStore<Persistable>
 
-    fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T?
+    fun <T: Persistable, ID> findById(entityType: KClass<T>, id: ID): T?
 
-    fun <T: Persistable> findAll(entityType: Class<T>): Iterable<T>
+    fun <T: Persistable> findAll(entityType: KClass<T>): Iterable<T>
 
     fun <T: Persistable> refresh(entity: T): T
 
@@ -26,6 +27,8 @@ interface RequeryOperations {
     fun <T: Persistable> refresh(entities: Iterable<T>, vararg attributes: Attribute<*, *>): Iterable<T>
 
     fun <T: Persistable> refreshAll(entity: T): T
+
+    fun <T: Persistable> refreshAll(entities: Iterable<T>): Iterable<T>
 
     fun <T: Persistable> save(entity: T): T
 
@@ -47,14 +50,13 @@ interface RequeryOperations {
 
     fun <T: Persistable> deleteAll(entities: Iterable<T>)
 
-    fun <T: Persistable> deleteAll(entityType: Class<T>): Long
+    fun <T: Persistable> deleteAll(entityType: KClass<T>): Long
 
-    fun <T: Persistable> count(entityType: Class<T>): Long
+    fun <T: Persistable> count(entityType: KClass<T>): Long
 
-    fun <T> runInTransaction(block: RequeryOperations.() -> T): T
+    fun <T> withTransaction(block: RequeryKotlinOperations.() -> T): T
 
-    fun <T> runInTransaction(isolation: TransactionIsolation, block: RequeryOperations.() -> T): T
+    fun <T> withTransaction(isolation: TransactionIsolation, block: RequeryKotlinOperations.() -> T): T
 
-    fun <T> withDataStore(block: EntityDataStore<Persistable>.() -> T): T
-
+    fun <T> withDataStore(block: KotlinEntityDataStore<Persistable>.() -> T): T
 }

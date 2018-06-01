@@ -16,10 +16,26 @@ class UpsertTest: AbstractDomainTest() {
 
     @Before
     fun setup() {
-        requeryTemplate.deleteAll(UpsertTag::class.java)
-        requeryTemplate.deleteAll(UpsertEvent::class.java)
-        requeryTemplate.deleteAll(UpsertPlace::class.java)
-        requeryTemplate.deleteAll(UpsertLocation::class.java)
+        requeryTmpl.deleteAll(UpsertTag::class.java)
+        requeryTmpl.deleteAll(UpsertEvent::class.java)
+        requeryTmpl.deleteAll(UpsertPlace::class.java)
+        requeryTmpl.deleteAll(UpsertLocation::class.java)
+    }
+
+    @Test
+    fun `insert location with embedded address`() {
+        val location = UpsertLocation().apply {
+            name = "Tower 730"
+            address.zipcode = "12345"
+            address.city = "seoul"
+        }
+        requeryTmpl.insert(location)
+
+        assertThat(location.isNew()).isFalse()
+
+        val loaded = requeryTmpl.findById(UpsertLocation::class.java, location.id)!!
+        assertThat(loaded).isEqualTo(location)
+        assertThat(loaded.address.zipcode).isEqualTo("12345")
     }
 
     @Test
@@ -36,19 +52,19 @@ class UpsertTest: AbstractDomainTest() {
         event.addTag(tag1)
         event.addTag(tag2)
 
-        requeryTemplate.insert(event)
+        requeryTmpl.insert(event)
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java)).isEqualTo(1)
-        assertThat(requeryTemplate.count(UpsertTag::class.java)).isEqualTo(2)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(1)
+        assertThat(requeryTmpl.count(UpsertTag::class.java)).isEqualTo(2)
 
-        val loaded = requeryTemplate.findById(UpsertEvent::class.java, event.id)!!
+        val loaded = requeryTmpl.findById(UpsertEvent::class.java, event.id)!!
 
         assertThat(loaded.tags).hasSize(2).containsOnly(tag1, tag2)
 
-        requeryTemplate.delete(loaded)
+        requeryTmpl.delete(loaded)
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java)).isEqualTo(0)
-        assertThat(requeryTemplate.count(UpsertTag::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertTag::class.java)).isEqualTo(0)
     }
 
     @Test
@@ -59,15 +75,15 @@ class UpsertTest: AbstractDomainTest() {
             name = "test"
         }
 
-        requeryTemplate.upsert(event)
+        requeryTmpl.upsert(event)
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java)).isEqualTo(1)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(1)
 
-        val loaded = requeryTemplate.findById(UpsertEvent::class.java, event.id)!!
+        val loaded = requeryTmpl.findById(UpsertEvent::class.java, event.id)!!
         assertThat(loaded).isEqualTo(event)
 
-        requeryTemplate.delete(loaded)
-        assertThat(requeryTemplate.count(UpsertEvent::class.java)).isEqualTo(0)
+        requeryTmpl.delete(loaded)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(0)
     }
 
     @Test
@@ -85,10 +101,10 @@ class UpsertTest: AbstractDomainTest() {
 
         place.addEvent(event)
 
-        requeryTemplate.upsert(place)
+        requeryTmpl.upsert(place)
 
 
-        val savedPlace = requeryTemplate.findById(UpsertPlace::class.java, place.id)!!
+        val savedPlace = requeryTmpl.findById(UpsertPlace::class.java, place.id)!!
 
         assertThat(savedPlace.id).isEqualTo(place.id)
         assertThat(savedPlace.events).hasSize(1)
@@ -109,19 +125,19 @@ class UpsertTest: AbstractDomainTest() {
         event.addTag(tag1)
         event.addTag(tag2)
 
-        requeryTemplate.upsert(event)
+        requeryTmpl.upsert(event)
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java)).isEqualTo(1)
-        assertThat(requeryTemplate.count(UpsertTag::class.java)).isEqualTo(2)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(1)
+        assertThat(requeryTmpl.count(UpsertTag::class.java)).isEqualTo(2)
 
-        val loaded = requeryTemplate.findById(UpsertEvent::class.java, event.id)!!
+        val loaded = requeryTmpl.findById(UpsertEvent::class.java, event.id)!!
 
         assertThat(loaded.tags).hasSize(2).containsOnly(tag1, tag2)
 
-        requeryTemplate.delete(loaded)
+        requeryTmpl.delete(loaded)
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java)).isEqualTo(0)
-        assertThat(requeryTemplate.count(UpsertTag::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertEvent::class.java)).isEqualTo(0)
+        assertThat(requeryTmpl.count(UpsertTag::class.java)).isEqualTo(0)
     }
 
     @Test
@@ -139,10 +155,10 @@ class UpsertTest: AbstractDomainTest() {
 
         place.addEvent(event)
 
-        requeryTemplate.insert(place)
+        requeryTmpl.insert(place)
 
 
-        val savedPlace = requeryTemplate.findById(UpsertPlace::class.java, place.id)!!
+        val savedPlace = requeryTmpl.findById(UpsertPlace::class.java, place.id)!!
 
         assertThat(savedPlace.id).isEqualTo(place.id)
         assertThat(savedPlace.events).hasSize(1)
@@ -164,9 +180,9 @@ class UpsertTest: AbstractDomainTest() {
         place.addEvent(event)
         place.events.clear()
 
-        requeryTemplate.upsert(place)
+        requeryTmpl.upsert(place)
 
-        val savedPlace = requeryTemplate.findById(UpsertPlace::class.java, place.id)!!
+        val savedPlace = requeryTmpl.findById(UpsertPlace::class.java, place.id)!!
 
         assertThat(savedPlace.id).isEqualTo(place.id)
         assertThat(savedPlace.events).hasSize(0)
@@ -180,16 +196,16 @@ class UpsertTest: AbstractDomainTest() {
             name = "event1"
         }
 
-        requeryTemplate.insert(event1)
+        requeryTmpl.insert(event1)
 
         val event2 = UpsertEvent().apply {
             id = eventId
             name = "event2"
         }
 
-        requeryTemplate.upsert(event2)
+        requeryTmpl.upsert(event2)
 
-        val events = requeryTemplate.findAll(UpsertEvent::class.java)
+        val events = requeryTmpl.findAll(UpsertEvent::class.java)
         assertThat(events).hasSize(1).containsOnly(event2)
     }
 }

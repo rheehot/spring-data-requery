@@ -5,6 +5,7 @@ import com.coupang.kotlinx.objectx.ToStringBuilder
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.*
 import io.requery.converter.LocalDateTimeConverter
+import io.requery.query.MutableResult
 import java.time.LocalDateTime
 
 /**
@@ -36,12 +37,12 @@ abstract class AbstractFuncGroup: AbstractPersistable<Long>() {
     @get:ManyToMany
     @get:JunctionTable(name = "Func_Group_Members")
     @get:OrderBy("name")
-    abstract val members: MutableSet<AbstractFuncPerson>
+    abstract val members: MutableResult<AbstractFuncPerson>
 
     @get:ManyToMany
     @get:JunctionTable(name = "Func_Group_Owners")
     @get:OrderBy("name")
-    abstract val owners: MutableSet<AbstractFuncPerson>
+    abstract val owners: MutableResult<AbstractFuncPerson>
 
     @get:Convert(LocalDateTimeConverter::class)
     abstract var createdAt: LocalDateTime?

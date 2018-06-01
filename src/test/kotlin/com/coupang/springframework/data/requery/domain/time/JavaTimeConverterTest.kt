@@ -5,9 +5,7 @@ import com.coupang.springframework.data.requery.domain.AbstractDomainTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 /**
  * JavaTimeConverterTest
@@ -28,9 +26,9 @@ class JavaTimeConverterTest: AbstractDomainTest() {
             name = "event"
         }
 
-        requeryTemplate.insert(event)
+        requeryTmpl.insert(event)
 
-        val loaded = requeryTemplate.findById(TimeEvent::class.java, eventId)!!
+        val loaded = requeryTmpl.findById(TimeEvent::class.java, eventId)!!
 
         assertThat(loaded.id).isEqualTo(eventId)
         assertThat(loaded.name).isEqualTo(event.name)

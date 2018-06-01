@@ -2,15 +2,13 @@ package com.coupang.springframework.data.requery.config
 
 import com.coupang.kotlinx.data.requery.listeners.LogbackListener
 import com.coupang.kotlinx.logging.KLogging
+import com.coupang.springframework.data.requery.core.RequeryKotlinTemplate
 import com.coupang.springframework.data.requery.core.RequeryTemplate
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext
 import io.requery.Persistable
 import io.requery.cache.EmptyEntityCache
 import io.requery.meta.EntityModel
-import io.requery.sql.ConfigurationBuilder
-import io.requery.sql.EntityDataStore
-import io.requery.sql.SchemaModifier
-import io.requery.sql.TableCreationMode
+import io.requery.sql.*
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -59,10 +57,24 @@ abstract class AbstractRequeryConfiguration {
         }
     }
 
+    @Bean(destroyMethod = "close")
+    fun requeryKotlinEntityDataStore(): KotlinEntityDataStore<Persistable> {
+        return KotlinEntityDataStore<Persistable>(requeryConfiguration()).apply {
+            log.info { "Create KotlinEntityDataStore instance." }
+        }
+    }
+
     @Bean
     fun requeryTemplate(): RequeryTemplate {
         return RequeryTemplate(requeryEntityDataStore()).apply {
             log.info { "Create RequeryTemplate instance." }
+        }
+    }
+
+    @Bean
+    fun requeryKotlinTemplate(): RequeryKotlinTemplate {
+        return RequeryKotlinTemplate(requeryKotlinEntityDataStore()).apply {
+            log.info { "Create RequeryKotlinTemplate instance." }
         }
     }
 

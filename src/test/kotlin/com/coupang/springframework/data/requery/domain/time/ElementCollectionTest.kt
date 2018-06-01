@@ -28,7 +28,7 @@ class ElementCollectionTest: AbstractDomainTest() {
                 phoneNumbers = mutableSetOf("555-5555", "666-6666")
             }
 
-            requeryTemplate.insert(user)
+            requeryTmpl.insert(user)
 
 
             val saved = dataStore

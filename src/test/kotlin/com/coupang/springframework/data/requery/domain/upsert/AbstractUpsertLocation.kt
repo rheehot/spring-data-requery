@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.domain.upsert
 
 import com.coupang.kotlinx.core.hashOf
+import com.coupang.kotlinx.objectx.uninitialized
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.*
 
@@ -22,8 +23,9 @@ abstract class AbstractUpsertLocation: AbstractPersistable<Int>() {
     @get:Column
     abstract var name: String?
 
+    // NOTE: Embedded 에 해당하는 놈은 abstract 를 빼야 한다.
     @get:Embedded
-    abstract val address: AbstractUpsertAddress
+    var address: AbstractUpsertAddress = uninitialized()
 
     override fun hashCode(): Int {
         return hashOf(address)
