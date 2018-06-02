@@ -20,7 +20,7 @@ abstract class AbstractUpsertTag: AbstractPersistable<UUID>() {
     @get:Column
     abstract var name: String?
 
-    @get:ManyToMany(mappedBy = "tags", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
+    @get:ManyToMany(cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     abstract val events: MutableSet<AbstractUpsertEvent>
 
 

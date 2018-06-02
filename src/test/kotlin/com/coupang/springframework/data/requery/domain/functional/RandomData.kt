@@ -12,18 +12,18 @@ import java.util.*
  */
 object RandomData {
 
-    val random = Random(System.currentTimeMillis())
+    private val rnd = Random(System.currentTimeMillis())
 
-    val firstNames = arrayOf("Alice", "Bob", "Carol")
-    val lastNames = arrayOf("Smith", "Lee", "Jones")
+    private val firstNames = arrayOf("Alice", "Bob", "Carol")
+    private val lastNames = arrayOf("Smith", "Lee", "Jones")
 
     fun randomPerson(): FuncPerson {
         return FuncPerson().apply {
-            name = firstNames[random.nextInt(firstNames.size)] + " " + lastNames[random.nextInt(lastNames.size)]
-            email = name.replace(" ", ".").toLowerCase() + random.nextInt(1000).toString() + "@example.com"
+            name = firstNames[rnd.nextInt(firstNames.size)] + " " + lastNames[rnd.nextInt(lastNames.size)]
+            email = name.replace(" ", ".").toLowerCase() + rnd.nextInt(1000).toString() + "@example.com"
             uuid = UUID.randomUUID()
             homepage = URL("http://www.requery.io")
-            birthday = LocalDate.of(1900 + random.nextInt(90), random.nextInt(11) + 1, random.nextInt(20) + 1)
+            birthday = LocalDate.of(1900 + rnd.nextInt(90), rnd.nextInt(11) + 1, rnd.nextInt(20) + 1)
         }
     }
 
@@ -33,10 +33,10 @@ object RandomData {
 
     fun randomAddress(): FuncAddress {
         return FuncAddress().apply {
-            line1 = "${random.nextInt(4)} Fake St"
+            line1 = "${rnd.nextInt(4)} Fake St"
             city = "San Franciso"
             state = "CA"
-            zip = (10000 + random.nextInt(70000)).toString()
+            zip = (10000 + rnd.nextInt(70000)).toString()
             type = AddressType.HOME
             coordinate.latitude = 0.0F
             coordinate.longitude = 0.0F
@@ -45,7 +45,7 @@ object RandomData {
 
     fun randomPhone(): FuncPhone {
         return FuncPhone().apply {
-            phoneNumber = "555-${1000 + random.nextInt(8000)}"
+            phoneNumber = "555-${1000 + rnd.nextInt(8000)}"
             normalized = true
             extensions = IntArray(5) { 300 + it }
         }

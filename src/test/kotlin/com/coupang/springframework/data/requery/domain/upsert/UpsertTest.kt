@@ -49,8 +49,8 @@ class UpsertTest: AbstractDomainTest() {
         val tag1 = UpsertTag().apply { id = UUID.randomUUID(); name = "tag1" }
         val tag2 = UpsertTag().apply { id = UUID.randomUUID(); name = "tag2" }
 
-        event.addTag(tag1)
-        event.addTag(tag2)
+        event.tags.add(tag1)
+        event.tags.add(tag2)
 
         requeryTemplate.insert(event)
 
@@ -122,8 +122,8 @@ class UpsertTest: AbstractDomainTest() {
         val tag1 = UpsertTag().apply { id = UUID.randomUUID(); name = "tag1" }
         val tag2 = UpsertTag().apply { id = UUID.randomUUID(); name = "tag2" }
 
-        event.addTag(tag1)
-        event.addTag(tag2)
+        event.tags.add(tag1)
+        event.tags.add(tag2)
 
         requeryTemplate.upsert(event)
 

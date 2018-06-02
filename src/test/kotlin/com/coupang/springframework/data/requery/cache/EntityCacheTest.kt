@@ -40,7 +40,9 @@ class EntityCacheTest: AbstractDomainTest() {
         val d = cache.get(FuncPerson::class.java, id)
 
         assertThat(d).isNotNull
-        assertThat(d === p).isFalse()
         assertThat(d).isEqualTo(p)
+
+        // no use reference cache
+        assertThat(d === p).isFalse()
     }
 }

@@ -107,6 +107,7 @@ dependencyManagement {
 
         dependency "io.requery:requery:$requery_version"
         dependency "io.requery:requery-kotlin:$requery_version"
+        dependency "io.requery:requery-jackson:$requery_version"
         dependency "io.requery:requery-processor:$requery_version"
 
         dependency "org.slf4j:slf4j-api:1.7.25"
@@ -130,6 +131,15 @@ dependencyManagement {
 
         dependency "org.cache2k:cache2k-all:1.0.2.Final"
         dependency "org.cache2k:cache2k-jcache:1.0.2.Final"
+
+        dependency "io.reactivex.rxjava2:rxjava:$rxjava2_version"
+        dependency "io.projectreactor:reactor-core:$reactor_version"
+
+        dependency "com.fasterxml.jackson.core:jackson-core:$jackson_version"
+        dependency "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+        dependency "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
+        dependency "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version"
+        dependency "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
 
         dependency "org.assertj:assertj-core:3.10.0"
         dependency "org.mockito:mockito-core:2.18.3"
@@ -160,6 +170,7 @@ dependencies {
 
     implementation "io.requery:requery"
     implementation "io.requery:requery-kotlin"
+    implementation "io.requery:requery-jackson"
 
     kapt "io.requery:requery-processor"
     kaptTest "io.requery:requery-processor"
@@ -177,8 +188,11 @@ dependencies {
     implementation "javax.validation:validation-api"
     implementation "org.eclipse.persistence:javax.persistence"
 
-    runtime "org.cache2k:cache2k-all"
-    runtime "org.cache2k:cache2k-jcache"
+    testImplementation "org.cache2k:cache2k-all"
+    testImplementation "org.cache2k:cache2k-jcache"
+
+    testImplementation "io.reactivex.rxjava2:rxjava:$rxjava2_version"
+    testImplementation "io.projectreactor:reactor-core:$reactor_version"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
     testRuntime "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
@@ -186,6 +200,12 @@ dependencies {
     testCompile "org.assertj:assertj-core"
     testCompile "org.mockito:mockito-core"
     testCompile "com.nhaarman:mockito-kotlin"
+
+    testImplementation "com.fasterxml.jackson.core:jackson-core"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind"
+    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin"
 
     // Only needed to run tests in an (IntelliJ) IDE(A) that bundles an older version
     testRuntime "org.junit.platform:junit-platform-launcher:$junit_platform_version"

@@ -6,24 +6,18 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.requery.*
 import java.util.*
 
-/**
- * AbstractUpsertEvent
- *
- * @author debop@coupang.com
- * @since 18. 5. 31
- */
 @Entity(copyable = true)
 abstract class AbstractUpsertEvent: AbstractPersistable<UUID>() {
 
     @get:Key
-    @get:JsonProperty("_id")
+    // @get:JsonProperty("_id")
     abstract override var id: UUID?
 
     @get:JsonProperty("_name")
     abstract var name: String?
 
     @get:JsonProperty("_place")
-    @get:ManyToOne(cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
+    @get:ManyToOne
     abstract var place: AbstractUpsertPlace?
 
     @get:JsonProperty("_tags")
@@ -33,6 +27,9 @@ abstract class AbstractUpsertEvent: AbstractPersistable<UUID>() {
 
     fun addTag(tag: AbstractUpsertTag) {
         this.tags.add(tag)
+
+        // NOTE: 이 것을 넣으면 무한루프에 빠진다. 
+        // tag.events.add(this)
     }
 
     override fun hashCode(): Int {

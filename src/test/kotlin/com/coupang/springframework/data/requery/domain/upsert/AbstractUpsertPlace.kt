@@ -15,11 +15,11 @@ abstract class AbstractUpsertPlace: AbstractPersistable<String>() {
     @get:Column
     abstract var name: String
 
-    @get:OneToMany(mappedBy = "place", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
+    @get:OneToMany(mappedBy = "place", cascade = [CascadeAction.SAVE])
     abstract val events: MutableSet<AbstractUpsertEvent>
 
     fun addEvent(event: AbstractUpsertEvent) {
-        events.add(event)
+        this.events.add(event)
         event.place = this
     }
 
