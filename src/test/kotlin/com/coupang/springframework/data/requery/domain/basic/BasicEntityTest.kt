@@ -68,9 +68,9 @@ class BasicEntityTest: AbstractDomainTest() {
     fun `run with transaction`() {
         with(requeryTemplate) {
             runInTransaction {
-                insert(RandomData.randomUser())
-                insert(RandomData.randomUser())
-                insert(RandomData.randomUser())
+                insert(randomUser())
+                insert(randomUser())
+                insert(randomUser())
 
                 val result = select(BasicUser::class.java).limit(10).get()
                 assertThat(result.toList()).hasSize(3)

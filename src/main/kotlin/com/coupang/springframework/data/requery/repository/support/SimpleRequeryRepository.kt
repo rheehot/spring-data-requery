@@ -18,8 +18,8 @@ import java.io.Serializable
 import java.util.*
 
 /**
- * The implementation of all CRUD, paging and sorting functionality in ArangoRepository from the Spring Data Commons
- * CRUD repository and PagingAndSorting repository
+ * The implementation of all CRUD, paging and sorting functionality in RequeryRepository
+ * from the Spring Data Commons CRUD repository and PagingAndSorting repository
  *
  * @author debop@coupang.com
  * @since 18. 5. 29
@@ -51,7 +51,7 @@ class SimpleRequeryRepository<T, ID>(
     override fun count(selection: Selection<Result<T>>): Long {
         // return selection.get().count().toLong()
 
-        return operations.dataStore
+        return operations
             .count(entityType)
             .where()
             .exists(selection)
@@ -69,7 +69,7 @@ class SimpleRequeryRepository<T, ID>(
     }
 
     override fun findAll(sort: Sort): Iterable<T> {
-        return operations.dataStore.select(entityType).orderBy(*sort.toRequeryOrder(entityType)).get().toList()
+        return operations.select(entityType).orderBy(*sort.toRequeryOrder(entityType)).get().toList()
     }
 
     //    override fun <S: T> findAll(example: Example<S>): Iterable<S> {
@@ -81,8 +81,8 @@ class SimpleRequeryRepository<T, ID>(
     //    }
 
     override fun findAll(pageable: Pageable): Page<T> {
-        val contents = operations.dataStore.select(entityType).paging(entityType, pageable).get().toList()
-        val totalCount = operations.dataStore.count(entityType).get().value().toLong()
+        val contents = operations.select(entityType).paging(entityType, pageable).get().toList()
+        val totalCount = operations.count(entityType).get().value().toLong()
         return PageImpl(contents, pageable, totalCount)
     }
 
@@ -91,7 +91,7 @@ class SimpleRequeryRepository<T, ID>(
     //    }
 
     override fun findAllById(ids: Iterable<ID>): Iterable<T> {
-        return operations.dataStore
+        return operations
             .select(entityType)
             .where(AbstractPersistable<ID>::id.`in`(ids.toList()))
             .get()
@@ -99,7 +99,7 @@ class SimpleRequeryRepository<T, ID>(
     }
 
     override fun <S: T> saveAll(entities: Iterable<S>): Iterable<S> {
-        return operations.saveAll(entities)
+        return operations.upsertAll(entities)
     }
 
     override fun <S: T> upsert(entity: S): S {
@@ -123,7 +123,7 @@ class SimpleRequeryRepository<T, ID>(
     }
 
     override fun <S: T> save(entity: S): S {
-        return operations.save(entity)
+        return operations.upsert(entity)
     }
 
     override fun deleteById(id: ID) {

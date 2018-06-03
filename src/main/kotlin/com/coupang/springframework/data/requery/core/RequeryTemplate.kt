@@ -19,7 +19,8 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         return dataStore.select(entityType)
     }
 
-    override fun <T: Persistable> select(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): Selection<out Result<T>> {
+    override fun <T: Persistable> select(entityType: Class<T>,
+                                         vararg attributes: QueryAttribute<T, *>): Selection<out Result<T>> {
         return dataStore.select(entityType, *attributes)
     }
 
@@ -51,14 +52,6 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         return dataStore.refreshAll(entity)
     }
 
-    override fun <T: Persistable> save(entity: T): T {
-        return dataStore.upsert(entity)
-    }
-
-    override fun <T: Persistable> saveAll(entities: Iterable<T>): Iterable<T> {
-        return dataStore.upsert(entities)
-    }
-
     override fun <T: Persistable> upsert(entity: T): T {
         return dataStore.upsert(entity)
     }
@@ -75,11 +68,12 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
         return dataStore.insert(entities)
     }
 
-    override fun <T: Persistable> insertInto(entityType: Class<T>): Insertion<out Result<Tuple>> {
+    override fun <T: Persistable> insert(entityType: Class<T>): Insertion<out Result<Tuple>> {
         return dataStore.insert(entityType)
     }
 
-    override fun <T: Persistable> insertInto(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): InsertInto<out Result<Tuple>> {
+    override fun <T: Persistable> insert(entityType: Class<T>,
+                                         vararg attributes: QueryAttribute<T, *>): InsertInto<out Result<Tuple>> {
         return dataStore.insert(entityType, *attributes)
     }
 
@@ -97,6 +91,10 @@ open class RequeryTemplate(override val dataStore: EntityDataStore<Persistable>)
 
     override fun <T: Persistable> delete(entity: T) {
         dataStore.delete(entity)
+    }
+
+    override fun <T: Persistable> delete(entityType: Class<T>): Deletion<out Scalar<Int>> {
+        return dataStore.delete(entityType)
     }
 
     override fun <T: Persistable> deleteAll(entities: Iterable<T>) {

@@ -15,6 +15,8 @@ import io.requery.sql.EntityDataStore
  */
 interface RequeryOperations {
 
+    // TODO: default methods 로 하면 안되나?
+
     val dataStore: EntityDataStore<Persistable>
 
     fun <T: Persistable> select(entityType: Class<T>): Selection<out Result<T>>
@@ -35,10 +37,6 @@ interface RequeryOperations {
 
     fun <T: Persistable> refreshAll(entity: T): T
 
-    fun <T: Persistable> save(entity: T): T
-
-    fun <T: Persistable> saveAll(entities: Iterable<T>): Iterable<T>
-
     fun <T: Persistable> upsert(entity: T): T
 
     fun <T: Persistable> upsertAll(entities: Iterable<T>): Iterable<T>
@@ -47,17 +45,19 @@ interface RequeryOperations {
 
     fun <T: Persistable> insertAll(entities: Iterable<T>): Iterable<T>
 
-    fun <T: Persistable> insertInto(entityType: Class<T>): Insertion<out Result<Tuple>>
+    fun <T: Persistable> insert(entityType: Class<T>): Insertion<out Result<Tuple>>
 
-    fun <T: Persistable> insertInto(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): InsertInto<out Result<Tuple>>
-
-    fun <T: Persistable> update(entityType: Class<T>): Update<out Scalar<Int>>
+    fun <T: Persistable> insert(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): InsertInto<out Result<Tuple>>
 
     fun <T: Persistable> update(entity: T): T
+
+    fun <T: Persistable> update(entityType: Class<T>): Update<out Scalar<Int>>
 
     fun <T: Persistable> updateAll(entities: Iterable<T>): Iterable<T>
 
     fun <T: Persistable> delete(entity: T)
+
+    fun <T: Persistable> delete(entityType: Class<T>): Deletion<out Scalar<Int>>
 
     fun <T: Persistable> deleteAll(entities: Iterable<T>)
 

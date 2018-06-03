@@ -104,7 +104,7 @@ class CompletableFutureTest: AbstractDomainTest() {
         val users = randomUsers(100)
         asyncEntityStore.insert(users).toCompletableFuture().get()
 
-        Thread.sleep(10)
+        Thread.sleep(100)
 
         val loadedUsers = requeryTemplate
             .select(BasicUser::class.java)

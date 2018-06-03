@@ -12,7 +12,6 @@ import io.requery.query.Result
 import io.requery.query.function.Case
 import io.requery.query.function.Coalesce
 import io.requery.query.function.Count
-import io.requery.sql.StatementExecutionException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before

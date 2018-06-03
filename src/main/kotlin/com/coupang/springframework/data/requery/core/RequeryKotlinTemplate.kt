@@ -2,8 +2,7 @@ package com.coupang.springframework.data.requery.core
 
 import io.requery.Persistable
 import io.requery.TransactionIsolation
-import io.requery.kotlin.QueryableAttribute
-import io.requery.kotlin.Selection
+import io.requery.kotlin.*
 import io.requery.meta.Attribute
 import io.requery.query.Expression
 import io.requery.query.Result
@@ -48,7 +47,8 @@ class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persis
         return dataStore.refresh(entity, *attributes)
     }
 
-    override fun <T: Persistable> refresh(entities: Iterable<T>, vararg attributes: Attribute<*, *>): Iterable<T> {
+    override fun <T: Persistable> refresh(entities: Iterable<T>,
+                                          vararg attributes: Attribute<*, *>): Iterable<T> {
         return dataStore.refresh(entities, *attributes)
     }
 
@@ -58,14 +58,6 @@ class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persis
 
     override fun <T: Persistable> refreshAll(entities: Iterable<T>): Iterable<T> {
         return entities.map { dataStore.refreshAll(it) }
-    }
-
-    override fun <T: Persistable> save(entity: T): T {
-        return dataStore.upsert(entity)
-    }
-
-    override fun <T: Persistable> saveAll(entities: Iterable<T>): Iterable<T> {
-        return dataStore.upsert(entities)
     }
 
     override fun <T: Persistable> upsert(entity: T): T {
@@ -80,6 +72,15 @@ class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persis
         return dataStore.insert(entity)
     }
 
+    override fun <T: Persistable> insert(entityType: KClass<T>): Insertion<Result<Tuple>> {
+        return dataStore.insert(entityType)
+    }
+
+    override fun <T: Persistable> insert(entityType: KClass<T>,
+                                         vararg attributes: QueryableAttribute<T, *>): InsertInto<out Result<Tuple>> {
+        return dataStore.insert(entityType, *attributes)
+    }
+
     override fun <T: Persistable> insertAll(entities: Iterable<T>): Iterable<T> {
         return dataStore.insert(entities)
     }
@@ -88,12 +89,20 @@ class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persis
         return dataStore.update(entity)
     }
 
+    override fun <T: Persistable> update(entityType: KClass<T>): Update<Scalar<Int>> {
+        return dataStore.update(entityType)
+    }
+
     override fun <T: Persistable> updateAll(entities: Iterable<T>): Iterable<T> {
         return dataStore.update(entities)
     }
 
     override fun <T: Persistable> delete(entity: T) {
         dataStore.delete(entity)
+    }
+
+    override fun <T: Persistable> delete(entityType: KClass<T>): Deletion<Scalar<Int>> {
+        return dataStore.delete(entityType)
     }
 
     override fun <T: Persistable> deleteAll(entities: Iterable<T>) {
@@ -106,6 +115,14 @@ class RequeryKotlinTemplate(override val dataStore: KotlinEntityDataStore<Persis
 
     override fun <T: Persistable> count(entityType: KClass<T>): Selection<Scalar<Int>> {
         return dataStore.count(entityType)
+    }
+
+    override fun raw(query: String, vararg parameters: Any): Result<out Tuple> {
+        return dataStore.raw(query, *parameters)
+    }
+
+    override fun <T: Persistable> raw(entityType: KClass<T>, query: String, vararg parameters: Any): Result<out T> {
+        return dataStore.raw(entityType, query, *parameters)
     }
 
     override fun <T> withTransaction(block: RequeryKotlinOperations.() -> T): T {
