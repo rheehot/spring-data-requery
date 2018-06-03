@@ -20,7 +20,7 @@ open class RequeryPersistentEntityInformation<T, ID>(private val entity: Requery
     }
 
     override fun hasCompositeId(): Boolean {
-        TODO("not implemented")
+        return getIdAttributeNames().count() > 1
     }
 
     override fun getIdAttributeNames(): Iterable<String> {
@@ -32,7 +32,7 @@ open class RequeryPersistentEntityInformation<T, ID>(private val entity: Requery
     }
 
     override val entityName: String
-        get() = TODO("not implemented")
+        get() = entity.name
 
 
 }

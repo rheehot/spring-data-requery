@@ -1,6 +1,8 @@
 package com.coupang.springframework.data.requery.repository.config
 
 import com.coupang.kotlinx.logging.KLogging
+import com.coupang.springframework.data.requery.repository.RequeryRepository
+import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport
 
 /**
@@ -16,12 +18,23 @@ class RequeryRepositoryConfigExtension: RepositoryConfigurationExtensionSupport(
         const val ENABLE_DEFAULT_TRANSACTIONS_ATTRIBUTE = "enableDefaultTransactions"
     }
 
+    override fun getModuleName(): String {
+        return "Requery"
+    }
 
     override fun getModulePrefix(): String {
-        TODO("not implemented")
+        return "requery"
     }
 
     override fun getRepositoryFactoryBeanClassName(): String {
-        TODO("not implemented")
+        return RequeryRepositoryFactoryBean::class.java.name
+    }
+
+    override fun getIdentifyingAnnotations(): MutableCollection<Class<out Annotation>> {
+        return mutableListOf(io.requery.Entity::class.java)
+    }
+
+    override fun getIdentifyingTypes(): MutableCollection<Class<*>> {
+        return mutableListOf(RequeryRepository::class.java)
     }
 }
