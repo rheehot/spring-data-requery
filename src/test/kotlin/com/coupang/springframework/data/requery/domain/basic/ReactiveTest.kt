@@ -305,6 +305,8 @@ class ReactiveTest: AbstractDomainTest() {
         with(reactiveStore) {
             insert(randomUsers(36)).blockingGet()
 
+            Thread.sleep(10)
+
             val loadedUsers = mutableListOf<BasicUser>()
             lateinit var subscription: Subscription
 
@@ -327,7 +329,7 @@ class ReactiveTest: AbstractDomainTest() {
                     }
                 )
 
-            assertThat(loadedUsers).hasSize(36)
+            assertThat(loadedUsers.size).isEqualTo(36)
         }
     }
 }

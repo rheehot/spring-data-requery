@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.domain.basic
 
+import com.coupang.kotlinx.utils.asyncs.toCompletableFuture
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest
 import com.coupang.springframework.data.requery.domain.basic.RandomData.randomUser
 import com.coupang.springframework.data.requery.domain.basic.RandomData.randomUsers
@@ -10,6 +11,7 @@ import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.Executors
 import java.util.concurrent.ForkJoinPool
+import kotlin.streams.toList
 
 /**
  * com.coupang.springframework.data.requery.domain.basic.CompletableFutureTest
@@ -100,9 +102,11 @@ class CompletableFutureTest: AbstractDomainTest() {
     @Test
     fun `query stream`() {
         val users = randomUsers(100)
-        asyncEntityStore.insert(users).join()
+        asyncEntityStore.insert(users).toCompletableFuture().get()
 
-        val loadedUsers = asyncEntityStore
+        Thread.sleep(10)
+
+        val loadedUsers = requeryTemplate
             .select(BasicUser::class.java)
             .orderBy(BasicUser.NAME.asc().nullsLast())
             .limit(200)
@@ -110,7 +114,7 @@ class CompletableFutureTest: AbstractDomainTest() {
             .stream()
             .map { user -> user }
 
-        assertThat(loadedUsers).hasSize(100)
+        assertThat(loadedUsers.count()).isEqualTo(100)
 
     }
 }

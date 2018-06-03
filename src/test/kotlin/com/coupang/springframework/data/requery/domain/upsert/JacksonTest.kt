@@ -30,7 +30,7 @@ class JacksonTest: AbstractDomainTest() {
     }
 
     @Test
-    fun `one to many serialize`() {
+    fun `one to many jackson serialize`() {
         with(requeryTemplate) {
             val uuid = UUID.randomUUID()
             val event = UpsertEvent()
