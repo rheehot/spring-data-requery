@@ -29,6 +29,7 @@ sourceSets {
 idea {
     module {
         sourceDirs += file("${buildDir}/generated/source/apt/main/")
+        testSourceDirs += file("${buildDir}/generated/source/apt/test/")
         generatedSourceDirs += file("${buildDir}/generated/source/apt/main/")
     }
 }
@@ -43,11 +44,11 @@ dependencies {
 
     // lombok을 gradle 에서 사용하기 위해 annotation process를 설정해주어야 합니다.
     compileOnly "org.projectlombok:lombok"
-    apt "org.projectlombok:lombok"
-    testApt "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
 
-    apt "io.requery:requery-processor"
-    testApt "io.requery:requery-processor"
+    annotationProcessor "io.requery:requery-processor"
+    testAnnotationProcessor "io.requery:requery-processor"
 
     implementation "org.jetbrains:annotations:16.0.2"
 

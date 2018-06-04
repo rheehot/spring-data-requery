@@ -3,17 +3,20 @@ package com.coupang.springframework.data.requery.convert;
 import io.requery.Converter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+
 /**
  * IntArrayStringConverter
  *
  * @author debop@coupang.com
  * @since 18. 6. 4
  */
-public class IntArrayStringConverter implements Converter<int[], String> {
+public class IntArrayStringConverter implements Converter<ArrayList<Integer>, String> {
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Class<int[]> getMappedType() {
-        return int[].class;
+    public Class<ArrayList<Integer>> getMappedType() {
+        return (Class) ArrayList.class;
     }
 
     @Override
@@ -27,29 +30,39 @@ public class IntArrayStringConverter implements Converter<int[], String> {
     }
 
     @Override
-    public String convertToPersisted(int[] value) {
-        StringBuilder sb = new StringBuilder(value.length);
+    public String convertToPersisted(ArrayList<Integer> value) {
+        if (value == null) {
+            return null;
+        }
 
-        for (int x : value) {
-            if (sb.length() > 0) {
+        StringBuilder sb = new StringBuilder();
+        int index = 0;
+        for (Integer v : value) {
+            if (index > 0) {
                 sb.append(",");
             }
-            sb.append(x);
+            sb.append(v);
+            index++;
         }
         return sb.toString();
     }
 
     @Override
-    public int[] convertToMapped(Class<? extends int[]> type, String value) {
-        if (StringUtils.isEmpty(value)) {
+    public ArrayList<Integer> convertToMapped(Class<? extends ArrayList<Integer>> type, String value) {
+        if (value == null) {
             return null;
         }
-
-        String[] strs = value.split(",");
-        int[] ints = new int[strs.length];
-        for (int i = 0; i < strs.length; i++) {
-            ints[i] = Integer.valueOf(strs[i]);
+        if (StringUtils.isEmpty(value)) {
+            return new ArrayList<>();
         }
-        return ints;
+
+        ArrayList<Integer> list = new ArrayList<>();
+
+        String[] parts = value.split(",");
+        for (String part : parts) {
+            list.add(Integer.valueOf(part));
+        }
+
+        return list;
     }
 }

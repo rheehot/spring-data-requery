@@ -6,15 +6,13 @@ import io.requery.converter.LocalDateTimeConverter;
 import java.time.LocalDateTime;
 
 /**
- * AbstractAuditable
+ * com.coupang.springframework.data.requery.domain.AuditableIntEntity
  *
- * @author debop@coupang.com
+ * @author debop
  * @since 18. 6. 4
  */
 @Superclass
-public abstract class AbstractAuditable<ID> extends AbstractPersistable<ID> {
-
-    private static final long serialVersionUID = 4027911066590384558L;
+public abstract class AuditableIntEntity extends AbstractPersistable<Integer> {
 
     @Convert(LocalDateTimeConverter.class)
     protected LocalDateTime createdDate;
@@ -34,4 +32,5 @@ public abstract class AbstractAuditable<ID> extends AbstractPersistable<ID> {
         lastModifiedDate = LocalDateTime.now();
     }
 
+    private static final long serialVersionUID = -4615850184590836079L;
 }

@@ -34,6 +34,9 @@ abstract class AbstractTreeNode: AbstractPersistable<Long>() {
     @get:OneToMany(mappedBy = "node")
     abstract val attributes: MutableSet<AbstractNodeAttribute>
 
+    // TODO: Embedded 로 TreePosition을 넣어야 한다.
+    
+
     fun addChild(child: AbstractTreeNode) {
         child.parent = this
         children.add(child)

@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.configs;
 
+import com.coupang.kotlinx.data.requery.listeners.LogbackListener;
 import com.coupang.springframework.data.requery.core.RequeryTemplate;
 import io.requery.cache.EmptyEntityCache;
 import io.requery.meta.EntityModel;
@@ -46,6 +47,7 @@ public abstract class AbstractRequeryConfiguration {
             .setEntityCache(new EmptyEntityCache())
             .setStatementCacheSize(1024)
             .setBatchUpdateSize(100)
+            .addStatementListener(new LogbackListener())
             .build();
     }
 
