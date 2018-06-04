@@ -1,0 +1,73 @@
+buildscript {
+
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        // for Java apt
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
+    }
+}
+
+// lombok을 gradle 에서 사용하기 위한 plugin
+plugins {
+    id 'io.franzbecker.gradle-lombok' version '1.14'
+}
+
+// for Java apt
+apply plugin: "java"
+apply plugin: "net.ltgt.apt"
+
+sourceSets {
+    generated {
+        "${buildDir}/generated/source/apt/main/"
+    }
+}
+
+idea {
+    module {
+        sourceDirs += file("${buildDir}/generated/source/apt/main/")
+        generatedSourceDirs += file("${buildDir}/generated/source/apt/main/")
+    }
+}
+
+
+dependencies {
+
+    compile "com.coupang.kotlinx:kotlinx-data-requery"
+    compile "io.requery:requery"
+
+    compile "org.apache.commons:commons-lang3:3.7"
+
+    // lombok을 gradle 에서 사용하기 위해 annotation process를 설정해주어야 합니다.
+    compileOnly "org.projectlombok:lombok"
+    apt "org.projectlombok:lombok"
+    testApt "org.projectlombok:lombok"
+
+    apt "io.requery:requery-processor"
+    testApt "io.requery:requery-processor"
+
+    implementation "org.jetbrains:annotations:16.0.2"
+
+    implementation "javax.inject:javax.inject:1"
+    implementation "javax.cache:cache-api"
+    implementation "javax.annotation:javax.annotation-api"
+    implementation "javax.interceptor:javax.interceptor-api"
+    implementation "javax.validation:validation-api"
+    implementation "org.eclipse.persistence:javax.persistence"
+
+    // spring framework
+    compile "org.springframework:spring-beans"
+    compile "org.springframework:spring-context"
+    compile "org.springframework:spring-expression"
+    compile "org.springframework:spring-tx"
+    compile "org.springframework.data:spring-data-commons"
+
+    optional "org.threeten:threetenbp"
+
+    compile "org.slf4j:slf4j-api"
+    testImplementation "ch.qos.logback:logback-classic"
+
+}
