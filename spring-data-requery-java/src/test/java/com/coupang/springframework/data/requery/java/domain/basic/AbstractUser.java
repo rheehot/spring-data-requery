@@ -1,9 +1,11 @@
 package com.coupang.springframework.data.requery.java.domain.basic;
 
-import io.requery.Entity;
-import io.requery.Generated;
-import io.requery.Key;
-import io.requery.Table;
+import com.coupang.kotlinx.objectx.ToStringBuilder;
+import com.coupang.springframework.data.requery.domain.AbstractPersistable;
+import io.requery.*;
+import org.jetbrains.annotations.NotNull;
+
+import static com.coupang.kotlinx.core.HashxKt.hashOf;
 
 /**
  * AbstractUser
@@ -13,11 +15,26 @@ import io.requery.Table;
  */
 @Entity
 @Table(name = "Users")
-public abstract class AbstractUser {
+public abstract class AbstractUser extends AbstractPersistable<Long> {
 
     @Key
     @Generated
     protected Long id;
 
     protected String name;
+
+
+    @Override
+    public int hashCode() {
+        return hashOf(name);
+    }
+
+    @Transient
+    @Override
+    protected @NotNull ToStringBuilder buildStringHelper() {
+        return super.buildStringHelper()
+            .add("name", name);
+    }
+
+    private static final long serialVersionUID = -2693264826800934057L;
 }

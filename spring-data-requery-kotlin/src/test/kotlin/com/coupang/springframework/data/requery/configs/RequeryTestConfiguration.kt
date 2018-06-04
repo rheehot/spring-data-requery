@@ -5,6 +5,7 @@ import com.coupang.kotlinx.data.JdbcDrivers
 import com.coupang.kotlinx.data.config.DatabaseConfigElement
 import com.coupang.kotlinx.data.config.DatabaseSetting
 import com.coupang.springframework.data.requery.config.AbstractRequeryConfiguration
+import com.coupang.springframework.data.requery.domain.Models
 import io.requery.meta.EntityModel
 import io.requery.sql.TableCreationMode
 import org.springframework.context.annotation.Bean

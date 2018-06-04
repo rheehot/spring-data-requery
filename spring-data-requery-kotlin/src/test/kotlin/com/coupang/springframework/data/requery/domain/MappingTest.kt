@@ -1,6 +1,8 @@
 package com.coupang.springframework.data.requery.domain
 
 import com.coupang.kotlinx.logging.KLogging
+import com.coupang.springframework.data.requery.domain.sample.CustomAbstractPersistable
+import com.coupang.springframework.data.requery.domain.sample.Person
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

@@ -31,6 +31,7 @@ public class RequeryConfigurationTest {
 
     @Test
     public void contextLoading() {
+        log.debug("Context Loading...");
         assertThat(dataStore).isNotNull();
         assertThat(requeryTemplate).isNotNull();
     }

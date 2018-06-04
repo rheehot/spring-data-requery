@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.domain.upsert
 
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest
+import com.coupang.springframework.data.requery.domain.Models
 import io.requery.jackson.EntityMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before

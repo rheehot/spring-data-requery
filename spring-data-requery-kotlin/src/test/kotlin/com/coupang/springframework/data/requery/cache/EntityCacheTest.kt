@@ -1,6 +1,8 @@
 package com.coupang.springframework.data.requery.cache
 
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest
+import com.coupang.springframework.data.requery.domain.Models
+import com.coupang.springframework.data.requery.domain.functional.FuncPerson
 import com.coupang.springframework.data.requery.domain.functional.RandomData
 import io.requery.EntityCache
 import io.requery.cache.EntityCacheBuilder

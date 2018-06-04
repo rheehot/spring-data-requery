@@ -120,8 +120,6 @@ class CompletableFutureTest: AbstractDomainTest() {
                     .orderBy(BasicUser.NAME.asc().nullsLast())
                     .limit(200)
                     .get()
-                    .toCompletableFuture()
-                    .get()
                     .stream()
                     .map { user -> user }
 

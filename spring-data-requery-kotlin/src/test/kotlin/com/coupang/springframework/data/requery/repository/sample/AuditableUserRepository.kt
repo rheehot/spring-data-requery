@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.repository.sample
 
+import com.coupang.springframework.data.requery.domain.sample.AuditableUser
 import com.coupang.springframework.data.requery.repository.RequeryRepository
 
 /**
