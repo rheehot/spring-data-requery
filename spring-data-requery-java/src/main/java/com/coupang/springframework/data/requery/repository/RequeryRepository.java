@@ -19,7 +19,7 @@ public interface RequeryRepository<T, ID> extends PagingAndSortingRepository<T, 
 
     <S extends T> void deleteInBatch(Iterable<S> entities);
 
-    void deleteAllInBatch();
+    int deleteAllInBatch();
 
     T getOne(ID id);
 }

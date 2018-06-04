@@ -17,37 +17,37 @@ import java.util.Optional;
  */
 public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> {
 
-    private final RequeryOperations requeryOperations;
-    private final Class<?> domainType;
+    private final RequeryOperations operations;
+    private final Class<T> domainType;
 
-    public SimpleRequeryRepository(RequeryOperations requeryOperations, Class<T> domainType) {
-        this.requeryOperations = requeryOperations;
+    public SimpleRequeryRepository(RequeryOperations operations, Class<T> domainType) {
+        this.operations = operations;
         this.domainType = domainType;
     }
 
     @Override
     public <S extends T> S upsert(S entity) {
-        return null;
+        return operations.upsert(entity);
     }
 
     @Override
     public <S extends T> Iterable<S> upsertAll(Iterable<S> entities) {
-        return null;
+        return operations.upsertAll(entities);
     }
 
     @Override
     public <S extends T> void deleteInBatch(Iterable<S> entities) {
-
+        operations.deleteAll(entities);
     }
 
     @Override
-    public void deleteAllInBatch() {
-
+    public int deleteAllInBatch() {
+        return operations.delete(domainType).get().value();
     }
 
     @Override
     public T getOne(ID id) {
-        return null;
+        return operations.findById(domainType, id);
     }
 
     @Override
@@ -62,12 +62,12 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> 
 
     @Override
     public <S extends T> S save(S entity) {
-        return null;
+        return operations.upsert(entity);
     }
 
     @Override
     public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
-        return null;
+        return operations.upsertAll(entities);
     }
 
     @Override
@@ -77,12 +77,12 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> 
 
     @Override
     public boolean existsById(ID id) {
-        return false;
+        return findById(id) != null;
     }
 
     @Override
     public Iterable<T> findAll() {
-        return null;
+        return operations.findAll(domainType);
     }
 
     @Override
@@ -92,27 +92,27 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> 
 
     @Override
     public long count() {
-        return 0;
+        return operations.count(domainType).get().value().longValue();
     }
 
     @Override
     public void deleteById(ID id) {
-
+        findById(id).ifPresent(this::delete);
     }
 
     @Override
     public void delete(T entity) {
-
+        operations.delete(entity);
     }
 
     @Override
     public void deleteAll(Iterable<? extends T> entities) {
-
+        operations.deleteAll(entities);
     }
 
     @Override
     public void deleteAll() {
-
+        operations.delete(domainType).get().value();
     }
 
     @Override
