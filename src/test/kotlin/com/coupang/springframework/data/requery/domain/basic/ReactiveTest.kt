@@ -302,6 +302,7 @@ class ReactiveTest: AbstractDomainTest() {
 
     @Test
     fun `query obervable pull`() {
+
         with(reactiveStore) {
             insert(randomUsers(36)).blockingGet()
 

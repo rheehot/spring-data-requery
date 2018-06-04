@@ -11,7 +11,6 @@ import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.Executors
 import java.util.concurrent.ForkJoinPool
-import kotlin.streams.toList
 
 /**
  * com.coupang.springframework.data.requery.domain.basic.CompletableFutureTest
@@ -46,50 +45,60 @@ class CompletableFutureTest: AbstractDomainTest() {
 
     @Test
     fun `async insert and count`() {
-        val user = randomUser()
-        asyncEntityStore.insert(user)
-            .thenAccept { user ->
-                assertThat(user.id).isNotNull()
-            }
-            .thenCompose {
-                asyncEntityStore.count(BasicUser::class.java).get().toCompletableFuture()
-            }
-            .get()
+
+        with(asyncEntityStore) {
+            val user = randomUser()
+
+            insert(user)
+                .thenAccept { savedUser ->
+                    assertThat(savedUser.id).isNotNull()
+                }
+                .thenCompose {
+                    count(BasicUser::class.java).get().toCompletableFuture()
+                }
+                .get()
+        }
     }
 
     @Test
     fun `async insert one to many`() {
-        val user = randomUser()
-        asyncEntityStore.insert(user)
-            .thenApply { user ->
-                val group = BasicGroup().apply { name = "group" }
-                user.groups.add(group)
-                group
-            }
-            .thenCompose { group ->
-                asyncEntityStore.insert(group)
-            }
-            .get()
 
-        assertThat(user.groups).hasSize(1)
+        with(asyncEntityStore) {
+            val user = randomUser()
+
+            insert(user)
+                .thenApply { savedUser ->
+                    val group = BasicGroup().apply { name = "group" }
+                    savedUser.groups.add(group)
+                    group
+                }
+                .thenCompose { group ->
+                    insert(group)
+                }
+                .get()
+
+            assertThat(user.groups).hasSize(1)
+        }
     }
 
     @Test
     fun `async query update`() {
         val user = randomUser().apply { age = 100 }
 
-        asyncEntityStore.insert(user)
-            .thenCompose { user ->
-                asyncEntityStore.update(BasicUser::class.java)
-                    .set(BasicUser.ABOUT, "nothing")
-                    .set(BasicUser.AGE, 50)
-                    .where(BasicUser.AGE eq user.age)
-                    .get()
-                    .toCompletableFuture(Executors.newSingleThreadExecutor())
-            }.thenApplyAsync { rowCount ->
-                assertThat(rowCount).isEqualTo(1)
-            }
-            .get()
+        with(asyncEntityStore) {
+            insert(user)
+                .thenCompose { savedUser ->
+                    update(BasicUser::class.java)
+                        .set(BasicUser.ABOUT, "nothing")
+                        .set(BasicUser.AGE, 50)
+                        .where(BasicUser.AGE eq user.age)
+                        .get()
+                        .toCompletableFuture(Executors.newSingleThreadExecutor())
+                }.thenApplyAsync { rowCount ->
+                    assertThat(rowCount).isEqualTo(1)
+                }
+                .get()
+        }
     }
 
     @Test
@@ -102,19 +111,24 @@ class CompletableFutureTest: AbstractDomainTest() {
     @Test
     fun `query stream`() {
         val users = randomUsers(100)
-        asyncEntityStore.insert(users).toCompletableFuture().get()
 
-        Thread.sleep(100)
+        with(asyncEntityStore) {
 
-        val loadedUsers = requeryTemplate
-            .select(BasicUser::class.java)
-            .orderBy(BasicUser.NAME.asc().nullsLast())
-            .limit(200)
-            .get()
-            .stream()
-            .map { user -> user }
+            insert(users).toCompletableFuture().get()
 
-        assertThat(loadedUsers.count()).isEqualTo(100)
+            Thread.sleep(100)
 
+            val loadedUsers =
+                select(BasicUser::class.java)
+                    .orderBy(BasicUser.NAME.asc().nullsLast())
+                    .limit(200)
+                    .get()
+                    .toCompletableFuture()
+                    .get()
+                    .stream()
+                    .map { user -> user }
+
+            assertThat(loadedUsers.count()).isEqualTo(100)
+        }
     }
 }
