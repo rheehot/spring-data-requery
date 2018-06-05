@@ -11,11 +11,7 @@ import java.time.LocalDateTime
  * @since 18. 5. 30
  */
 @Superclass
-abstract class AbstractAnnotatedAuditable: AbstractPersistable<Long>() {
-
-    @get:Key
-    @get:Generated
-    abstract override val id: Long?
+abstract class AbstractAnnotatedAuditable {
 
     @get:Convert(LocalDateTimeConverter::class)
     abstract var createdAt: LocalDateTime?

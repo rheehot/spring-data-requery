@@ -18,7 +18,7 @@ abstract class AbstractUser: AbstractPersistable<Int>() {
     @get:Key
     @get:Generated
     @get:Column(name = "user_id")
-    abstract override val id: Int?
+    abstract val id: Int?
 
     abstract var firstname: String?
     abstract var lastname: String?

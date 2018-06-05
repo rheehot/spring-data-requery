@@ -16,7 +16,7 @@ abstract class AbstractFuncAddress: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     abstract var line1: String?
     abstract var line2: String?

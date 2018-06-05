@@ -14,7 +14,7 @@ abstract class AbstractBinaryData: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:Column(nullable = false)
     abstract var name: String

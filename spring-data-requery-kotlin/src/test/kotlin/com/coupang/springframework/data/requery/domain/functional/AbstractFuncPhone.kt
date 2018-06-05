@@ -16,7 +16,7 @@ abstract class AbstractFuncPhone: AbstractPersistable<Long>() {
     @get:Key
     @get:Generated
     @get:Column(name = "phoneId")
-    abstract override val id: Long?
+    abstract val id: Long?
 
 
     abstract var phoneNumber: String

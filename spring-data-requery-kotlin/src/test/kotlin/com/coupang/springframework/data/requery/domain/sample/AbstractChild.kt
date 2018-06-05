@@ -16,7 +16,7 @@ abstract class AbstractChild: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:ManyToMany(mappedBy = "children")
     abstract val parents: MutableSet<AbstractParent>

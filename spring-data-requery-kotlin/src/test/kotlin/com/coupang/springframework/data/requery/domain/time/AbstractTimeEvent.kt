@@ -16,7 +16,7 @@ import java.util.*
 abstract class AbstractTimeEvent: AbstractPersistable<UUID>() {
 
     @get:Key
-    abstract override var id: UUID?
+    abstract var id: UUID?
 
     abstract var name: String
 

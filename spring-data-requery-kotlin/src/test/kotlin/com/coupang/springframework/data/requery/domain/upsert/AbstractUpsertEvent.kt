@@ -11,7 +11,7 @@ abstract class AbstractUpsertEvent: AbstractPersistable<UUID>() {
 
     @get:Key
     // @get:JsonProperty("_id")
-    abstract override var id: UUID?
+    abstract var id: UUID?
 
     @get:JsonProperty("_name")
     abstract var name: String?

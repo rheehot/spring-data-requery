@@ -5,7 +5,7 @@ import io.requery.*;
 import lombok.Getter;
 
 /**
- * com.coupang.springframework.data.requery.java.domain.basic.AbstractBasicAddress
+ * com.coupang.springframework.data.requery.java.domain.basic.AbstractBasicLocation
  *
  * @author debop
  * @since 18. 6. 4
@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 @Entity
 @Table(name = "basic_address")
-public class AbstractBasicAddress extends AbstractPersistable<Integer> {
+public class AbstractBasicLocation extends AbstractPersistable<Integer> {
 
     private static final long serialVersionUID = -4665641548712152873L;
 
@@ -32,6 +32,8 @@ public class AbstractBasicAddress extends AbstractPersistable<Integer> {
     protected String countryCode;
 
     protected String city;
+
+    protected String state;
 
     @OneToOne(mappedBy = "address")
     @Column(name = "basic_user")

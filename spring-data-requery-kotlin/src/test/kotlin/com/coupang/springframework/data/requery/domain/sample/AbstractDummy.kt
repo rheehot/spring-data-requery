@@ -16,7 +16,7 @@ abstract class AbstractDummy @JvmOverloads constructor(aname: String? = null): A
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:Column(name = "dummy_name", length = 48)
     var name: String? = aname

@@ -17,7 +17,7 @@ abstract class AbstractBasicUser: AbstractPersistable<Long>() {
     @get:Key
     @get:Generated
     @get:Column(name = "userId")
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:Index(value = ["idx_basic_user_name_email"])
     abstract var name: String

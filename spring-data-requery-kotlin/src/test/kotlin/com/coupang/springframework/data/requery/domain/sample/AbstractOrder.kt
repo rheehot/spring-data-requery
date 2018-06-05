@@ -12,7 +12,7 @@ abstract class AbstractOrder: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:ManyToOne
     @get:Column(nullable = false)

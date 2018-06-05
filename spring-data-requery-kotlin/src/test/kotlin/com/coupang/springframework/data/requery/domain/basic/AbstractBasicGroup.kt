@@ -13,7 +13,7 @@ abstract class AbstractBasicGroup: AbstractPersistable<Long>() {
     @get:Key
     @get:Generated
     @get:Column(name = "groupId")
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:Column(nullable = false, unique = true)
     abstract var name: String

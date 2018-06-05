@@ -5,7 +5,6 @@ import com.coupang.kotlinx.objectx.ToStringBuilder;
 import io.requery.Persistable;
 import io.requery.Superclass;
 import io.requery.Transient;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,10 +16,10 @@ import java.util.Objects;
  * @author debop@coupang.com
  * @since 18. 6. 4
  */
-@Getter
 @Superclass
 public abstract class AbstractPersistable<ID> extends AbstractValueObject implements Persistable {
 
+    @Nullable
     abstract public ID getId();
 
     @io.requery.Transient

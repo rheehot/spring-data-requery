@@ -6,12 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 
 /**
- * IntArrayStringConverter
+ * IntArrayListStringConverter
  *
  * @author debop@coupang.com
  * @since 18. 6. 4
  */
-public class IntArrayStringConverter implements Converter<ArrayList<Integer>, String> {
+public class IntArrayListStringConverter implements Converter<ArrayList<Integer>, String> {
 
     @SuppressWarnings("unchecked")
     @Override

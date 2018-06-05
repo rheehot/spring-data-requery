@@ -117,14 +117,17 @@ public interface RequeryOperations {
         return getDataStore().delete(entityType);
     }
 
-    default <E> Void delete(E entity) {
-        return getDataStore().delete(entity);
+    default <E> void delete(E entity) {
+        getDataStore().delete(entity);
     }
 
-    default <E> Void deleteAll(Iterable<E> entities) {
-        return getDataStore().delete(entities);
+    default <E> void deleteAll(Iterable<E> entities) {
+        getDataStore().delete(entities);
     }
 
+    default <E> Integer deleteAll(Class<E> entityType) {
+        return getDataStore().delete(entityType).get().value();
+    }
 
     default <E> Selection<? extends Scalar<Integer>> count(Class<E> entityType) {
         return getDataStore().count(entityType);

@@ -13,7 +13,7 @@ abstract class AbstractMailMessage: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:OneToOne(cascade = [CascadeAction.SAVE, CascadeAction.DELETE])
     @get:ForeignKey

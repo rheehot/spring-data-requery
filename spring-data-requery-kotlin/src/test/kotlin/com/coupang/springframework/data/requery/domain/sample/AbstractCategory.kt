@@ -20,7 +20,7 @@ abstract class AbstractCategory(): AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:ManyToOne
     abstract var product: AbstractProduct?

@@ -9,11 +9,11 @@ import io.requery.query.*
 import io.requery.sql.EntityDataStore
 
 /**
- * com.coupang.springframework.data.requery.core.coroutines.RequeryCoroutineOperations
+ * com.coupang.springframework.data.requery.core.coroutines.CoroutineRequeryOperations
  * @author debop
  * @since 18. 6. 2
  */
-interface RequeryCoroutineOperations {
+interface CoroutineRequeryOperations {
 
     val dataStore: EntityDataStore<Persistable>
 

@@ -15,7 +15,7 @@ import java.util.*
 abstract class AbstractUpsertTag: AbstractPersistable<UUID>() {
 
     @get:Key
-    abstract override var id: UUID?
+    abstract var id: UUID?
 
     @get:Column
     abstract var name: String?

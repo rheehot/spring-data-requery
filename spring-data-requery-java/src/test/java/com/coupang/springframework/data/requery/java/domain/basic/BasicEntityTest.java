@@ -1,6 +1,9 @@
 package com.coupang.springframework.data.requery.java.domain.basic;
 
 import com.coupang.springframework.data.requery.java.domain.AbstractDomainTest;
+import com.coupang.springframework.data.requery.java.domain.RandomData;
+import io.requery.query.Result;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,13 +16,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class BasicEntityTest extends AbstractDomainTest {
 
+    @Before
+    public void setup() {
+        requeryTemplate.deleteAll(BasicLocation.class);
+        requeryTemplate.deleteAll(BasicGroup.class);
+        requeryTemplate.deleteAll(BasicUser.class);
+    }
+
 
     @Test
-    public void insertUser() throws InterruptedException {
-        BasicUser user = new BasicUser();
-        user.setName("test");
+    public void insert_user_without_association() throws Exception {
 
-        requeryTemplate.upsert(user);
+        BasicUser user = RandomData.randomUser();
+        requeryTemplate.insert(user);
 
         BasicUser loaded = requeryTemplate.findById(BasicUser.class, user.id);
 
@@ -28,7 +37,23 @@ public class BasicEntityTest extends AbstractDomainTest {
         requeryTemplate.update(loaded);
 
         assertThat(loaded.getLastModifiedDate()).isNotNull();
+    }
 
-        Thread.sleep(100L);
+    @Test
+    public void select_with_limit() throws Exception {
+        BasicUser user = RandomData.randomUser();
+        requeryTemplate.insert(user);
+
+        Result<BasicUser> result = requeryTemplate
+            .select(BasicUser.class, BasicUser.ID.get(), BasicUser.NAME.get())
+            .limit(10)
+            .get();
+
+        BasicUser first = result.first();
+        assertThat(first.getId()).isEqualTo(user.getId());
+        assertThat(first.getName()).isEqualTo(user.getName());
+
+        // NOTE: Lazy loading을 수행합니다 !!!
+        assertThat(first.getAge()).isEqualTo(user.getAge());
     }
 }

@@ -17,7 +17,7 @@ abstract class AbstractFuncPerson: AbstractPersistable<Long>() {
     @get:Key
     @get:Generated
     @get:Column(name = "personId")
-    abstract override val id: Long?
+    abstract val id: Long?
 
 
     @get:Index(value = ["idx_func_person_name_email"])

@@ -16,11 +16,11 @@ public class RequeryTemplate implements RequeryOperations {
 
     private final EntityDataStore dataStore;
 
-    public RequeryTemplate(EntityDataStore dataStore) {
+    public RequeryTemplate(EntityDataStore<Object> dataStore) {
         this.dataStore = dataStore;
     }
 
-    public EntityDataStore getDataStore() {
+    public EntityDataStore<Object> getDataStore() {
         return (EntityDataStore<Object>) dataStore;
     }
 

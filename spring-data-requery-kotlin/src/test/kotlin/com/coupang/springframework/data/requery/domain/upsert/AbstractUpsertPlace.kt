@@ -10,7 +10,7 @@ import io.requery.*
 abstract class AbstractUpsertPlace: AbstractPersistable<String>() {
 
     @get:Key
-    abstract override var id: String?
+    abstract var id: String?
 
     @get:Column
     abstract var name: String

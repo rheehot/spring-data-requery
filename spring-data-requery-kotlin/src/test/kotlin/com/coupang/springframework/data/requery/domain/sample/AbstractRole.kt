@@ -16,7 +16,7 @@ abstract class AbstractRole: AbstractPersistable<Int>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Int?
+    abstract val id: Int?
 
     abstract var name: String?
 

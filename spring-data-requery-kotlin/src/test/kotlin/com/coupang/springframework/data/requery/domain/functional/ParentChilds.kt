@@ -9,7 +9,7 @@ abstract class AbstractFuncParent: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:Column
     abstract var name: String?

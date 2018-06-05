@@ -2,8 +2,8 @@ package com.coupang.springframework.data.requery.domain
 
 import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.AbstractSpringDataRequeryTest
-import com.coupang.springframework.data.requery.configs.RequeryTestConfiguration
-import com.coupang.springframework.data.requery.core.RequeryKotlinTemplate
+import com.coupang.springframework.data.requery.configs.KotlinRequeryTestConfiguration
+import com.coupang.springframework.data.requery.core.KotlinRequeryTemplate
 import com.coupang.springframework.data.requery.core.RequeryTemplate
 import io.requery.sql.EntityDataStore
 import io.requery.sql.KotlinEntityDataStore
@@ -22,7 +22,7 @@ import javax.inject.Inject
  * @since 18. 5. 31
  */
 @RunWith(SpringRunner::class)
-@SpringBootTest(classes = [RequeryTestConfiguration::class])
+@SpringBootTest(classes = [KotlinRequeryTestConfiguration::class])
 abstract class AbstractDomainTest: AbstractSpringDataRequeryTest() {
 
     companion object: KLogging() {
@@ -33,7 +33,7 @@ abstract class AbstractDomainTest: AbstractSpringDataRequeryTest() {
     @Inject lateinit var dataStore: EntityDataStore<Any>
     @Inject lateinit var kotlinDataStore: KotlinEntityDataStore<Any>
     @Inject lateinit var requeryTemplate: RequeryTemplate
-    @Inject lateinit var requeryKtTmpl: RequeryKotlinTemplate
+    @Inject lateinit var requeryKtTmpl: KotlinRequeryTemplate
 
     @Test
     fun `context loading`() {

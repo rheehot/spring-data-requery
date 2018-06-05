@@ -15,7 +15,7 @@ abstract class AbstractVersionedUser: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:Column(name = "user_attr")
     abstract var attribute: String?

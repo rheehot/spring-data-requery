@@ -15,7 +15,7 @@ abstract class AbstractCustomer: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     abstract var name: String?
 

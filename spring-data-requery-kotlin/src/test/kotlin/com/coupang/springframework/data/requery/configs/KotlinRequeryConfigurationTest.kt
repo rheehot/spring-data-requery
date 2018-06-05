@@ -12,14 +12,14 @@ import org.springframework.test.context.junit4.SpringRunner
 import javax.inject.Inject
 
 /**
- * RequeryConfigurationTest
+ * KotlinRequeryConfigurationTest
  *
  * @author debop@coupang.com
  * @since 18. 5. 30
  */
 @RunWith(SpringRunner::class)
-@SpringBootTest(classes = [RequeryTestConfiguration::class])
-class RequeryConfigurationTest: AbstractSpringDataRequeryTest() {
+@SpringBootTest(classes = [KotlinRequeryTestConfiguration::class])
+class KotlinRequeryConfigurationTest: AbstractSpringDataRequeryTest() {
 
     companion object: KLogging()
 

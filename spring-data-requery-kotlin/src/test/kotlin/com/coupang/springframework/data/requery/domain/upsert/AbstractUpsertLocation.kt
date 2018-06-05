@@ -18,7 +18,7 @@ abstract class AbstractUpsertLocation: AbstractPersistable<Int>() {
     @get:Key
     @get:Generated
     @get:Column(name = "locationId")
-    abstract override val id: Int?
+    abstract val id: Int?
 
     @get:Column
     abstract var name: String?

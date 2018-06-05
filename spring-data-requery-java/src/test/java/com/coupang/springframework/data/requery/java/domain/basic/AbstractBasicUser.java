@@ -35,7 +35,7 @@ public abstract class AbstractBasicUser extends AuditableLongEntity {
 
     @ForeignKey
     @OneToOne
-    protected AbstractBasicAddress address;
+    protected AbstractBasicLocation address;
 
     @ManyToMany(mappedBy = "members")
     protected Set<AbstractBasicGroup> groups;

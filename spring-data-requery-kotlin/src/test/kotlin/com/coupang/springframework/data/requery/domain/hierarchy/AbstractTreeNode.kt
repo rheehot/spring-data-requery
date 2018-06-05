@@ -17,7 +17,7 @@ abstract class AbstractTreeNode: AbstractPersistable<Long>() {
     @get:Key
     @get:Generated
     @get:Column(name = "nodeId")
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:Column(name = "nodeName", length = 48)
     abstract var name: String

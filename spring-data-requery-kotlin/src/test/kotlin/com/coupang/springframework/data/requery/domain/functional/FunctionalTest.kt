@@ -70,7 +70,7 @@ class FunctionalTest: AbstractDomainTest() {
 
         requeryTemplate.insert(phone)
 
-        val loaded = requeryTemplate.dataStore
+        val loaded = requeryTemplate
             .select(FuncPhone::class.java)
             .where(FuncPhone.EXTENSIONS.eq(phone.extensions))
             .get()
@@ -89,7 +89,7 @@ class FunctionalTest: AbstractDomainTest() {
         val loaded = requeryTemplate.findById(FuncPerson::class.java, person.id)!!
         assertThat(loaded).isEqualTo(person)
 
-        val loaded2 = requeryTemplate.dataStore
+        val loaded2 = requeryTemplate
             .select(FuncPerson::class.java)
             .where(FuncPerson.ID eq person.id)
             .get()
@@ -130,7 +130,7 @@ class FunctionalTest: AbstractDomainTest() {
 
             for(i in 0 until COUNT) {
                 val person = randomPerson()
-                insert(person)
+                requeryTemplate.insert(person)
             }
 
             val personCount = requeryTemplate.count(FuncPerson::class.java).get().value()

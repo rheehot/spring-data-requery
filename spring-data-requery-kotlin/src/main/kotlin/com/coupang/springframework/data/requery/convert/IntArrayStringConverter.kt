@@ -3,7 +3,7 @@ package com.coupang.springframework.data.requery.convert
 import io.requery.Converter
 
 /**
- * IntArrayStringConverter
+ * IntArrayListStringConverter
  *
  * @author debop@coupang.com
  * @since 18. 5. 31

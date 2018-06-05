@@ -16,7 +16,7 @@ abstract class AbstractStatelessEntity: AbstractPersistable<String>() {
 
     @get:Key
     @get:Column(name = "statelessId")
-    abstract override var id: String?
+    abstract var id: String?
 
     abstract var flag1: Boolean
     abstract var flag2: Boolean

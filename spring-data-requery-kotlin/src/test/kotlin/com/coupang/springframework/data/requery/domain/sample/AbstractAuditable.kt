@@ -16,7 +16,7 @@ import java.util.*
 @Superclass
 abstract class AbstractAuditable<U, ID: Serializable>: AbstractPersistable<ID>(), Auditable<U, ID, LocalDateTime> {
 
-    abstract override val id: ID?
+    abstract val id: ID?
 
     @get:ManyToOne
     var _createdBy: U? = null
@@ -40,7 +40,7 @@ abstract class AbstractAuditable<U, ID: Serializable>: AbstractPersistable<ID>()
 
     override fun getCreatedDate(): Optional<LocalDateTime> = Optional.ofNullable(_createdDate)
 
-    override fun setCreatedDate(creationDate: LocalDateTime?) {
+    override fun setCreatedDate(creationDate: LocalDateTime) {
         _createdDate = creationDate
     }
 
@@ -53,7 +53,7 @@ abstract class AbstractAuditable<U, ID: Serializable>: AbstractPersistable<ID>()
 
     override fun getLastModifiedDate(): Optional<LocalDateTime> = Optional.ofNullable(_lastModifiedDate)
 
-    override fun setLastModifiedDate(lastModifiedDate: LocalDateTime?) {
+    override fun setLastModifiedDate(lastModifiedDate: LocalDateTime) {
         _lastModifiedDate = lastModifiedDate
     }
 

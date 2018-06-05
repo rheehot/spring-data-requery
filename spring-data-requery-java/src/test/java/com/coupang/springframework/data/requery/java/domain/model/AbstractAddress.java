@@ -3,7 +3,7 @@ package com.coupang.springframework.data.requery.java.domain.model;
 import io.requery.*;
 
 /**
- * com.coupang.springframework.data.requery.java.domain.model.AbstractBasicAddress
+ * com.coupang.springframework.data.requery.java.domain.model.AbstractBasicLocation
  *
  * @author debop
  * @since 18. 6. 4

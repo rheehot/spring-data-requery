@@ -5,11 +5,7 @@ import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.*
 
 @Superclass
-abstract class AbstractInheritanceBase: AbstractPersistable<Long>() {
-
-    @get:Key
-    @get:Generated
-    abstract override val id: Long?
+abstract class AbstractInheritanceBase {
 
     @get:ManyToMany(cascade = [CascadeAction.SAVE, CascadeAction.DELETE])
     @get:JunctionTable
@@ -18,6 +14,10 @@ abstract class AbstractInheritanceBase: AbstractPersistable<Long>() {
 
 @Entity
 abstract class AbstractInheritanceDerivedA: AbstractInheritanceBase() {
+
+    @get:Key
+    @get:Generated
+    abstract val id: Long
 
     abstract var attr: String?
 
@@ -28,6 +28,10 @@ abstract class AbstractInheritanceDerivedA: AbstractInheritanceBase() {
 
 @Entity
 abstract class AbstractInheritanceDerivedB: AbstractInheritanceBase() {
+
+    @get:Key
+    @get:Generated
+    abstract val id: Long
 
     abstract var flag: Boolean
 
@@ -42,7 +46,7 @@ abstract class AbstractInheritanceRelated: AbstractPersistable<Long>() {
 
     @get:Key
     @get:Generated
-    abstract override val id: Long?
+    abstract val id: Long?
 
     @get:Column(name = "attr")
     abstract var attribute: String?

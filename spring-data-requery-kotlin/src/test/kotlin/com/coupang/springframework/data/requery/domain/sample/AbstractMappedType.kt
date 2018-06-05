@@ -9,15 +9,11 @@ import io.requery.*
  * @since 18. 5. 30
  */
 @Superclass
-abstract class AbstractMappedType(): AbstractPersistable<Long>() {
+abstract class AbstractMappedType() {
 
     constructor(attribute1: String?): this() {
         this.attribute1 = attribute1
     }
-
-    @get:Key
-    @get:Generated
-    abstract override val id: Long?
 
     @get:Column(name = "mapped_attr1")
     abstract var attribute1: String?

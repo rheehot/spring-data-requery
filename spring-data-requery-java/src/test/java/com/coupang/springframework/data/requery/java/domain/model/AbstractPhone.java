@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.java.domain.model;
 
 import com.coupang.kotlinx.objectx.ToStringBuilder;
-import com.coupang.springframework.data.requery.convert.IntArrayStringConverter;
+import com.coupang.springframework.data.requery.convert.IntArrayListStringConverter;
 import com.coupang.springframework.data.requery.domain.AbstractPersistable;
 import io.requery.*;
 import lombok.Getter;
@@ -41,7 +41,7 @@ public class AbstractPhone extends AbstractPersistable<Integer> {
     protected String phoneNumber;
     protected boolean normalized;
 
-    @Convert(IntArrayStringConverter.class)
+    @Convert(IntArrayListStringConverter.class)
     protected ArrayList<Integer> extensions;
 
     @ManyToOne
