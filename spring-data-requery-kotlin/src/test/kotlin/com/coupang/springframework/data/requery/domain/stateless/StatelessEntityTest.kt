@@ -15,18 +15,19 @@ class StatelessEntityTest: AbstractDomainTest() {
 
     @Test
     fun `insert and delete stateless`() {
+        with(requeryKotlin) {
+            val uuid = UUID.randomUUID()
 
-        val uuid = UUID.randomUUID()
+            val entity = StatelessEntity().also {
+                it.id = uuid.toString()
+                it.flag1 = true
+                it.flag2 = false
+            }
 
-        val entity = StatelessEntity().also {
-            it.id = uuid.toString()
-            it.flag1 = true
-            it.flag2 = false
+            insert(entity)
+
+            val found = findById(StatelessEntity::class, entity.id)!!
+            assertThat(found.id).isEqualTo(entity.id)
         }
-
-        requeryTemplate.insert(entity)
-
-        val found = requeryTemplate.findById(StatelessEntity::class.java, entity.id)!!
-        assertThat(found.id).isEqualTo(entity.id)
     }
 }

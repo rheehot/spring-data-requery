@@ -13,12 +13,10 @@ import io.requery.sql.KotlinEntityDataStore
  */
 class KotlinRequeryTemplate(override val dataStore: KotlinEntityDataStore<Any>): KotlinRequeryOperations {
 
-    override fun <T: Any> withTransaction(block: KotlinRequeryOperations.() -> T): T {
-        return dataStore.withTransaction { block.invoke(this@KotlinRequeryTemplate) }
-    }
-
-    override fun <T: Any> withTransaction(isolation: TransactionIsolation, block: KotlinRequeryOperations.() -> T): T {
-        return dataStore.withTransaction(isolation) { block.invoke(this@KotlinRequeryTemplate) }
+    override fun <T: Any> withTransaction(isolation: TransactionIsolation?, block: KotlinRequeryOperations.() -> T): T {
+        return isolation?.let {
+            dataStore.withTransaction(it) { block.invoke(this@KotlinRequeryTemplate) }
+        } ?: dataStore.withTransaction { block.invoke(this@KotlinRequeryTemplate) }
     }
 
     override fun <T: Any> withDataStore(block: KotlinEntityDataStore<Any>.() -> T): T {

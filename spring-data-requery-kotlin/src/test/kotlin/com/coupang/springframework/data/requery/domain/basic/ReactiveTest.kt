@@ -8,8 +8,7 @@ import com.coupang.springframework.data.requery.domain.basic.RandomData.randomUs
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import io.requery.reactivex.ReactiveEntityStore
-import io.requery.reactivex.ReactiveSupport
+import io.requery.reactivex.KotlinReactiveEntityStore
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Before
@@ -23,16 +22,16 @@ class ReactiveTest: AbstractDomainTest() {
 
     companion object: KLogging()
 
-    private val reactiveStore: ReactiveEntityStore<Any> by lazy {
-        ReactiveSupport.toReactiveStore(dataStore)
+    private val reactiveStore: KotlinReactiveEntityStore<Any> by lazy {
+        KotlinReactiveEntityStore(kotlinDataStore)
     }
 
     @Before
     fun setup() {
-        with(requeryTemplate) {
-            deleteAll(BasicGroup::class.java)
-            deleteAll(BasicLocation::class.java)
-            deleteAll(BasicUser::class.java)
+        with(requeryKotlin) {
+            deleteAll(BasicGroup::class)
+            deleteAll(BasicLocation::class)
+            deleteAll(BasicUser::class)
         }
     }
 
@@ -44,7 +43,7 @@ class ReactiveTest: AbstractDomainTest() {
         reactiveStore.insert(user)
             .subscribe { saved ->
                 assertThat(saved.id).isNotNull()
-                val loaded = reactiveStore.select(BasicUser::class.java).where(BasicUser.ID eq saved.id).get().first()
+                val loaded = reactiveStore.select(BasicUser::class).where(BasicUser.ID eq saved.id).get().first()
                 assertThat(loaded).isEqualTo(saved)
                 latch.countDown()
             }
@@ -62,7 +61,7 @@ class ReactiveTest: AbstractDomainTest() {
 
             delete(user).blockingGet()
 
-            val loaded = select(BasicUser::class.java)
+            val loaded = select(BasicUser::class)
                 .where(BasicUser.ID eq user.id)
                 .get()
                 .firstOrNull()
@@ -84,7 +83,7 @@ class ReactiveTest: AbstractDomainTest() {
             val saved = insert(user).blockingGet()
             assertThat(saved).isNotNull
 
-            val count = count(BasicUser::class.java).get().single().blockingGet()
+            val count = count(BasicUser::class).get().single().blockingGet()
             assertThat(count).isEqualTo(1)
         }
     }
@@ -113,7 +112,7 @@ class ReactiveTest: AbstractDomainTest() {
         val latch = CountDownLatch(1)
 
         with(reactiveStore) {
-            select(BasicUser::class.java).get().observable()
+            select(BasicUser::class).get().observable()
                 .observeOn(Schedulers.io())
                 .subscribe({ fail("User가 없어야 하는뎅") },
                            { fail("예외도 나서는 안되는뎅") },
@@ -132,7 +131,7 @@ class ReactiveTest: AbstractDomainTest() {
             insert<BasicUser>(randomUsers(30)).subscribeOn(Schedulers.io()).blockingGet()
 
             val rowCount = AtomicInteger()
-            select(BasicUser::class.java).limit(50).get()
+            select(BasicUser::class).limit(50).get()
                 .observable()
                 .observeOn(Schedulers.computation())
                 .subscribe { user ->
@@ -150,7 +149,7 @@ class ReactiveTest: AbstractDomainTest() {
         val count = AtomicInteger(0)
 
         with(reactiveStore) {
-            val disposable = select(BasicUser::class.java).limit(2).get().observableResult()
+            val disposable = select(BasicUser::class).limit(2).get().observableResult()
                 .flatMap { user -> user.observable() }
                 .subscribe {
                     count.incrementAndGet()
@@ -169,7 +168,7 @@ class ReactiveTest: AbstractDomainTest() {
         val count = AtomicInteger()
 
         with(reactiveStore) {
-            val disposable = select(BasicUser::class.java).get().observableResult()
+            val disposable = select(BasicUser::class).get().observableResult()
                 .subscribe {
                     count.incrementAndGet()
                 }
@@ -189,7 +188,7 @@ class ReactiveTest: AbstractDomainTest() {
         val count = AtomicInteger()
 
         with(reactiveStore) {
-            val disposable = select(BasicUser::class.java).get().observableResult()
+            val disposable = select(BasicUser::class).get().observableResult()
                 .subscribe {
                     count.incrementAndGet()
                 }
@@ -199,7 +198,7 @@ class ReactiveTest: AbstractDomainTest() {
             insert(user).blockingGet()
             assertThat(count.get()).isEqualTo(2)
 
-            val rows = delete<BasicUser>(BasicUser::class.java).get().value()
+            val rows = delete<BasicUser>(BasicUser::class).get().value()
             assertThat(count.get()).isEqualTo(3)
             assertThat(rows).isEqualTo(1)
             disposable.dispose()
@@ -211,7 +210,7 @@ class ReactiveTest: AbstractDomainTest() {
         val count = AtomicInteger()
 
         with(reactiveStore) {
-            val disposable = select(BasicUser::class.java).get().observableResult()
+            val disposable = select(BasicUser::class).get().observableResult()
                 .subscribe {
                     count.incrementAndGet()
                 }
@@ -258,24 +257,22 @@ class ReactiveTest: AbstractDomainTest() {
         with(reactiveStore) {
             val user = randomUser()
 
-            runInTransaction { blocking ->
-                blocking.insert(user)
+            withTransaction<Unit> {
+                insert(user)
                 user.about = "new about"
-                blocking.update(user)
-                blocking.delete(user)
-                Unit
+                update(user)
+                delete(user)
             }.blockingGet()
 
-            assertThat(count(BasicUser::class.java).get().value()).isEqualTo(0)
+            assertThat(count(BasicUser::class).get().value()).isEqualTo(0)
 
             val user2 = randomUser()
 
-            runInTransaction { blocking ->
-                blocking.insert(user2)
-                Unit
+            withTransaction<Unit> {
+                insert(user2)
             }.blockingGet()
 
-            assertThat(count(BasicUser::class.java).get().value()).isEqualTo(1)
+            assertThat(count(BasicUser::class).get().value()).isEqualTo(1)
         }
     }
 
@@ -284,18 +281,17 @@ class ReactiveTest: AbstractDomainTest() {
         with(reactiveStore) {
             val blocking = this.toBlocking()
             Completable.fromCallable {
-                blocking.runInTransaction {
+                blocking.withTransaction<Unit> {
                     val user = randomUser()
                     blocking.insert(user)
 
                     user.about = "new about"
                     blocking.update(user)
-                    null
                 }
             }
                 .subscribe()
 
-            assertThat(count(BasicUser::class.java).get().value()).isEqualTo(1)
+            assertThat(count(BasicUser::class).get().value()).isEqualTo(1)
         }
     }
 
@@ -310,7 +306,7 @@ class ReactiveTest: AbstractDomainTest() {
             val loadedUsers = mutableListOf<BasicUser>()
             lateinit var subscription: Subscription
 
-            select(BasicUser::class.java)
+            select(BasicUser::class)
                 .get()
                 .flowable()
                 .subscribeOn(Schedulers.trampoline())

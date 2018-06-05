@@ -23,15 +23,17 @@ class JacksonTest: AbstractDomainTest() {
 
     @Before
     fun setup() {
-        requeryTemplate.deleteAll(UpsertTag::class.java)
-        requeryTemplate.deleteAll(UpsertEvent::class.java)
-        requeryTemplate.deleteAll(UpsertPlace::class.java)
-        requeryTemplate.deleteAll(UpsertLocation::class.java)
+        with(requeryKotlin) {
+            deleteAll(UpsertTag::class)
+            deleteAll(UpsertEvent::class)
+            deleteAll(UpsertPlace::class)
+            deleteAll(UpsertLocation::class)
+        }
     }
 
     @Test
     fun `one to many jackson serialize`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val uuid = UUID.randomUUID()
             val event = UpsertEvent()
             event.id = uuid

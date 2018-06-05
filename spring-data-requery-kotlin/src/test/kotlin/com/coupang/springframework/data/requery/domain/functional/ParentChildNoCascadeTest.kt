@@ -23,21 +23,21 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
 
     @Before
     fun setup() {
-        with(requeryTemplate) {
-            deleteAll(FuncChild::class.java)
-            deleteAll(FuncParent::class.java)
-            deleteAll(FuncChildOneToOneNoCascade::class.java)
-            deleteAll(FuncChildOneToManyNoCascade::class.java)
-            deleteAll(FuncChildManyToOneNoCascade::class.java)
-            deleteAll(FuncChildManyToManyNoCascade::class.java)
-            deleteAll(FuncParentNoCascade::class.java)
+        with(requeryKotlin) {
+            deleteAll(FuncChild::class)
+            deleteAll(FuncParent::class)
+            deleteAll(FuncChildOneToOneNoCascade::class)
+            deleteAll(FuncChildOneToManyNoCascade::class)
+            deleteAll(FuncChildManyToOneNoCascade::class)
+            deleteAll(FuncChildManyToManyNoCascade::class)
+            deleteAll(FuncParentNoCascade::class)
         }
     }
 
     @Test
     fun `insert without cascade action save`() {
         assertThatThrownBy {
-            with(requeryTemplate) {
+            with(requeryKotlin) {
                 val child = FuncChild().apply { id = 1 }
                 val parent = FuncParent().also { it.child = child }
 
@@ -55,7 +55,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
         // This should fail with a foreign-key violation, since child does not exist in the database
 
         // assertThatThrownBy {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child = FuncChildOneToOneNoCascade()
             val parent = FuncParentNoCascade()
             parent.id = 1
@@ -63,13 +63,13 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
 
             insert(parent)
         }
-        // }.isInstanceOf(StatementExecutionException::class.java)
+        // }.isInstanceOf(StatementExecutionException::class)
     }
 
     @Test
     fun `insert no cascade one to one existing child`() {
         // Insert parent entity, associated one-to-one to an existing child entity
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child = FuncChildOneToOneNoCascade().apply { id = 1; attribute = "1" }
             insert(child)
 
@@ -77,14 +77,14 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
             insert(parent)
 
             // Assert that child has been associated to parent
-            val parentGot = findById(FuncParentNoCascade::class.java, 1L)!!
+            val parentGot = findById(FuncParentNoCascade::class, 1L)!!
         }
     }
 
     @Test
     fun `insert no cascade many to one existing child`() {
         // Insert parent entity, associated many-to-one to an existing child entity
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child = FuncChildManyToOneNoCascade().apply { id = 1; attribute = "1" }
             insert(child)
 
@@ -92,7 +92,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
             insert(parent)
 
             // Assert that child has been associated to parent
-            val parentGot = findById(FuncParentNoCascade::class.java, 1L)!!
+            val parentGot = findById(FuncParentNoCascade::class, 1L)!!
         }
     }
 
@@ -100,14 +100,14 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
     fun `insert no cascade one to many non existing child`() {
         // Insert parent entity, associated one-to-may to 1 non-existing child entity
         assertThatThrownBy {
-            with(requeryTemplate) {
+            with(requeryKotlin) {
                 val child = FuncChildOneToManyNoCascade().apply { id = 1; attribute = "1" }
 
                 val parent = FuncParentNoCascade().apply { id = 1; oneToMany += child }
                 insert(parent)
 
                 // Assert that child has been associated to parent
-                val parentGot = findById(FuncParentNoCascade::class.java, 1L)!!
+                val parentGot = findById(FuncParentNoCascade::class, 1L)!!
             }
         }.isInstanceOf(RowCountException::class.java)
     }
@@ -115,7 +115,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
     @Test
     fun `insert no cascade one to many existing child`() {
         // Insert parent entity, associated one-to-may to 1 existing child entity
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child = FuncChildOneToManyNoCascade().apply { id = 1; attribute = "1" }
             insert(child)
 
@@ -123,7 +123,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
             insert(parent)
 
             // Assert that child has been associated to parent
-            val parentGot = findById(FuncParentNoCascade::class.java, 1L)!!
+            val parentGot = findById(FuncParentNoCascade::class, 1L)!!
             assertThat(parentGot.oneToMany).hasSize(1)
             assertThat(parentGot.oneToMany[0]).isEqualTo(child)
         }
@@ -133,7 +133,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
     fun `insert no cascade many to many non existing child`() {
         // Insert parent entity, associated many-to-may to 1 non-existing child entity
         assertThatThrownBy {
-            with(requeryTemplate) {
+            with(requeryKotlin) {
                 val child = FuncChildManyToManyNoCascade().apply { id = 505; attribute = "1" }
 
                 val parent = FuncParentNoCascade().apply { id = 1; manyToMany += child }
@@ -145,7 +145,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
     @Test
     fun `insert no cascade many to many existing child`() {
         // Insert parent entity, associated many-to-may to 1 existing child entity
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child = FuncChildManyToManyNoCascade().apply { id = 1; attribute = "1" }
             insert(child)
 
@@ -153,7 +153,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
             insert(parent)
 
             // Assert that child has been associated to parent
-            val parentGot = findById(FuncParentNoCascade::class.java, 1L)!!
+            val parentGot = findById(FuncParentNoCascade::class, 1L)!!
             assertThat(parentGot.manyToMany).hasSize(1)
             assertThat(parentGot.manyToMany[0]).isEqualTo(child)
         }
@@ -161,7 +161,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
 
     @Test
     fun `delete no cascade one to one`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child = FuncChildOneToOneNoCascade()
             child.id = 123
             child.attribute = "1"
@@ -175,14 +175,14 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
 
             delete(parent)
 
-            val childGot = findById(FuncChildOneToOneNoCascade::class.java, 123L)
+            val childGot = findById(FuncChildOneToOneNoCascade::class, 123L)
             assertThat(childGot).isNotNull
         }
     }
 
     @Test
     fun `delete no cascade many to one`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child = FuncChildManyToOneNoCascade()
             child.id = 123
             child.attribute = "1"
@@ -196,14 +196,14 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
 
             delete(parent)
 
-            val childGot = findById(FuncChildManyToOneNoCascade::class.java, 123L)
+            val childGot = findById(FuncChildManyToOneNoCascade::class, 123L)
             assertThat(childGot).isNotNull
         }
     }
 
     @Test
     fun `delete no cascade one to many`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child1 = FuncChildOneToManyNoCascade().apply { id = 1; attribute = "1" }
             val child2 = FuncChildOneToManyNoCascade().apply { id = 2; attribute = "2" }
 
@@ -218,11 +218,11 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
             // delete parent
             delete(parent)
 
-            val child1Got = findById(FuncChildOneToManyNoCascade::class.java, 1L)
+            val child1Got = findById(FuncChildOneToManyNoCascade::class, 1L)
             assertThat(child1Got).isNotNull
             assertThat(child1Got!!.parent).isNull()
 
-            val child2Got = findById(FuncChildOneToManyNoCascade::class.java, 2L)
+            val child2Got = findById(FuncChildOneToManyNoCascade::class, 2L)
             assertThat(child2Got).isNotNull
             assertThat(child2Got!!.parent).isNull()
         }
@@ -230,7 +230,7 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
 
     @Test
     fun `delete no cascade many to many`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val child1 = FuncChildManyToManyNoCascade().apply { id = 1; attribute = "1" }
             val child2 = FuncChildManyToManyNoCascade().apply { id = 2; attribute = "2" }
             val parent = FuncParentNoCascade().apply { id = 1 }
@@ -245,10 +245,10 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
             // delete parent
             delete(parent)
 
-            val child1Got = findById(FuncChildManyToManyNoCascade::class.java, 1L)
+            val child1Got = findById(FuncChildManyToManyNoCascade::class, 1L)
             assertThat(child1Got).isNotNull
 
-            val child2Got = findById(FuncChildManyToManyNoCascade::class.java, 2L)
+            val child2Got = findById(FuncChildManyToManyNoCascade::class, 2L)
             assertThat(child2Got).isNotNull
         }
     }

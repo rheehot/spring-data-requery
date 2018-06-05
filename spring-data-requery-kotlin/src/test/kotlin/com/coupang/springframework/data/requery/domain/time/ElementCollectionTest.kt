@@ -21,25 +21,25 @@ class ElementCollectionTest: AbstractDomainTest() {
     fun `insert element collection`() {
 
         assertThatThrownBy {
-            val user = ElementCollectionUser().apply {
-                id = UUID.randomUUID()
-                name = "user"
+            with(requeryKotlin) {
+                val user = ElementCollectionUser().apply {
+                    id = UUID.randomUUID()
+                    name = "user"
 
-                phoneNumbers = mutableSetOf("555-5555", "666-6666")
+                    phoneNumbers = mutableSetOf("555-5555", "666-6666")
+                }
+
+                insert(user)
+
+                val saved = select(ElementCollectionUser::class)
+                    .where(ElementCollectionUser.ID.eq(user.id).and(ElementCollectionUser.NAME.eq(user.name)))
+                    .get()
+                    .first()
+
+                assertThat(saved).isNotNull
+
+                assertThat(saved.phoneNumbers).hasSize(2).containsOnly("555-5555", "666-6666")
             }
-
-            requeryTemplate.insert(user)
-
-
-            val saved = dataStore
-                .select(ElementCollectionUser::class.java)
-                .where(ElementCollectionUser.ID.eq(user.id).and(ElementCollectionUser.NAME.eq(user.name)))
-                .get()
-                .first()
-
-            assertThat(saved).isNotNull
-
-            assertThat(saved.phoneNumbers).hasSize(2).containsOnly("555-5555", "666-6666")
 
         }.isInstanceOf(ClassCastException::class.java)
     }

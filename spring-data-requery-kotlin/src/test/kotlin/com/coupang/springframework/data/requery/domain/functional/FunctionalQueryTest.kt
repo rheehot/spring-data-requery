@@ -34,22 +34,22 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Before
     fun setup() {
-        with(requeryTemplate) {
-            deleteAll(FuncAddress::class.java)
-            deleteAll(FuncGroup::class.java)
-            deleteAll(FuncPhone::class.java)
-            deleteAll(FuncPerson::class.java)
+        with(requeryKotlin) {
+            deleteAll(FuncAddress::class)
+            deleteAll(FuncGroup::class)
+            deleteAll(FuncPhone::class)
+            deleteAll(FuncPerson::class)
         }
     }
 
     @Test
     fun `query function now`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson()
             person.birthday = LocalDate.now().plusDays(1)
             insert(person)
 
-            val result = select(FuncPerson::class.java)
+            val result = select(FuncPerson::class)
                 .where(FuncPerson.BIRTHDAY.gt(LocalDate.now()))
                 .get()
 
@@ -59,10 +59,10 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query function random`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             insertAll(randomPersons(10))
 
-            val result = select(FuncPerson::class.java)
+            val result = select(FuncPerson::class)
                 .orderBy(io.requery.query.function.Random())
                 .get()
 
@@ -74,10 +74,10 @@ class FunctionalQueryTest: AbstractDomainTest() {
         val name = "duplicateFirstname"
 
         List(10) {
-            requeryKtTmpl.insert(randomPerson().also { it.name = name })
+            requeryKotlin.insert(randomPerson().also { it.name = name })
         }
 
-        val result = requeryKtTmpl.select(FuncPerson::class)
+        val result = requeryKotlin.select(FuncPerson::class)
             .where(FuncPerson.NAME.eq(name))
             .get()
 
@@ -94,11 +94,11 @@ class FunctionalQueryTest: AbstractDomainTest() {
                 0 -> person.name = name
                 1 -> person.email = email
             }
-            requeryKtTmpl.insert(person)
+            requeryKotlin.insert(person)
         }
 
         // TODO: not 연산자가 제대로 동작하지 않는다. (Java 와 Kotlin 모두)
-        val result = requeryKtTmpl.select(FuncPerson::class)
+        val result = requeryKotlin.select(FuncPerson::class)
             .where(
                 FuncPerson.NAME.ne(name).and(FuncPerson.EMAIL.ne(email))
             )
@@ -109,162 +109,176 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `single query execute`() {
-        requeryKtTmpl.insertAll(RandomData.randomPersons(10))
+        with(requeryKotlin) {
+            insertAll(RandomData.randomPersons(10))
 
-        val result: Result<FuncPerson> = requeryKtTmpl.select(FuncPerson::class).get()
-        assertThat(result.toList()).hasSize(10)
+            val result: Result<FuncPerson> = select(FuncPerson::class).get()
+            assertThat(result.toList()).hasSize(10)
 
-        val person = randomPerson()
-        requeryKtTmpl.insert(person)
+            val person = randomPerson()
+            insert(person)
 
-        // 이렇게 Result<T> 로 얻은 객체는 조건을 가진 Query 구문이라고 봐도 될 듯
-        assertThat(result.toList()).hasSize(11)
+            // 이렇게 Result<T> 로 얻은 객체는 조건을 가진 Query 구문이라고 봐도 될 듯
+            assertThat(result.toList()).hasSize(11)
+        }
     }
 
     @Test
     fun `single query with limit and offset`() {
-        val name = "duplicateFirstName"
-        List(10) {
-            requeryKtTmpl.insert(randomPerson().also { it.name = name })
-        }
+        with(requeryKotlin) {
+            val name = "duplicateFirstName"
+            List(10) {
+                insert(randomPerson().also { it.name = name })
+            }
 
-        for(i in 0 until 3) {
-            val query = requeryKtTmpl
-                .select(FuncPerson::class)
-                .where(FuncPerson.NAME.eq(name))
-                .orderBy(FuncPerson.NAME)
-                .limit(5)
-                .get()
-            assertThat(query.toList()).hasSize(5)
+            for(i in 0 until 3) {
+                val query = select(FuncPerson::class)
+                    .where(FuncPerson.NAME.eq(name))
+                    .orderBy(FuncPerson.NAME)
+                    .limit(5)
+                    .get()
+                assertThat(query.toList()).hasSize(5)
 
-            val query2 = requeryKtTmpl
-                .select(FuncPerson::class)
-                .where(FuncPerson.NAME.eq(name))
-                .limit(5)
-                .offset(5)
-                .get()
+                val query2 = select(FuncPerson::class)
+                    .where(FuncPerson.NAME.eq(name))
+                    .limit(5)
+                    .offset(5)
+                    .get()
 
-            assertThat(query2.toList()).hasSize(5)
+                assertThat(query2.toList()).hasSize(5)
+            }
         }
     }
 
     @Test
     fun `single query where null`() {
-        val person = randomPerson()
-        person.name = null
-        requeryKtTmpl.insert(person)
+        with(requeryKotlin) {
+            val person = randomPerson()
+            person.name = null
+            insert(person)
 
-        val query = requeryKtTmpl
-            .select(FuncPerson::class)
-            .where(FuncPerson.NAME.isNull())
-            .get()
+            val query = select(FuncPerson::class)
+                .where(FuncPerson.NAME.isNull())
+                .get()
 
-        assertThat(query.toList()).hasSize(1)
+            assertThat(query.toList()).hasSize(1)
+        }
     }
 
 
     @Test
     fun `delete all`() {
-        val name = "someName"
-        List(10) {
-            val person = randomPerson()
-            person.name = name
-            requeryKtTmpl.insert(person)
+        with(requeryKotlin) {
+            val name = "someName"
+            List(10) {
+                val person = randomPerson()
+                person.name = name
+                insert(person)
+            }
+            assertThat(deleteAll(FuncPerson::class)).isGreaterThan(0)
+            assertThat(select(FuncPerson::class).get().firstOrNull()).isNull()
         }
-        assertThat(requeryKtTmpl.deleteAll(FuncPerson::class)).isGreaterThan(0)
-        assertThat(requeryKtTmpl.select(FuncPerson::class).get().firstOrNull()).isNull()
     }
 
     @Test
     fun `delete batch`() {
-        val people = List(COUNT) { randomPerson() }
-        requeryKtTmpl.insertAll(people)
+        with(requeryKotlin) {
+            val people = randomPersons(COUNT)
+            insertAll(people)
 
-        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(COUNT)
+            assertThat(count(FuncPerson::class).get().value()).isEqualTo(COUNT)
 
-        requeryKtTmpl.deleteAll(people)
-        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(0)
+            requeryKotlin.deleteAll(people)
+            assertThat(count(FuncPerson::class).get().value()).isEqualTo(0)
+        }
     }
 
     @Test
     fun `query by foreign key`() {
-        val person = randomPerson()
-        requeryKtTmpl.insert(person)
+        with(requeryKotlin) {
+            val person = randomPerson()
+            insert(person)
 
-        val phone1 = randomPhone()
-        val phone2 = randomPhone()
-        person.phoneNumbers.add(phone1)
-        person.phoneNumbers.add(phone2)
-        requeryKtTmpl.upsert(person)
+            val phone1 = randomPhone()
+            val phone2 = randomPhone()
+            person.phoneNumbers.add(phone1)
+            person.phoneNumbers.add(phone2)
 
-        assertThat(person.phoneNumberSet).containsOnly(phone1, phone2)
+            upsert(person)
+            assertThat(person.phoneNumberSet).containsOnly(phone1, phone2)
 
-        // by entity
-        val query1 = requeryKtTmpl.select(FuncPhone::class).where(FuncPhone.OWNER.eq(person)).get()
+            // by entity
+            val query1 = select(FuncPhone::class).where(FuncPhone.OWNER eq person).get()
 
-        assertThat(query1.toList()).hasSize(2).containsOnly(phone1, phone2)
-        assertThat(person.phoneNumberList).hasSize(2).containsAll(query1.toList())
+            assertThat(query1.toList()).hasSize(2).containsOnly(phone1, phone2)
+            assertThat(person.phoneNumberList).hasSize(2).containsAll(query1.toList())
 
-        // by id
-        val query2 = requeryKtTmpl.select(FuncPhone::class).where(FuncPhone.OWNER_ID.eq(person.id)).get()
+            // by id
+            val query2 = select(FuncPhone::class).where(FuncPhone.OWNER_ID.eq(person.id)).get()
 
-        assertThat(query2.toList()).hasSize(2).containsOnly(phone1, phone2)
-        assertThat(person.phoneNumberList).hasSize(2).containsAll(query2.toList())
+            assertThat(query2.toList()).hasSize(2).containsOnly(phone1, phone2)
+            assertThat(person.phoneNumberList).hasSize(2).containsAll(query2.toList())
+        }
     }
 
     @Test
     fun `query by UUID`() {
-        val person = randomPerson()
-        requeryKtTmpl.insert(person)
+        with(requeryKotlin) {
+            val person = randomPerson()
+            insert(person)
 
-        val uuid = person.uuid
-        val loaded = requeryKtTmpl.select(FuncPerson::class).where(FuncPerson.UUID.eq(uuid)).get().first()
-        assertThat(loaded).isEqualTo(person)
+            val uuid = person.uuid
+            val loaded = select(FuncPerson::class).where(FuncPerson.UUID.eq(uuid)).get().first()
+            assertThat(loaded).isEqualTo(person)
+        }
     }
 
     @Test
     fun `query select distinct`() {
-        repeat(10) {
-            val person = randomPerson().apply { name = (it / 2).toString() }
-            requeryKtTmpl.insert(person)
+        with(requeryKotlin) {
+            repeat(10) {
+                val person = randomPerson().apply { name = (it / 2).toString() }
+                insert(person)
+            }
+
+            val result = select(FuncPerson.NAME).distinct().get()
+
+            assertThat(result.toList()).hasSize(5)
         }
-
-        val result = requeryKtTmpl.select(FuncPerson.NAME).distinct().get()
-
-        assertThat(result.toList()).hasSize(5)
     }
 
     @Test
     fun `query select count`() {
-        requeryKtTmpl.insertAll(randomPersons(10))
+        with(requeryKotlin) {
+            insertAll(randomPersons(10))
 
-        // HINT: count 가져오기 : sql 함수를 사용하는구나 !!!
-        //
-        // select count(*) as bb from FuncPerson
-        requeryKtTmpl
-            .select(Count.count(FuncPerson::class.java).`as`("bb"))
-            .get()
-            .use { result ->
-                assertThat(result.first().get<Int>("bb")).isEqualTo(10)
+            // HINT: count 가져오기 : sql 함수를 사용하는구나 !!!
+            //
+            // select count(*) as bb from FuncPerson
+
+            select(Count.count(FuncPerson::class.java).`as`("bb"))
+                .get()
+                .use { result ->
+                    assertThat(result.first().get<Int>("bb")).isEqualTo(10)
+                }
+
+            select(Count.count(FuncPerson::class.java))
+                .get()
+                .use { result ->
+                    assertThat(result.first().get<Int>(0)).isEqualTo(10)
+                }
+
+            assertThat(count(FuncPerson::class).get().value()).isEqualTo(10)
+
+            count(FuncPerson::class).get().consume { count ->
+                assertThat(count).isEqualTo(10)
             }
-
-        requeryKtTmpl
-            .select(Count.count(FuncPerson::class.java))
-            .get()
-            .use { result ->
-                assertThat(result.first().get<Int>(0)).isEqualTo(10)
-            }
-
-        assertThat(requeryKtTmpl.count(FuncPerson::class).get().value()).isEqualTo(10)
-
-        requeryKtTmpl.dataStore.count(FuncPerson::class).get().consume { count ->
-            assertThat(count).isEqualTo(10)
         }
     }
 
     @Test
     fun `query select count where`() {
-        with(requeryKtTmpl) {
+        with(requeryKotlin) {
             insert(randomPerson().apply { name = "countme" })
             insertAll(randomPersons(9))
 
@@ -281,7 +295,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query not null`() {
-        with(requeryKtTmpl) {
+        with(requeryKotlin) {
             insertAll(randomPersons(10))
 
             val result = select(FuncPerson::class).where(FuncPerson.NAME.notNull()).get()
@@ -291,7 +305,9 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query from sub query`() {
-        // NOTE: 현재 KotlinTemlate에서는 제대로 안된다. Java 버전의 RequeryTemplate에서는 제대로 된다. 
+        //
+        // BUG: 현재 KotlinTemlate에서는 제대로 안된다. Java 버전의 RequeryTemplate에서는 제대로 된다.
+        //
         with(requeryTemplate) {
             repeat(10) {
                 val person = randomPerson().apply { age = it + 1 }
@@ -303,13 +319,15 @@ class FunctionalQueryTest: AbstractDomainTest() {
             val subQuery = select(personAge.sum().`as`("avg_age"))
                 .from(FuncPerson::class.java)
                 .groupBy(personAge)
+                .`as`("sums")
 
-            subQuery.get().forEach {
-                log.debug { "row=$it" }
-            }
+            //            subQuery.get().forEach {
+            //                log.debug { "row=$it" }
+            //            }
 
-            val result = select(NamedNumericExpression.ofInteger("avg_age").avg())
-                .from(subQuery.`as`("t1"))
+            val result =
+                select(NamedNumericExpression.ofInteger("avg_age").avg())
+                    .from(subQuery)
                 .get()
 
             assertThat(result.first().get<Int>(0)).isGreaterThanOrEqualTo(5)
@@ -318,14 +336,14 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query join orderBy`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson()
             person.address = randomAddress()
             insert(person)
 
             // not a useful query just tests the sql output
-            val result = select(FuncAddress::class.java)
-                .join(FuncPerson::class.java).on(FuncPerson.ADDRESS_ID.eq(FuncAddress.ID))
+            val result = select(FuncAddress::class)
+                .join(FuncPerson::class).on(FuncPerson.ADDRESS_ID.eq(FuncAddress.ID))
                 .where(FuncPerson.ID.eq(person.id))
                 .orderBy(FuncAddress.CITY.desc())
                 .get()
@@ -337,7 +355,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query select min`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             repeat(9) { insert(randomPerson()) }
             insert(randomPerson().apply { birthday = LocalDate.of(1800, 11, 11) })
 
@@ -351,7 +369,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query select trim`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson().apply { name = "  Name  " }
             insert(person)
 
@@ -363,7 +381,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query select substr`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson().apply { name = "  Name" }
             insert(person)
 
@@ -375,7 +393,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query orderBy`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             repeat(10) {
                 val person = randomPerson().apply { age = it }
                 insert(person)
@@ -390,7 +408,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query orderBy function`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             insert(randomPerson().apply { name = "BOBB" })
             insert(randomPerson().apply { name = "BobA" })
             insert(randomPerson().apply { name = "bobC" })
@@ -409,7 +427,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query groupBy`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             repeat(5) {
                 insert(randomPerson().apply { age = it })
             }
@@ -432,7 +450,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query select where in`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val name = "Hello!"
             val person = randomPerson().also { it.name = name }
             insert(person)
@@ -446,23 +464,23 @@ class FunctionalQueryTest: AbstractDomainTest() {
             val groupNames = select(FuncGroup.NAME)
                 .where(FuncGroup.NAME.eq(name))
 
-            var p = select(FuncPerson::class.java)
+            var p = select(FuncPerson::class)
                 .where(FuncPerson.NAME.`in`(groupNames)).get().first()
             assertThat(p.name).isEqualTo(name)
 
-            p = select(FuncPerson::class.java)
+            p = select(FuncPerson::class)
                 .where(FuncPerson.NAME.notIn(groupNames)).get().firstOrNull()
             assertThat(p).isNull()
 
-            p = select(FuncPerson::class.java)
+            p = select(FuncPerson::class)
                 .where(FuncPerson.NAME.`in`(listOf("Hello!", "Other"))).get().first()
             assertThat(p.name).isEqualTo(name)
 
-            p = select(FuncPerson::class.java)
+            p = select(FuncPerson::class)
                 .where(FuncPerson.NAME.`in`(listOf("Hello!"))).get().first()
             assertThat(p.name).isEqualTo(name)
 
-            p = select(FuncPerson::class.java)
+            p = select(FuncPerson::class)
                 .where(FuncPerson.NAME.notIn(listOf("Hello!"))).get().firstOrNull()
             assertThat(p).isNull()
         }
@@ -470,36 +488,36 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query between`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson()
             person.age = 75
             insert(person)
 
-            val p = select(FuncPerson::class.java).where(FuncPerson.AGE.between(50, 100)).get().first()
+            val p = select(FuncPerson::class).where(FuncPerson.AGE.between(50, 100)).get().first()
             assertThat(p).isEqualTo(person)
         }
     }
 
     @Test
     fun `query conditions`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson()
             person.age = 75
             insert(person)
 
-            var p = select(FuncPerson::class.java).where(FuncPerson.AGE.gte(75)).get().first()
+            var p = select(FuncPerson::class).where(FuncPerson.AGE.gte(75)).get().first()
             assertThat(p).isEqualTo(person)
 
-            p = select(FuncPerson::class.java).where(FuncPerson.AGE.lte(75)).get().first()
+            p = select(FuncPerson::class).where(FuncPerson.AGE.lte(75)).get().first()
             assertThat(p).isEqualTo(person)
 
-            p = select(FuncPerson::class.java).where(FuncPerson.AGE.gt(75)).get().firstOrNull()
+            p = select(FuncPerson::class).where(FuncPerson.AGE.gt(75)).get().firstOrNull()
             assertThat(p).isNull()
 
-            p = select(FuncPerson::class.java).where(FuncPerson.AGE.lt(75)).get().firstOrNull()
+            p = select(FuncPerson::class).where(FuncPerson.AGE.lt(75)).get().firstOrNull()
             assertThat(p).isNull()
 
-            p = select(FuncPerson::class.java).where(FuncPerson.AGE.ne(75)).get().firstOrNull()
+            p = select(FuncPerson::class).where(FuncPerson.AGE.ne(75)).get().firstOrNull()
             assertThat(p).isNull()
 
         }
@@ -507,7 +525,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query compound conditions`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person1 = randomPerson().apply { age = 75 }
             insert(person1)
 
@@ -517,14 +535,14 @@ class FunctionalQueryTest: AbstractDomainTest() {
             val person3 = randomPerson().apply { age = 0; name = "Bob" }
             insert(person3)
 
-            var result = select(FuncPerson::class.java)
+            var result = select(FuncPerson::class)
                 .where(FuncPerson.AGE.gt(5).and(FuncPerson.AGE.lt(75)).and(FuncPerson.NAME.ne("Bob")))
                 .or(FuncPerson.NAME.eq("Bob"))
                 .get()
 
             assertThat(result.toList()).hasSize(2).containsOnly(person2, person3)
 
-            result = select(FuncPerson::class.java)
+            result = select(FuncPerson::class)
                 .where(FuncPerson.AGE.gt(5).or(FuncPerson.AGE.lt(75)))
                 .and(FuncPerson.NAME.eq("Bob"))
                 .get()
@@ -535,11 +553,11 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query consume`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             insertAll(randomPersons(10))
 
             var count = 0
-            val result = select(FuncPerson::class.java).get()
+            val result = select(FuncPerson::class).get()
             result.each {
                 count++
             }
@@ -549,11 +567,11 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query map`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             insert(randomPerson().apply { email = "one@test.com" })
             insertAll(randomPersons(9))
 
-            val result = select(FuncPerson::class.java).get()
+            val result = select(FuncPerson::class).get()
             var map = result.toMap(FuncPerson.EMAIL, ConcurrentHashMap<String, FuncPerson>())
             assertThat(map["one@test.com"]).isNotNull
 
@@ -567,11 +585,11 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query update`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson().apply { age = 100 }
             insert(person)
 
-            val updatedCount = update(FuncPerson::class.java)
+            val updatedCount = update(FuncPerson::class)
                 .set(FuncPerson.ABOUT, "nothing")
                 .set(FuncPerson.AGE, 50)
                 .where(FuncPerson.AGE.eq(100))
@@ -584,11 +602,11 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query update refresh`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson().apply { age = 100 }
             insert(person)
 
-            val updatedCount = update(FuncPerson::class.java)
+            val updatedCount = update(FuncPerson::class)
                 .set(FuncPerson.AGE, 50)
                 .where(FuncPerson.ID.eq(person.id))
                 .get()
@@ -596,14 +614,14 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
             assertThat(updatedCount).isEqualTo(1)
 
-            val selected = select(FuncPerson::class.java).where(FuncPerson.ID.eq(person.id)).get().first()
+            val selected = select(FuncPerson::class).where(FuncPerson.ID.eq(person.id)).get().first()
             assertThat(selected.age).isEqualTo(50)
         }
     }
 
     @Test
     fun `query coalesce`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             var person = randomPerson().apply {
                 name = "Carol"
                 email = null
@@ -627,25 +645,25 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query like`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             insert(randomPerson().apply { name = "Carol" })
             insert(randomPerson().apply { name = "Bob" })
 
-            var p = select(FuncPerson::class.java)
+            var p = select(FuncPerson::class)
                 .where(FuncPerson.NAME.like("B%"))
                 .get()
                 .first()
 
             assertThat(p.name).isEqualTo("Bob")
 
-            p = select(FuncPerson::class.java)
+            p = select(FuncPerson::class)
                 .where(FuncPerson.NAME.lower().like("b%"))
                 .get()
                 .first()
 
             assertThat(p.name).isEqualTo("Bob")
 
-            val p2 = select(FuncPerson::class.java)
+            val p2 = select(FuncPerson::class)
                 .where(FuncPerson.NAME.notLike("B%"))
                 .get()
                 .firstOrNull()
@@ -656,11 +674,11 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query equals ignore case`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson().apply { name = "Carol" }
             insert(person)
 
-            val p = select(FuncPerson::class.java)
+            val p = select(FuncPerson::class)
                 .where(FuncPerson.NAME.equalsIgnoreCase("carol"))
                 .get()
                 .first()
@@ -671,7 +689,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query case`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val names = listOf("Carol", "Bob", "Jack")
             names.forEach { name ->
                 insert(randomPerson().also { it.name = name })
@@ -685,7 +703,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
                         .`when`(FuncPerson.NAME.eq("Carol"), "C")
                         .elseThen("Unknown")
                 )
-                    .from(FuncPerson::class.java)
+                    .from(FuncPerson::class)
                     .orderBy(FuncPerson.NAME)
                     .get()
 
@@ -713,7 +731,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query union`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val person = randomPerson().apply { name = "Carol" }
             insert(person)
 
@@ -737,7 +755,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query raw`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val count = 5
             val people = List(count) { insert(randomPerson()) }
 
@@ -775,13 +793,13 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query raw entities`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val count = 5
             val people = List(count) { insert(randomPerson()) }
 
             val resultIds = mutableListOf<Long>()
 
-            raw(FuncPerson::class.java, "select * from FuncPerson").use { result ->
+            raw(FuncPerson::class, "select * from FuncPerson").use { result ->
                 val rows = result.toList()
                 assertThat(rows).hasSize(count)
 
@@ -794,13 +812,13 @@ class FunctionalQueryTest: AbstractDomainTest() {
                 }
             }
 
-            raw(FuncPerson::class.java, "select * from FuncPerson WHERE personId in ?", resultIds).use { result ->
+            raw(FuncPerson::class, "select * from FuncPerson WHERE personId in ?", resultIds).use { result ->
                 val rows = result.toList()
                 val ids = rows.map { it.id }
                 assertThat(ids).isEqualTo(resultIds)
             }
 
-            raw(FuncPerson::class.java, "select * from FuncPerson WHERE personId = ?", people[0]).use { result ->
+            raw(FuncPerson::class, "select * from FuncPerson WHERE personId = ?", people[0]).use { result ->
                 assertThat(result.first().id).isEqualTo(people[0].id)
             }
         }
@@ -808,7 +826,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
 
     @Test
     fun `query union join on same entities`() {
-        with(requeryTemplate) {
+        with(requeryKotlin) {
             val group = FuncGroup().apply { name = "Hello!" }
             insert(group)
 
@@ -840,7 +858,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     @Test
     fun `voilate unique constraint`() {
         assertThatThrownBy {
-            with(requeryTemplate) {
+            with(requeryKotlin) {
 
                 val uuid = UUID.randomUUID()
                 val p1 = randomPerson().also { it.uuid = uuid }

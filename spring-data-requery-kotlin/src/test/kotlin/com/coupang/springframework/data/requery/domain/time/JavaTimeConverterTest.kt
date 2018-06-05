@@ -26,19 +26,22 @@ class JavaTimeConverterTest: AbstractDomainTest() {
             name = "event"
         }
 
-        requeryTemplate.insert(event)
+        with(requeryKotlin) {
 
-        val loaded = requeryTemplate.findById(TimeEvent::class.java, eventId)!!
+            insert(event)
 
-        assertThat(loaded.id).isEqualTo(eventId)
-        assertThat(loaded.name).isEqualTo(event.name)
-        assertThat(loaded.localDate).isEqualTo(event.localDate)
-        assertThat(loaded.localDateTime).isEqualTo(event.localDateTime)
+            val loaded = findById(TimeEvent::class, eventId)!!
 
-        // BUG: LocalTime 은 milliseconds 값을 가지는데, java.sql.Time 은 seconds 까지 밖에 표현하지 못한다 (DB마다 다르다)
-        assertThat(loaded.localTime).isEqualTo(event.localTime.truncatedTo(ChronoUnit.SECONDS))
+            assertThat(loaded.id).isEqualTo(eventId)
+            assertThat(loaded.name).isEqualTo(event.name)
+            assertThat(loaded.localDate).isEqualTo(event.localDate)
+            assertThat(loaded.localDateTime).isEqualTo(event.localDateTime)
 
-        assertThat(loaded.offsetDateTime).isEqualTo(event.offsetDateTime)
-        assertThat(loaded.zonedDateTime).isEqualTo(event.zonedDateTime)
+            // BUG: LocalTime 은 milliseconds 값을 가지는데, java.sql.Time 은 seconds 까지 밖에 표현하지 못한다 (DB마다 다르다)
+            assertThat(loaded.localTime).isEqualTo(event.localTime.truncatedTo(ChronoUnit.SECONDS))
+
+            assertThat(loaded.offsetDateTime).isEqualTo(event.offsetDateTime)
+            assertThat(loaded.zonedDateTime).isEqualTo(event.zonedDateTime)
+        }
     }
 }

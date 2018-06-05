@@ -16,10 +16,12 @@ class UpsertTest: AbstractDomainTest() {
 
     @Before
     fun setup() {
-        requeryTemplate.deleteAll(UpsertTag::class.java)
-        requeryTemplate.deleteAll(UpsertEvent::class.java)
-        requeryTemplate.deleteAll(UpsertPlace::class.java)
-        requeryTemplate.deleteAll(UpsertLocation::class.java)
+        with(requeryKotlin) {
+            deleteAll(UpsertTag::class)
+            deleteAll(UpsertEvent::class)
+            deleteAll(UpsertPlace::class)
+            deleteAll(UpsertLocation::class)
+        }
     }
 
     @Test
@@ -29,13 +31,16 @@ class UpsertTest: AbstractDomainTest() {
             address.zipcode = "12345"
             address.city = "seoul"
         }
-        requeryTemplate.insert(location)
 
-        assertThat(location.isNew()).isFalse()
+        with(requeryKotlin) {
+            insert(location)
 
-        val loaded = requeryTemplate.findById(UpsertLocation::class.java, location.id)!!
-        assertThat(loaded).isEqualTo(location)
-        assertThat(loaded.address.zipcode).isEqualTo("12345")
+            assertThat(location.isNew()).isFalse()
+
+            val loaded = findById(UpsertLocation::class, location.id)!!
+            assertThat(loaded).isEqualTo(location)
+            assertThat(loaded.address.zipcode).isEqualTo("12345")
+        }
     }
 
     @Test
@@ -52,19 +57,22 @@ class UpsertTest: AbstractDomainTest() {
         event.tags.add(tag1)
         event.tags.add(tag2)
 
-        requeryTemplate.insert(event)
+        with(requeryKotlin) {
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java).get().value()).isEqualTo(1)
-        assertThat(requeryTemplate.count(UpsertTag::class.java).get().value()).isEqualTo(2)
+            insert(event)
 
-        val loaded = requeryTemplate.findById(UpsertEvent::class.java, event.id)!!
+            assertThat(count(UpsertEvent::class).get().value()).isEqualTo(1)
+            assertThat(count(UpsertTag::class).get().value()).isEqualTo(2)
 
-        assertThat(loaded.tags).hasSize(2).containsOnly(tag1, tag2)
+            val loaded = findById(UpsertEvent::class, event.id)!!
 
-        requeryTemplate.delete(loaded)
+            assertThat(loaded.tags).hasSize(2).containsOnly(tag1, tag2)
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTemplate.count(UpsertTag::class.java).get().value()).isEqualTo(0)
+            delete(loaded)
+
+            assertThat(count(UpsertEvent::class).get().value()).isEqualTo(0)
+            assertThat(count(UpsertTag::class).get().value()).isEqualTo(0)
+        }
     }
 
     @Test
@@ -74,16 +82,17 @@ class UpsertTest: AbstractDomainTest() {
             id = eventId
             name = "test"
         }
+        with(requeryKotlin) {
+            upsert(event)
 
-        requeryTemplate.upsert(event)
+            assertThat(count(UpsertEvent::class).get().value()).isEqualTo(1)
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java).get().value()).isEqualTo(1)
+            val loaded = findById(UpsertEvent::class, event.id)!!
+            assertThat(loaded).isEqualTo(event)
 
-        val loaded = requeryTemplate.findById(UpsertEvent::class.java, event.id)!!
-        assertThat(loaded).isEqualTo(event)
-
-        requeryTemplate.delete(loaded)
-        assertThat(requeryTemplate.count(UpsertEvent::class.java).get().value()).isEqualTo(0)
+            delete(loaded)
+            assertThat(count(UpsertEvent::class).get().value()).isEqualTo(0)
+        }
     }
 
     @Test
@@ -101,14 +110,15 @@ class UpsertTest: AbstractDomainTest() {
 
         place.addEvent(event)
 
-        requeryTemplate.upsert(place)
+        with(requeryKotlin) {
 
+            upsert(place)
+            val savedPlace = findById(UpsertPlace::class, place.id)!!
 
-        val savedPlace = requeryTemplate.findById(UpsertPlace::class.java, place.id)!!
-
-        assertThat(savedPlace.id).isEqualTo(place.id)
-        assertThat(savedPlace.events).hasSize(1)
-        assertThat(savedPlace.events.firstOrNull()?.id).isEqualTo(eventId)
+            assertThat(savedPlace.id).isEqualTo(place.id)
+            assertThat(savedPlace.events).hasSize(1)
+            assertThat(savedPlace.events.firstOrNull()?.id).isEqualTo(eventId)
+        }
     }
 
     @Test
@@ -125,23 +135,27 @@ class UpsertTest: AbstractDomainTest() {
         event.tags.add(tag1)
         event.tags.add(tag2)
 
-        requeryTemplate.upsert(event)
+        with(requeryKotlin) {
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java).get().value()).isEqualTo(1)
-        assertThat(requeryTemplate.count(UpsertTag::class.java).get().value()).isEqualTo(2)
+            upsert(event)
 
-        val loaded = requeryTemplate.findById(UpsertEvent::class.java, event.id)!!
+            assertThat(count(UpsertEvent::class).get().value()).isEqualTo(1)
+            assertThat(count(UpsertTag::class).get().value()).isEqualTo(2)
 
-        assertThat(loaded.tags).hasSize(2).containsOnly(tag1, tag2)
+            val loaded = findById(UpsertEvent::class, event.id)!!
 
-        requeryTemplate.delete(loaded)
+            assertThat(loaded.tags).hasSize(2).containsOnly(tag1, tag2)
 
-        assertThat(requeryTemplate.count(UpsertEvent::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTemplate.count(UpsertTag::class.java).get().value()).isEqualTo(0)
+            delete(loaded)
+
+            assertThat(count(UpsertEvent::class).get().value()).isEqualTo(0)
+            assertThat(count(UpsertTag::class).get().value()).isEqualTo(0)
+        }
     }
 
     @Test
     fun `upsert insert one to many`() {
+
         val eventId = UUID.randomUUID()
         val event = UpsertEvent().apply {
             id = eventId
@@ -155,14 +169,17 @@ class UpsertTest: AbstractDomainTest() {
 
         place.addEvent(event)
 
-        requeryTemplate.insert(place)
+        with(requeryKotlin) {
+
+            insert(place)
 
 
-        val savedPlace = requeryTemplate.findById(UpsertPlace::class.java, place.id)!!
+            val savedPlace = findById(UpsertPlace::class, place.id)!!
 
-        assertThat(savedPlace.id).isEqualTo(place.id)
-        assertThat(savedPlace.events).hasSize(1)
-        assertThat(savedPlace.events.firstOrNull()?.id).isEqualTo(eventId)
+            assertThat(savedPlace.id).isEqualTo(place.id)
+            assertThat(savedPlace.events).hasSize(1)
+            assertThat(savedPlace.events.firstOrNull()?.id).isEqualTo(eventId)
+        }
     }
 
     @Test
@@ -180,12 +197,14 @@ class UpsertTest: AbstractDomainTest() {
         place.addEvent(event)
         place.events.clear()
 
-        requeryTemplate.upsert(place)
+        with(requeryKotlin) {
 
-        val savedPlace = requeryTemplate.findById(UpsertPlace::class.java, place.id)!!
+            upsert(place)
+            val savedPlace = findById(UpsertPlace::class, place.id)!!
 
-        assertThat(savedPlace.id).isEqualTo(place.id)
-        assertThat(savedPlace.events).hasSize(0)
+            assertThat(savedPlace.id).isEqualTo(place.id)
+            assertThat(savedPlace.events).hasSize(0)
+        }
     }
 
     @Test
@@ -196,16 +215,18 @@ class UpsertTest: AbstractDomainTest() {
             name = "event1"
         }
 
-        requeryTemplate.insert(event1)
+        with(requeryKotlin) {
+            insert(event1)
 
-        val event2 = UpsertEvent().apply {
-            id = eventId
-            name = "event2"
+            val event2 = UpsertEvent().apply {
+                id = eventId
+                name = "event2"
+            }
+
+            upsert(event2)
+
+            val events = findAll(UpsertEvent::class)
+            assertThat(events).hasSize(1).containsOnly(event2)
         }
-
-        requeryTemplate.upsert(event2)
-
-        val events = requeryTemplate.findAll(UpsertEvent::class.java)
-        assertThat(events).hasSize(1).containsOnly(event2)
     }
 }

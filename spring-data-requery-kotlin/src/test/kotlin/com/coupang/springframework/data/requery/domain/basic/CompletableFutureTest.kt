@@ -3,7 +3,7 @@ package com.coupang.springframework.data.requery.domain.basic
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest
 import com.coupang.springframework.data.requery.domain.basic.RandomData.randomUser
 import com.coupang.springframework.data.requery.domain.basic.RandomData.randomUsers
-import io.requery.async.CompletableEntityStore
+import io.requery.async.KotlinCompletableEntityStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -17,16 +17,16 @@ import java.util.concurrent.ForkJoinPool
  */
 class CompletableFutureTest: AbstractDomainTest() {
 
-    private val asyncEntityStore: CompletableEntityStore<Any> by lazy {
-        CompletableEntityStore(requeryTemplate.dataStore, ForkJoinPool.commonPool())
+    private val asyncEntityStore: KotlinCompletableEntityStore<Any> by lazy {
+        KotlinCompletableEntityStore(requeryKotlin.dataStore, ForkJoinPool.commonPool())
     }
 
     @Before
     fun setup() {
-        with(requeryTemplate) {
-            deleteAll(BasicLocation::class.java)
-            deleteAll(BasicGroup::class.java)
-            deleteAll(BasicUser::class.java)
+        with(requeryKotlin) {
+            deleteAll(BasicLocation::class)
+            deleteAll(BasicGroup::class)
+            deleteAll(BasicUser::class)
         }
     }
 
@@ -36,7 +36,7 @@ class CompletableFutureTest: AbstractDomainTest() {
         asyncEntityStore.insert(user).thenAccept { u ->
             assertThat(u.id).isNotNull()
 
-            val loaded = asyncEntityStore.select(BasicUser::class.java).where(BasicUser.ID eq user.id).get().first()
+            val loaded = asyncEntityStore.select(BasicUser::class).where(BasicUser.ID eq user.id).get().first()
             assertThat(loaded).isEqualTo(user)
         }.join()
     }
@@ -52,7 +52,7 @@ class CompletableFutureTest: AbstractDomainTest() {
                     assertThat(savedUser.id).isNotNull()
                 }
                 .thenCompose {
-                    count(BasicUser::class.java).get().toCompletableFuture()
+                    count(BasicUser::class).get().toCompletableFuture()
                 }
                 .get()
         }
@@ -86,7 +86,7 @@ class CompletableFutureTest: AbstractDomainTest() {
         with(asyncEntityStore) {
             insert(user)
                 .thenCompose { savedUser ->
-                    update<BasicUser>(BasicUser::class.java)
+                    update<BasicUser>(BasicUser::class)
                         .set(BasicUser.ABOUT, "nothing")
                         .set(BasicUser.AGE, 50)
                         .where(BasicUser.AGE eq user.age)
@@ -116,7 +116,7 @@ class CompletableFutureTest: AbstractDomainTest() {
             Thread.sleep(10)
 
             val loadedUsers =
-                select(BasicUser::class.java)
+                select(BasicUser::class)
                     .orderBy(BasicUser.NAME.asc().nullsLast())
                     .limit(200)
                     .get()

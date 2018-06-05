@@ -34,92 +34,97 @@ class HierarchyTest: AbstractDomainTest() {
 
     @Before
     fun `cleanup tree node`() {
-        requeryTemplate.deleteAll(NodeAttribute::class.java)
-        requeryTemplate.deleteAll(TreeNode::class.java)
+        with(requeryKotlin) {
+            deleteAll(NodeAttribute::class)
+            deleteAll(TreeNode::class)
 
-        assertThat(requeryTemplate.count(TreeNode::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTemplate.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
+            assertThat(count(TreeNode::class).get().value()).isEqualTo(0)
+            assertThat(count(NodeAttribute::class).get().value()).isEqualTo(0)
+        }
     }
 
     @Test
     fun `insert root node only`() {
+        with(requeryKotlin) {
+            val root = treeNodeOf("root")
 
-        val root = treeNodeOf("root")
-        requeryTemplate.insert(root)
-        assertThat(root.id).isGreaterThan(0)
+            insert(root)
+            assertThat(root.id).isGreaterThan(0)
 
-        val loadedRoot = requeryTemplate.findById(TreeNode::class.java, root.id)!!
+            val loadedRoot = findById(TreeNode::class, root.id)!!
+            assertThat(loadedRoot).isEqualTo(root)
 
-        assertThat(loadedRoot).isEqualTo(root)
-
-        requeryTemplate.delete(loadedRoot)
-        assertThat(requeryTemplate.count(TreeNode::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTemplate.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
+            delete(loadedRoot)
+            assertThat(count(TreeNode::class).get().value()).isEqualTo(0)
+            assertThat(count(NodeAttribute::class).get().value()).isEqualTo(0)
+        }
     }
 
     @Test
     fun `insert hierarchy nodes`() {
+        with(requeryKotlin) {
+            val root = treeNodeOf("root")
 
-        val root = treeNodeOf("root")
+            val child1 = treeNodeOf("child1", root)
+            val child2 = treeNodeOf("child2", root)
 
-        val child1 = treeNodeOf("child1", root)
-        val child2 = treeNodeOf("child2", root)
+            insert(root)
+            assertThat(root.id).isGreaterThan(0)
+            assertThat(child1.id).isGreaterThan(0)
+            assertThat(child2.id).isGreaterThan(0)
 
-        requeryTemplate.insert(root)
-        requeryTemplate.refreshAll(root)
-        assertThat(root.id).isGreaterThan(0)
-        assertThat(child1.id).isGreaterThan(0)
-        assertThat(child2.id).isGreaterThan(0)
+            val loadedRoot = findById(TreeNode::class, root.id)!!
 
-        val loadedRoot = requeryTemplate.findById(TreeNode::class.java, root.id)!!
+            assertThat(loadedRoot).isEqualTo(root)
+            assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
 
-        assertThat(loadedRoot).isEqualTo(root)
-        assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
+            // cascade delete
+            delete(loadedRoot)
 
-        // cascade delete
-        requeryTemplate.delete(loadedRoot)
-
-        assertThat(requeryTemplate.count(TreeNode::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTemplate.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
+            assertThat(count(TreeNode::class).get().value()).isEqualTo(0)
+            assertThat(count(NodeAttribute::class).get().value()).isEqualTo(0)
+        }
     }
 
     @Test
     fun `insert 3 generation hiearchy nodes and delete child`() {
-        val root = treeNodeOf("root")
+        with(requeryKotlin) {
+            val root = treeNodeOf("root")
 
-        val child1 = treeNodeOf("child1", root)
-        val child2 = treeNodeOf("child2", root)
+            val child1 = treeNodeOf("child1", root)
+            val child2 = treeNodeOf("child2", root)
 
-        val grandChild11 = treeNodeOf("grandChild11", child1)
-        val grandChild12 = treeNodeOf("grandChild12", child1)
+            val grandChild11 = treeNodeOf("grandChild11", child1)
+            val grandChild12 = treeNodeOf("grandChild12", child1)
 
-        val grandChild21 = treeNodeOf("grandChild21", child2)
+            val grandChild21 = treeNodeOf("grandChild21", child2)
 
 
-        requeryTemplate.insert(root)
-        assertThat(root.id).isGreaterThan(0)
-        assertThat(child1.id).isGreaterThan(0)
-        assertThat(child2.id).isGreaterThan(0)
+            insert(root)
+            assertThat(root.id).isGreaterThan(0)
+            assertThat(child1.id).isGreaterThan(0)
+            assertThat(child2.id).isGreaterThan(0)
 
-        val loadedRoot = requeryTemplate.findById(TreeNode::class.java, root.id)!!
+            val loadedRoot = findById(TreeNode::class, root.id)!!
 
-        assertThat(loadedRoot).isEqualTo(root)
-        assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
+            assertThat(loadedRoot).isEqualTo(root)
+            assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
 
-        val childLoaded = requeryTemplate.findById(TreeNode::class.java, child1.id)!!
-        assertThat(childLoaded.children).hasSize(2).containsOnly(grandChild11, grandChild12)
+            val childLoaded = findById(TreeNode::class, child1.id)!!
+            assertThat(childLoaded.children).hasSize(2).containsOnly(grandChild11, grandChild12)
 
-        // child delete
-        requeryTemplate.delete(childLoaded)
+            // child delete
+            delete(childLoaded)
 
-        // HINT: child가 삭제된 후에는 parent를 refresh 해야 child가 삭제되었음을 안다 (그 전에 parent 에서 child를 제거해되 된다)
-        requeryTemplate.refreshAll(loadedRoot)
-        assertThat(loadedRoot.children).hasSize(1).containsOnly(child2)
+            // HINT: child가 삭제된 후에는 parent를 refresh 해야 child가 삭제되었음을 안다 (그 전에 parent 에서 child를 제거해되 된다)
+            refreshAll(loadedRoot)
+            assertThat(loadedRoot.children).hasSize(1).containsOnly(child2)
 
-        // cascade delete
-        requeryTemplate.delete(loadedRoot)
+            // cascade delete
+            delete(loadedRoot)
 
-        assertThat(requeryTemplate.count(TreeNode::class.java).get().value()).isEqualTo(0)
-        assertThat(requeryTemplate.count(NodeAttribute::class.java).get().value()).isEqualTo(0)
+            assertThat(count(TreeNode::class).get().value()).isEqualTo(0)
+            assertThat(count(NodeAttribute::class).get().value()).isEqualTo(0)
+        }
     }
 }

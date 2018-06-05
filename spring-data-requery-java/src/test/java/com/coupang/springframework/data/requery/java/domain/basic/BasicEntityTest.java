@@ -44,6 +44,7 @@ public class BasicEntityTest extends AbstractDomainTest {
         BasicUser user = RandomData.randomUser();
         requeryTemplate.insert(user);
 
+        // NOTE: 특정 컬럼만 가지고 온 후, 다른 컬럼을 참조하면, Lazy loading을 수행해준다.
         Result<BasicUser> result = requeryTemplate
             .select(BasicUser.class, BasicUser.ID.get(), BasicUser.NAME.get())
             .limit(10)

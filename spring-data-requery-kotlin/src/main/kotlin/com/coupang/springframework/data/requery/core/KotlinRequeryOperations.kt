@@ -26,7 +26,6 @@ interface KotlinRequeryOperations {
     fun <T: Any> select(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): Selection<out Result<T>> =
         dataStore.select(entityType, *attributes)
 
-
     fun select(vararg expressions: Expression<*>): Selection<Result<Tuple>> =
         dataStore.select(*expressions)
 
@@ -110,9 +109,10 @@ interface KotlinRequeryOperations {
     fun <T: Any> raw(entityType: KClass<T>, query: String, vararg parameters: Any) =
         dataStore.raw(entityType, query, *parameters)
 
-    fun <T: Any> withTransaction(block: KotlinRequeryOperations.() -> T): T
+    fun <T: Any> withTransaction(block: KotlinRequeryOperations.() -> T): T =
+        withTransaction(null, block)
 
-    fun <T: Any> withTransaction(isolation: TransactionIsolation, block: KotlinRequeryOperations.() -> T): T
+    fun <T: Any> withTransaction(isolation: TransactionIsolation?, block: KotlinRequeryOperations.() -> T): T
 
     fun <T: Any> withDataStore(block: KotlinEntityDataStore<Any>.() -> T): T
 }
