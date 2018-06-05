@@ -8,7 +8,6 @@ import io.requery.sql.ConfigurationBuilder;
 import io.requery.sql.EntityDataStore;
 import io.requery.sql.SchemaModifier;
 import io.requery.sql.TableCreationMode;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -20,7 +19,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 
 /**
- * AbstractRequeryConfiguration
+ * Spring 용 Requery 환경설정 파일입니다.
  *
  * @author debop@coupang.com
  * @since 18. 6. 4
@@ -36,9 +35,19 @@ public abstract class AbstractRequeryConfiguration {
     @Inject
     DataSource dataSource;
 
+    /**
+     * Requery용 EntityModel 을 지정해주셔야 합니다. 기본적으로 Models.DEFAULT 를 지정해주시면 됩니다.
+     */
     abstract public EntityModel getEntityModel();
 
-    abstract public TableCreationMode getTableCreationMode();
+    /**
+     * Schema Generation 옵션입니다. 기본적으로 {@link TableCreationMode#CREATE_NOT_EXISTS} 을 사용합니다.
+     *
+     * @return {@link TableCreationMode} 값
+     */
+    public TableCreationMode getTableCreationMode() {
+        return TableCreationMode.CREATE_NOT_EXISTS;
+    }
 
     @Bean
     io.requery.sql.Configuration requeryConfiguration() {
@@ -63,6 +72,9 @@ public abstract class AbstractRequeryConfiguration {
         return new RequeryTemplate(entityDataStore());
     }
 
+    /**
+     * 사용할 Database에 Requery Entity에 해당하는 Schema 를 생성하는 작업을 수행합니다.
+     */
     @PostConstruct
     protected void setupSchema() {
         log.info("Setup Requery Database Schema...");
@@ -70,7 +82,6 @@ public abstract class AbstractRequeryConfiguration {
         SchemaModifier schemaModifier = new SchemaModifier(requeryConfiguration());
         try {
             log.debug(schemaModifier.createTablesString(getTableCreationMode()));
-
             schemaModifier.createTables(getTableCreationMode());
             log.info("Success to setup database schema!!!");
         } catch (Exception e) {

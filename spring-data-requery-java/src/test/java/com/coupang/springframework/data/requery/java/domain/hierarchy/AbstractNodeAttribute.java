@@ -9,18 +9,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-/**
- * com.coupang.springframework.data.requery.java.domain.hierarchy.AbstractNodeAttribute
- *
- * @author debop
- * @since 18. 6. 4
- */
+@Getter
+@Setter
 @Entity
 public class AbstractNodeAttribute extends AbstractPersistable<Long> {
 
     private static final long serialVersionUID = 7424000305448372730L;
 
-    @Getter
     @Key
     @Generated
     @Column(name = "attr_id")

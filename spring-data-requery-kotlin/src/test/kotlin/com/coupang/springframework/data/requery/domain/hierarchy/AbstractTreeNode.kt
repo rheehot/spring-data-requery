@@ -2,6 +2,7 @@ package com.coupang.springframework.data.requery.domain.hierarchy
 
 import com.coupang.kotlinx.core.hashOf
 import com.coupang.kotlinx.objectx.ToStringBuilder
+import com.coupang.kotlinx.objectx.uninitialized
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.*
 
@@ -26,7 +27,7 @@ abstract class AbstractTreeNode: AbstractPersistable<Long>() {
     @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.CASCADE)
     abstract var parent: AbstractTreeNode?
 
-    // TODO: association을 MutableResult 로 변경하는 것이 정석이다.
+    // TODO: association을 MutableResult 로 변경하면 제대로 안된다.
 
     @get:OneToMany(mappedBy = "parent", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     abstract val children: MutableSet<AbstractTreeNode>
@@ -34,12 +35,14 @@ abstract class AbstractTreeNode: AbstractPersistable<Long>() {
     @get:OneToMany(mappedBy = "node")
     abstract val attributes: MutableSet<AbstractNodeAttribute>
 
-    // TODO: Embedded 로 TreePosition을 넣어야 한다.
-    
+    @get:Embedded
+    var nodePosition: NodePosition = uninitialized()
 
     fun addChild(child: AbstractTreeNode) {
         child.parent = this
         children.add(child)
+        child.nodePosition.nodeLevel = this.nodePosition.nodeLevel + 1
+        child.nodePosition.nodeOrder = children.size - 1
     }
 
     fun removeChild(child: AbstractTreeNode) {

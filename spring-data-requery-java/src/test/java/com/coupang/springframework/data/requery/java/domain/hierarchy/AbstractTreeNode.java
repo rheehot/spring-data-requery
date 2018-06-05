@@ -3,12 +3,12 @@ package com.coupang.springframework.data.requery.java.domain.hierarchy;
 import com.coupang.kotlinx.objectx.ToStringBuilder;
 import com.coupang.springframework.data.requery.domain.AbstractPersistable;
 import io.requery.*;
-import io.requery.query.MutableResult;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * com.coupang.springframework.data.requery.java.domain.hierarchy.AbstractTreeNode
@@ -16,12 +16,14 @@ import java.util.Objects;
  * @author debop
  * @since 18. 6. 4
  */
+@Getter
+@Setter
 @Entity
+@Table(name = "tree_node")
 public class AbstractTreeNode extends AbstractPersistable<Long> {
 
     private static final long serialVersionUID = -4267441735293906937L;
 
-    @Getter
     @Key
     @Generated
     @Column(name = "nodeId")
@@ -32,15 +34,16 @@ public class AbstractTreeNode extends AbstractPersistable<Long> {
 
     @ManyToOne
     @ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.CASCADE)
-    protected TreeNode parent;
+    protected AbstractTreeNode parent;
 
     @OneToMany(mappedBy = "parent", cascade = { CascadeAction.DELETE, CascadeAction.SAVE })
-    protected MutableResult<TreeNode> children;
+    protected Set<AbstractTreeNode> children;
 
     @OneToMany(mappedBy = "node")
-    protected MutableResult<NodeAttribute> attributes;
+    protected Set<NodeAttribute> attributes;
 
-    // TODO: Embedded 로 TreePosition을 넣어야 한다.
+    @Embedded
+    protected NodePosition nodePosition;
 
     @Override
     public int hashCode() {

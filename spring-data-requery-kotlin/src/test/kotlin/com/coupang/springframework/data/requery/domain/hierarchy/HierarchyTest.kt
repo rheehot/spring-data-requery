@@ -7,12 +7,6 @@ import org.junit.Before
 import org.junit.Test
 import java.util.*
 
-/**
- * HierarchyTest
- *
- * @author debop@coupang.com
- * @since 18. 5. 31
- */
 class HierarchyTest: AbstractDomainTest() {
 
     companion object: KLogging() {
@@ -22,12 +16,6 @@ class HierarchyTest: AbstractDomainTest() {
         fun treeNodeOf(name: String, parent: AbstractTreeNode? = null): AbstractTreeNode {
             return TreeNode().also {
                 it.name = name
-                //                it.parent = parent
-                //                parent?.children?.add(it)
-                //
-                //                it.attributes.add(nodeAttributeOf())
-                //                it.attributes.add(nodeAttributeOf())
-                it.parent = parent
                 parent?.addChild(it)
 
                 it.addAttribute(nodeAttributeOf())

@@ -5,6 +5,7 @@ import io.requery.sql.EntityDataStore;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 /**
  * Java용 RequeryTemplate
@@ -14,7 +15,7 @@ import java.util.concurrent.Callable;
  */
 public class RequeryTemplate implements RequeryOperations {
 
-    private final EntityDataStore dataStore;
+    private final EntityDataStore<Object> dataStore;
 
     public RequeryTemplate(EntityDataStore<Object> dataStore) {
         this.dataStore = dataStore;
@@ -28,5 +29,11 @@ public class RequeryTemplate implements RequeryOperations {
     @Override
     public <V> V runInTransaction(Callable<V> callable, @Nullable TransactionIsolation isolation) {
         return (V) dataStore.runInTransaction(callable, isolation);
+    }
+
+    @Override
+    public <V> V withTransaction(Function<EntityDataStore<Object>, V> block,
+                                 @Nullable TransactionIsolation isolation) {
+        return getDataStore().runInTransaction(() -> block.apply(dataStore), isolation);
     }
 }

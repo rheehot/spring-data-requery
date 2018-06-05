@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 /**
  * Java용 RequeryOperations
@@ -150,4 +151,10 @@ public interface RequeryOperations {
     }
 
     <V> V runInTransaction(Callable<V> callable, @Nullable TransactionIsolation isolation);
+
+    default <V> V withTransaction(Function<EntityDataStore<Object>, V> block) {
+        return withTransaction(block, null);
+    }
+
+    <V> V withTransaction(Function<EntityDataStore<Object>, V> block, @Nullable TransactionIsolation isolation);
 }

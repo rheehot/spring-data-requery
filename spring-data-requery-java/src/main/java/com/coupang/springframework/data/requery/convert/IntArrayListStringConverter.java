@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 
 /**
- * IntArrayListStringConverter
+ * ArrayList of Integer 를 String 으로 저장하는 {@link Converter} 입니다.
  *
  * @author debop@coupang.com
  * @since 18. 6. 4

@@ -3,13 +3,8 @@ package com.coupang.springframework.data.requery.domain.hierarchy
 import com.coupang.kotlinx.objectx.ToStringBuilder
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.*
+import java.util.*
 
-/**
- * AbstractNodeAttribute
- *
- * @author debop@coupang.com
- * @since 18. 5. 31
- */
 @Entity
 abstract class AbstractNodeAttribute: AbstractPersistable<Long>() {
 
@@ -31,7 +26,7 @@ abstract class AbstractNodeAttribute: AbstractPersistable<Long>() {
     abstract var node: AbstractTreeNode?
 
     override fun hashCode(): Int {
-        return name?.hashCode() ?: System.identityHashCode(this)
+        return Objects.hash(name)
     }
 
     @Transient
