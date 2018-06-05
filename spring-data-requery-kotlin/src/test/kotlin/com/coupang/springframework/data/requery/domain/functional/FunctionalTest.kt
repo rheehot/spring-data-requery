@@ -5,6 +5,7 @@ import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.core.EntityState
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPerson
+import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPersons
 import io.requery.proxy.CompositeKey
 import io.requery.proxy.PropertyState
 import kotlinx.coroutines.experimental.Unconfined
@@ -149,7 +150,7 @@ class FunctionalTest: AbstractDomainTest() {
 
     @Test
     fun `insert many people with batch`() {
-        val people = List(COUNT) { randomPerson() }
+        val people = randomPersons(COUNT)
         with(requeryKotlin) {
             // Batch 방식으로 저장한다.
             insertAll(people)

@@ -185,8 +185,9 @@ class FunctionalQueryTest: AbstractDomainTest() {
         with(requeryKotlin) {
             val people = randomPersons(COUNT)
             insertAll(people)
+            // refresh(people)
 
-            assertThat(count(FuncPerson::class).get().value()).isEqualTo(COUNT)
+            assertThat(count(FuncPerson::class).get().value()).isEqualTo(people.size)
 
             requeryKotlin.deleteAll(people)
             assertThat(count(FuncPerson::class).get().value()).isEqualTo(0)
@@ -250,7 +251,8 @@ class FunctionalQueryTest: AbstractDomainTest() {
     @Test
     fun `query select count`() {
         with(requeryKotlin) {
-            insertAll(randomPersons(10))
+            val people = randomPersons(10)
+            insertAll(people)
 
             // HINT: count 가져오기 : sql 함수를 사용하는구나 !!!
             //
@@ -259,16 +261,16 @@ class FunctionalQueryTest: AbstractDomainTest() {
             select(Count.count(FuncPerson::class.java).`as`("bb"))
                 .get()
                 .use { result ->
-                    assertThat(result.first().get<Int>("bb")).isEqualTo(10)
+                    assertThat(result.first().get<Int>("bb")).isEqualTo(people.size)
                 }
 
             select(Count.count(FuncPerson::class.java))
                 .get()
                 .use { result ->
-                    assertThat(result.first().get<Int>(0)).isEqualTo(10)
+                    assertThat(result.first().get<Int>(0)).isEqualTo(people.size)
                 }
 
-            assertThat(count(FuncPerson::class).get().value()).isEqualTo(10)
+            assertThat(count(FuncPerson::class).get().value()).isEqualTo(people.size)
 
             count(FuncPerson::class).get().consume { count ->
                 assertThat(count).isEqualTo(10)

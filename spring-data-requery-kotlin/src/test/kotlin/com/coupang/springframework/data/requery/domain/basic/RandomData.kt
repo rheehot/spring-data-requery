@@ -27,7 +27,11 @@ object RandomData {
     }
 
     fun randomUsers(count: Int): MutableSet<BasicUser> {
-        return List(count) { randomUser() }.toMutableSet()
+        val set = HashSet<BasicUser>()
+        while(set.size < count) {
+            set.add(randomUser())
+        }
+        return set
     }
 
     fun randomLocation(): BasicLocation {

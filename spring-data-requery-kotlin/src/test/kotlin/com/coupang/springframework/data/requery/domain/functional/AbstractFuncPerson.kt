@@ -70,7 +70,7 @@ abstract class AbstractFuncPerson: AbstractPersistable<Long>() {
     abstract var picture: String?
 
     override fun hashCode(): Int {
-        return hashOf(name, email)
+        return hashOf(name, email, birthday)
     }
 
     @Transient

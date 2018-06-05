@@ -128,7 +128,9 @@ class ReactiveTest: AbstractDomainTest() {
     fun `query observable`() {
 
         with(reactiveStore) {
-            insert<BasicUser>(randomUsers(30)).subscribeOn(Schedulers.io()).blockingGet()
+            val users = randomUsers(30)
+            val userCount = users.size
+            insert<BasicUser>(users).subscribeOn(Schedulers.io()).blockingGet()
 
             val rowCount = AtomicInteger()
             select(BasicUser::class).limit(50).get()
@@ -140,7 +142,7 @@ class ReactiveTest: AbstractDomainTest() {
                 }
 
             Thread.sleep(10)
-            assertThat(rowCount.get()).isEqualTo(30)
+            assertThat(rowCount.get()).isEqualTo(userCount)
         }
     }
 
@@ -299,9 +301,9 @@ class ReactiveTest: AbstractDomainTest() {
     fun `query obervable pull`() {
 
         with(reactiveStore) {
-            insert<BasicUser>(randomUsers(10)).blockingGet()
-
-            Thread.sleep(10)
+            val users = randomUsers(100)
+            val userCount = users.size
+            insert<BasicUser>(users).blockingGet()
 
             val loadedUsers = mutableListOf<BasicUser>()
             lateinit var subscription: Subscription
@@ -325,7 +327,7 @@ class ReactiveTest: AbstractDomainTest() {
                     }
                 )
 
-            assertThat(loadedUsers.size).isEqualTo(10)
+            assertThat(loadedUsers.size).isEqualTo(userCount)
         }
     }
 }

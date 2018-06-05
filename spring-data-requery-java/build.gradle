@@ -34,7 +34,6 @@ idea {
     }
 }
 
-
 dependencies {
 
     compile "com.coupang.kotlinx:kotlinx-data-requery"
@@ -50,7 +49,7 @@ dependencies {
     annotationProcessor "io.requery:requery-processor"
     testAnnotationProcessor "io.requery:requery-processor"
 
-    implementation "org.jetbrains:annotations:16.0.2"
+    implementation "org.jetbrains:annotations"
 
     implementation "javax.inject:javax.inject:1"
     implementation "javax.cache:cache-api"

@@ -14,8 +14,8 @@ object RandomData {
 
     private val rnd = Random(System.currentTimeMillis())
 
-    private val firstNames = arrayOf("Alice", "Bob", "Carol")
-    private val lastNames = arrayOf("Smith", "Lee", "Jones")
+    private val firstNames = arrayOf("Alice", "Bob", "Carol", "Debop", "Erik")
+    private val lastNames = arrayOf("Smith", "Lee", "Jones", "Bae", "Kim")
 
     fun randomPerson(): FuncPerson {
         return FuncPerson().apply {

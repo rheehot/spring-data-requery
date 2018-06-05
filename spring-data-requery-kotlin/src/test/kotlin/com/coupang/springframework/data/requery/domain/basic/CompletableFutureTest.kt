@@ -108,12 +108,10 @@ class CompletableFutureTest: AbstractDomainTest() {
 
     @Test
     fun `query stream`() {
-        val users = randomUsers(10)
+        val users = randomUsers(100)
 
         with(asyncEntityStore) {
             insert<BasicUser>(users).join()
-
-            Thread.sleep(10)
 
             val loadedUsers =
                 select(BasicUser::class)
@@ -123,7 +121,7 @@ class CompletableFutureTest: AbstractDomainTest() {
                     .stream()
                     .map { user -> user }
 
-            assertThat(loadedUsers.count()).isEqualTo(10)
+            assertThat(loadedUsers.count()).isEqualTo(100L)
         }
     }
 }
