@@ -8,12 +8,6 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * com.coupang.springframework.data.requery.java.domain.basic.BasicEntityTest
- *
- * @author debop
- * @since 18. 6. 4
- */
 public class BasicEntityTest extends AbstractDomainTest {
 
     @Before

@@ -1,15 +1,17 @@
 package com.coupang.springframework.data.requery.java.cache;
 
 import com.coupang.springframework.data.requery.java.domain.AbstractDomainTest;
-import com.coupang.springframework.data.requery.java.domain.Models;
 import com.coupang.springframework.data.requery.java.domain.basic.BasicUser;
 import io.requery.EntityCache;
 import io.requery.cache.EntityCacheBuilder;
+import io.requery.meta.EntityModel;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
+import javax.inject.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,17 +23,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class EntityCacheTest extends AbstractDomainTest {
 
-    private static final EntityCache cache = getCache();
+    @Inject
+    EntityModel entityModel;
 
-    private static EntityCache getCache() {
+    private EntityCache cache;
+
+    private EntityCache getCache(EntityModel entityModel) {
         CachingProvider provider = Caching.getCachingProvider();
         CacheManager cacheManager = provider.getCacheManager();
 
-        return new EntityCacheBuilder(Models.DEFAULT)
+        return new EntityCacheBuilder(entityModel)
             .useReferenceCache(false)
             .useSerializableCache(true)
             .useCacheManager(cacheManager)
             .build();
+    }
+
+    @Before
+    public void setup() {
+        if (cache == null) {
+            cache = getCache(entityModel);
+        }
     }
 
     @Test

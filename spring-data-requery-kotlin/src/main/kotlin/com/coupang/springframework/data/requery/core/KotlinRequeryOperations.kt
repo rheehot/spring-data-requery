@@ -106,7 +106,7 @@ interface KotlinRequeryOperations {
     fun raw(query: String, vararg parameters: Any): Result<Tuple> =
         dataStore.raw(query, *parameters)
 
-    fun <T: Any> raw(entityType: KClass<T>, query: String, vararg parameters: Any) =
+    fun <T: Any> raw(entityType: KClass<T>, query: String, vararg parameters: Any): Result<T> =
         dataStore.raw(entityType, query, *parameters)
 
     fun <T: Any> withTransaction(block: KotlinRequeryOperations.() -> T): T =

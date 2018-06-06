@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.java.domain;
 
+import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.core.RequeryTemplate;
 import com.coupang.springframework.data.requery.java.configs.RequeryTestConfiguration;
 import io.requery.sql.EntityDataStore;
@@ -28,5 +29,5 @@ public abstract class AbstractDomainTest {
     protected EntityDataStore dataStore;
 
     @Inject
-    protected RequeryTemplate requeryTemplate;
+    protected RequeryOperations requeryTemplate;
 }

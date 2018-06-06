@@ -53,7 +53,7 @@ public class AbstractPerson extends AbstractPersistable<Long> {
     @OneToMany(mappedBy = "owner", cascade = { CascadeAction.DELETE, CascadeAction.SAVE })
     protected MutableResult<AbstractPhone> phoneNumbers;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany
     protected Set<AbstractPhone> phoneNumberSet;
 
     @OneToMany
@@ -62,7 +62,7 @@ public class AbstractPerson extends AbstractPersistable<Long> {
     @ManyToMany(mappedBy = "members")
     protected MutableResult<AbstractGroup> groups;
 
-    @JunctionTable
+    @JunctionTable(name = "Person_Friends")
     @ManyToMany(mappedBy = "personId")
     protected Set<AbstractPerson> friends;
 

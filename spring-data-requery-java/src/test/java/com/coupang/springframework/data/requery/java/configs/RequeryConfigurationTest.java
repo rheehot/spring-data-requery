@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.java.configs;
 
 import com.coupang.springframework.data.requery.core.RequeryTemplate;
+import io.requery.meta.EntityModel;
 import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -28,6 +29,15 @@ public class RequeryConfigurationTest {
 
     @Inject
     RequeryTemplate requeryTemplate;
+
+    @Inject
+    EntityModel entityModel;
+
+    @Test
+    public void loadEntityModel() {
+        log.info("EntityMode={}", entityModel);
+        assertThat(entityModel).isNotNull();
+    }
 
     @Test
     public void contextLoading() {

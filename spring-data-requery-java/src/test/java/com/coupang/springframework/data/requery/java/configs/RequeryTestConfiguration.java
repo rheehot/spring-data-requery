@@ -11,16 +11,11 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 
-/**
- * RequeryTestConfiguration
- *
- * @author debop@coupang.com
- * @since 18. 6. 4
- */
 @Configuration
 public class RequeryTestConfiguration extends AbstractRequeryConfiguration {
 
     @Override
+    @Bean
     public EntityModel getEntityModel() {
         return Models.DEFAULT;
     }

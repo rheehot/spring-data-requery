@@ -6,10 +6,7 @@ import com.coupang.springframework.data.requery.java.domain.basic.BasicUser;
 
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * RandomData
@@ -41,9 +38,9 @@ public class RandomData {
         }
     }
 
-    public static List<BasicUser> randomUsers(int count) {
-        ArrayList<BasicUser> users = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
+    public static Set<BasicUser> randomUsers(int count) {
+        Set<BasicUser> users = new HashSet<>();
+        while (users.size() < count) {
             users.add(randomUser());
         }
         return users;

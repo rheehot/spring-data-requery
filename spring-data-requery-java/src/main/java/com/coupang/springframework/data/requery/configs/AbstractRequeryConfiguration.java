@@ -38,6 +38,7 @@ public abstract class AbstractRequeryConfiguration {
     /**
      * Requery용 EntityModel 을 지정해주셔야 합니다. 기본적으로 Models.DEFAULT 를 지정해주시면 됩니다.
      */
+    @Bean
     abstract public EntityModel getEntityModel();
 
     /**

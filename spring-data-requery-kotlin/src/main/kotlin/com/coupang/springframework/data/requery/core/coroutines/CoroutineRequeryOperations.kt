@@ -1,12 +1,15 @@
 package com.coupang.springframework.data.requery.core.coroutines
 
-import com.coupang.springframework.data.requery.core.RequeryOperations
-import io.requery.Persistable
+import com.coupang.springframework.data.requery.core.KotlinRequeryOperations
 import io.requery.TransactionIsolation
+import io.requery.kotlin.*
 import io.requery.meta.Attribute
-import io.requery.meta.QueryAttribute
-import io.requery.query.*
-import io.requery.sql.EntityDataStore
+import io.requery.query.Expression
+import io.requery.query.Result
+import io.requery.query.Scalar
+import io.requery.query.Tuple
+import io.requery.sql.KotlinEntityDataStore
+import kotlin.reflect.KClass
 
 /**
  * com.coupang.springframework.data.requery.core.coroutines.CoroutineRequeryOperations
@@ -15,63 +18,102 @@ import io.requery.sql.EntityDataStore
  */
 interface CoroutineRequeryOperations {
 
-    val dataStore: EntityDataStore<Persistable>
+    val dataStore: KotlinEntityDataStore<Any>
 
-    fun <T: Persistable> select(entityType: Class<T>): Selection<out Result<T>>
+    suspend fun <T: Any> select(entityType: KClass<T>): Selection<out Result<T>> =
+        dataStore.select(entityType)
 
-    fun <T: Persistable> select(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): Selection<out Result<T>>
+    suspend fun <T: Any> select(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): Selection<out Result<T>> =
+        dataStore.select(entityType, *attributes)
 
-    fun select(vararg expressions: Expression<*>): Selection<out Result<Tuple>>
+    suspend fun select(vararg expressions: Expression<*>): Selection<Result<Tuple>> =
+        dataStore.select(*expressions)
 
-    fun <T: Persistable, ID> findById(entityType: Class<T>, id: ID): T?
+    suspend fun <T: Any, ID> findById(entityType: KClass<T>, id: ID): T? =
+        dataStore.findByKey(entityType, id)
 
-    fun <T: Persistable> findAll(entityType: Class<T>): Iterable<T>
+    suspend fun <T: Any> findAll(entityType: KClass<T>): Iterable<T> =
+        dataStore.select(entityType).get().toList()
 
-    fun <T: Persistable> refresh(entity: T): T
+    suspend fun <T: Any> refresh(entity: T): T =
+        dataStore.refresh(entity)
 
-    fun <T: Persistable> refresh(entity: T, vararg attributes: Attribute<*, *>): T
+    suspend fun <T: Any> refresh(entity: T, vararg attributes: Attribute<*, *>): T =
+        dataStore.refresh(entity, *attributes)
 
-    fun <T: Persistable> refresh(entities: Iterable<T>, vararg attributes: Attribute<*, *>): Iterable<T>
+    suspend fun <T: Any> refresh(entities: Iterable<T>, vararg attributes: Attribute<*, *>): Iterable<T> =
+        dataStore.refresh<T>(entities, *attributes)
 
-    fun <T: Persistable> refreshAll(entity: T): T
+    suspend fun <T: Any> refreshAll(entity: T): T =
+        dataStore.refreshAll(entity)
 
-    fun <T: Persistable> save(entity: T): T
+    suspend fun <T: Any> refreshAll(entities: Iterable<T>): Iterable<T> =
+        entities.map { dataStore.refreshAll(it) }
 
-    fun <T: Persistable> saveAll(entities: Iterable<T>): Iterable<T>
+    suspend fun <T: Any> upsert(entity: T): T =
+        dataStore.upsert(entity)
 
-    fun <T: Persistable> upsert(entity: T): T
+    suspend fun <T: Any> upsertAll(entities: Iterable<T>): Iterable<T> =
+        dataStore.upsert<T>(entities)
 
-    fun <T: Persistable> upsertAll(entities: Iterable<T>): Iterable<T>
+    suspend fun <T: Any> insert(entity: T): T =
+        dataStore.insert(entity)
 
-    fun <T: Persistable> insert(entity: T): T
+    suspend fun <T: Any> insert(entityType: KClass<T>): Insertion<Result<Tuple>> =
+        dataStore.insert<T>(entityType)
 
-    fun <T: Persistable> insertAll(entities: Iterable<T>): Iterable<T>
+    suspend fun <T: Any> insert(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): InsertInto<out Result<Tuple>> =
+        dataStore.insert(entityType, *attributes)
 
-    fun <T: Persistable> insertInto(entityType: Class<T>): Insertion<out Result<Tuple>>
+    suspend fun <T: Any> insertAll(entities: Iterable<T>): Iterable<T> =
+        dataStore.insert<T>(entities)
 
-    fun <T: Persistable> insertInto(entityType: Class<T>, vararg attributes: QueryAttribute<T, *>): InsertInto<out Result<Tuple>>
+    suspend fun <T: Any, K: Any> insertAll(entities: Iterable<T>, keyClass: KClass<K>): Iterable<K> =
+        dataStore.insert<K, T>(entities, keyClass)
 
-    fun <T: Persistable> update(entityType: Class<T>): Update<out Scalar<Int>>
+    suspend fun <T: Any> update(): Update<Scalar<Int>> =
+        dataStore.update()
 
-    fun <T: Persistable> update(entity: T): T
+    suspend fun <T: Any> update(entity: T): T =
+        dataStore.update(entity)
 
-    fun <T: Persistable> updateAll(entities: Iterable<T>): Iterable<T>
+    suspend fun <T: Any> update(entityType: KClass<T>): Update<Scalar<Int>> =
+        dataStore.update<T>(entityType)
 
-    fun <T: Persistable> delete(entity: T)
+    suspend fun <T: Any> updateAll(entities: Iterable<T>): Iterable<T> =
+        dataStore.update<T>(entities)
 
-    fun <T: Persistable> deleteAll(entities: Iterable<T>)
+    suspend fun delete(): Deletion<Scalar<Int>> =
+        dataStore.delete()
 
-    fun <T: Persistable> deleteAll(entityType: Class<T>): Long
+    suspend fun <T: Any> delete(entity: T) {
+        dataStore.delete(entity)
+    }
 
-    fun <T: Persistable> count(entityType: Class<T>): Selection<out Scalar<Int>>
+    suspend fun <T: Any> delete(entityType: KClass<T>): Deletion<Scalar<Int>> =
+        dataStore.delete<T>(entityType)
 
-    fun raw(query: String, vararg parameters: Any?): Result<out Tuple>
+    suspend fun <T: Any> deleteAll(entities: Iterable<T>) {
+        dataStore.delete<T>(entities)
+    }
 
-    fun <T: Persistable> raw(entityType: Class<T>, query: String, vararg parameters: Any?): Result<out T>
+    suspend fun <T: Any> deleteAll(entityType: KClass<T>): Long =
+        dataStore.delete<T>(entityType).get().value().toLong()
 
-    fun <T> runInTransaction(block: RequeryOperations.() -> T): T
+    suspend fun <T: Any> count(entityType: KClass<T>): Selection<Scalar<Int>> =
+        dataStore.count(entityType)
 
-    fun <T> runInTransaction(isolation: TransactionIsolation, block: RequeryOperations.() -> T): T
+    suspend fun raw(query: String, vararg parameters: Any): Result<Tuple> =
+        dataStore.raw(query, *parameters)
 
-    fun <T> withDataStore(block: EntityDataStore<Persistable>.() -> T): T
+    suspend fun <T: Any> raw(entityType: KClass<T>, query: String, vararg parameters: Any): Result<T> =
+        dataStore.raw(entityType, query, *parameters)
+
+    suspend fun <T: Any> withTransaction(block: KotlinRequeryOperations.() -> T): T =
+        withTransaction(null, block)
+
+    suspend fun <T: Any> withTransaction(isolation: TransactionIsolation?, block: KotlinRequeryOperations.() -> T): T
+
+    suspend fun <T: Any> withDataStore(block: KotlinEntityDataStore<Any>.() -> T): T
+
 }

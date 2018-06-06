@@ -27,6 +27,10 @@ public class BinaryDataTest extends AbstractDomainTest {
 
         BinaryData loaded = requeryTemplate.findById(BinaryData.class, binData.id);
         assertThat(loaded).isNotNull().isEqualTo(binData);
-        assertThat(loaded.getPicture()).isEqualTo(binData.getPicture());
+        assertThat(loaded.getPicture()).isNotNull().isEqualTo(binData.getPicture());
+
+        rnd.nextBytes(bytes);
+        loaded.setPicture(bytes);
+        requeryTemplate.upsert(loaded);
     }
 }

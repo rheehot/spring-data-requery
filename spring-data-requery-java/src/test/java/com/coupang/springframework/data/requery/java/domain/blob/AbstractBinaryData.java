@@ -17,7 +17,7 @@ import java.util.Objects;
  */
 @Getter
 @Entity
-public class AbstractBinaryData extends AbstractPersistable<Long> {
+public abstract class AbstractBinaryData extends AbstractPersistable<Long> {
 
     private static final long serialVersionUID = -3776835149818493670L;
 

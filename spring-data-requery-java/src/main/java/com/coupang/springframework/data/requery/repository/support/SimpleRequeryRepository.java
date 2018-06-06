@@ -2,6 +2,8 @@ package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
+import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +22,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> 
     private final RequeryOperations operations;
     private final Class<T> domainType;
 
-    public SimpleRequeryRepository(RequeryOperations operations, Class<T> domainType) {
+    public SimpleRequeryRepository(@NotNull RequeryOperations operations, @NotNull Class<T> domainType) {
         this.operations = operations;
         this.domainType = domainType;
     }
@@ -50,44 +52,51 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> 
         return operations.findById(domainType, id);
     }
 
+    @NotNull
     @Override
-    public Iterable<T> findAll(Sort sort) {
-        return null;
+    public Iterable<T> findAll(@NotNull Sort sort) {
+        throw new NotImplementedException("구현 중");
     }
 
+    @NotNull
     @Override
-    public Page<T> findAll(Pageable pageable) {
-        return null;
+    public Page<T> findAll(@NotNull Pageable pageable) {
+        throw new NotImplementedException("구현 중");
     }
 
+    @NotNull
     @Override
-    public <S extends T> S save(S entity) {
+    public <S extends T> S save(@NotNull S entity) {
         return operations.upsert(entity);
     }
 
+    @NotNull
     @Override
-    public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
+    public <S extends T> Iterable<S> saveAll(@NotNull Iterable<S> entities) {
         return operations.upsertAll(entities);
     }
 
+    @NotNull
     @Override
-    public Optional<T> findById(ID id) {
-        return Optional.empty();
+    public Optional<T> findById(@NotNull ID id) {
+        return Optional.ofNullable(operations.findById(domainType, id));
     }
 
     @Override
-    public boolean existsById(ID id) {
-        return findById(id) != null;
+    public boolean existsById(@NotNull ID id) {
+        return findById(id).isPresent();
     }
 
+    @NotNull
     @Override
     public Iterable<T> findAll() {
         return operations.findAll(domainType);
     }
 
+    @NotNull
     @Override
-    public Iterable<T> findAllById(Iterable<ID> ids) {
-        return null;
+    public Iterable<T> findAllById(@NotNull Iterable<ID> ids) {
+        throw new NotImplementedException("구현 중");
     }
 
     @Override
@@ -96,17 +105,17 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> 
     }
 
     @Override
-    public void deleteById(ID id) {
+    public void deleteById(@NotNull ID id) {
         findById(id).ifPresent(this::delete);
     }
 
     @Override
-    public void delete(T entity) {
+    public void delete(@NotNull T entity) {
         operations.delete(entity);
     }
 
     @Override
-    public void deleteAll(Iterable<? extends T> entities) {
+    public void deleteAll(@NotNull Iterable<? extends T> entities) {
         operations.deleteAll(entities);
     }
 
@@ -115,33 +124,38 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> 
         operations.delete(domainType).get().value();
     }
 
+    @NotNull
     @Override
-    public <S extends T> Optional<S> findOne(Example<S> example) {
-        return Optional.empty();
+    public <S extends T> Optional<S> findOne(@NotNull Example<S> example) {
+        throw new NotImplementedException("구현 중");
+    }
+
+    @NotNull
+    @Override
+    public <S extends T> Iterable<S> findAll(@NotNull Example<S> example) {
+        throw new NotImplementedException("구현 중");
+    }
+
+    @NotNull
+    @Override
+    public <S extends T> Iterable<S> findAll(@NotNull Example<S> example, @NotNull Sort sort) {
+        throw new NotImplementedException("구현 중");
+    }
+
+
+    @NotNull
+    @Override
+    public <S extends T> Page<S> findAll(@NotNull Example<S> example, @NotNull Pageable pageable) {
+        throw new NotImplementedException("구현 중");
     }
 
     @Override
-    public <S extends T> Iterable<S> findAll(Example<S> example) {
-        return null;
+    public <S extends T> long count(@NotNull Example<S> example) {
+        throw new NotImplementedException("구현 중");
     }
 
     @Override
-    public <S extends T> Iterable<S> findAll(Example<S> example, Sort sort) {
-        return null;
-    }
-
-    @Override
-    public <S extends T> Page<S> findAll(Example<S> example, Pageable pageable) {
-        return null;
-    }
-
-    @Override
-    public <S extends T> long count(Example<S> example) {
-        return 0;
-    }
-
-    @Override
-    public <S extends T> boolean exists(Example<S> example) {
-        return false;
+    public <S extends T> boolean exists(@NotNull Example<S> example) {
+        throw new NotImplementedException("구현 중");
     }
 }
