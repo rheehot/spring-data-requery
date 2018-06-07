@@ -57,6 +57,7 @@ public class RequeryRepositoryConfigExtension extends RepositoryConfigurationExt
         return Collections.singleton(RequeryRepository.class);
     }
 
+
     @Override
     public void postProcess(BeanDefinitionBuilder builder, RepositoryConfigurationSource source) {
         Optional<String> transactionManagerRef = source.getAttribute("transactionManagerRef");
