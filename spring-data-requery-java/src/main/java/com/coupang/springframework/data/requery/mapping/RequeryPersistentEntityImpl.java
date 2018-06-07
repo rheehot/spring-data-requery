@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.mapping;
 
 import com.coupang.springframework.data.requery.provider.ProxyIdAccessor;
+import io.requery.Version;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.mapping.IdentifierAccessor;
 import org.springframework.data.mapping.PersistentEntity;
@@ -10,7 +11,7 @@ import org.springframework.data.util.TypeInformation;
 import org.springframework.util.Assert;
 
 /**
- * com.coupang.springframework.data.requery.mapping.RequeryPersistentEntityImpl
+ * Implementation of {@link RequeryPersistentEntity}.
  *
  * @author debop
  * @since 18. 6. 7
@@ -42,17 +43,32 @@ public class RequeryPersistentEntityImpl<T>
         return new RequeryProxyAwareIdentifierAccessor(this, bean, proxyIdAccessor);
     }
 
+    @Override
+    public void verify() {
+        super.verify();
+
+        RequeryPersistentProperty versionProperty = getVersionProperty();
+
+        if (versionProperty != null && versionProperty.isAnnotationPresent(Version.class)) {
+            throw new IllegalArgumentException(String.format(INVALID_VERSION_ANNOTATION, versionProperty));
+        }
+    }
+
+
+    /**
+     * {@link IdentifierAccessor} that tries to use a {@link ProxyIdAccessor} for id access to potentially avoid the
+     * initialization of JPA proxies. We're falling back to the default behavior of {@link IdPropertyIdentifierAccessor}
+     * if that's not possible.
+     */
     private static class RequeryProxyAwareIdentifierAccessor extends IdPropertyIdentifierAccessor {
 
         private final Object bean;
         private final ProxyIdAccessor proxyIdAccessor;
 
         /**
-         * Creates a new {@link IdPropertyIdentifierAccessor} for the given {@link PersistentEntity} and
-         * {@link ConvertingPropertyAccessor}.
+         * Creates a new {@link IdPropertyIdentifierAccessor} for the given {@link PersistentEntity}.
          *
          * @param entity must not be {@literal null}.
-         * @param target must not be {@literal null}.
          */
         public RequeryProxyAwareIdentifierAccessor(PersistentEntity<?, ?> entity, Object bean, ProxyIdAccessor proxyIdAccessor) {
             super(entity, bean);

@@ -3,6 +3,7 @@ package com.coupang.springframework.data.requery.repository.support;
 import com.coupang.springframework.data.requery.repository.RequeryContext;
 import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
 import io.requery.sql.EntityDataStore;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -17,6 +18,7 @@ import java.util.Set;
  * @author debop@coupang.com
  * @since 18. 6. 7
  */
+@Slf4j
 public class DefaultRequeryContext implements RequeryContext {
 
     private final MultiValueMap<Class<?>, EntityDataStore> entityDataStores;
@@ -33,9 +35,10 @@ public class DefaultRequeryContext implements RequeryContext {
         }
     }
 
-
+    @SuppressWarnings("unchecked")
     @Override
     public EntityDataStore getEntityDataStoreByManagedType(@NotNull Class<?> managedType) {
+
         if (!entityDataStores.containsKey(managedType)) {
             throw new IllegalArgumentException(managedType + " is not a managed type!");
         }
