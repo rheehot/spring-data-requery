@@ -1,23 +1,33 @@
 package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
-import com.coupang.springframework.data.requery.repository.RequeryRepository;
+import io.requery.query.WhereAndOr;
+import io.requery.sql.EntityDataStore;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- * SimpleRequeryRepository
+ * Default implementation of the {@link org.springframework.data.repository.CrudRepository} interface.
+ * This will offer you a more sophisticated interface than the plain {@link EntityDataStore}.
  *
  * @author debop@coupang.com
  * @since 18. 6. 4
  */
-public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> {
+@Slf4j
+@Repository
+@Transactional(readOnly = true)
+public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplementation<T, ID> {
 
     private final RequeryOperations operations;
     private final Class<T> domainType;
@@ -157,5 +167,35 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepository<T, ID> 
     @Override
     public <S extends T> boolean exists(@NotNull Example<S> example) {
         throw new NotImplementedException("구현 중");
+    }
+
+    @Override
+    public void setRepositoryMethodMetadata(CrudMethodMetadata crudMethodMetadata) {
+
+    }
+
+    @Override
+    public Optional<T> findOne(@Nullable WhereAndOr<T> predicate) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<T> findAll(@Nullable WhereAndOr<T> predicate) {
+        return null;
+    }
+
+    @Override
+    public Page<T> findAll(@Nullable WhereAndOr<T> predicate, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public List<T> findAll(@Nullable WhereAndOr<T> predicate, Sort sort) {
+        return null;
+    }
+
+    @Override
+    public long count(@Nullable WhereAndOr<T> predicate) {
+        return 0;
     }
 }
