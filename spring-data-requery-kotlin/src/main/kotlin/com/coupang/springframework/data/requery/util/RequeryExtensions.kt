@@ -32,7 +32,7 @@ fun <T> Sort.toRequeryOrder(entityType: Class<T>): Array<OrderingExpression<T>> 
 fun <E> Selection<out Result<E>>.paging(entityType: Class<E>, pageable: Pageable): Return<out Result<E>> {
 
     val ordering = pageable.sort.toRequeryOrder(entityType)
-    val offset = pageable.pageNumber * pageable.pageSize
+    val offset = pageable.offset.toInt()
     val limit = pageable.pageSize
 
     return orderBy(*ordering)

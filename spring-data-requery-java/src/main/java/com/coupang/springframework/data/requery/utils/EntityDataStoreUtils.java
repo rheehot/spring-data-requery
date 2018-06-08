@@ -3,6 +3,7 @@ package com.coupang.springframework.data.requery.utils;
 import io.requery.meta.Attribute;
 import io.requery.meta.EntityModel;
 import io.requery.meta.Type;
+import io.requery.sql.EntityContext;
 import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,20 @@ public final class EntityDataStoreUtils {
 
     private EntityDataStoreUtils() {}
 
-    @Nullable
+    @NotNull
+    public static <T> EntityContext getEntityContext(@NotNull EntityDataStore entityDataStore) {
+        try {
+            Field f = entityDataStore.getClass().getDeclaredField("context");
+            f.setAccessible(true);
+            EntityContext entityContext = (EntityContext) f.get(entityDataStore);
+            log.debug("Get EntityContext. entityContext={}", entityContext);
+            return entityContext;
+        } catch (Exception e) {
+            throw new IllegalStateException("Fail to retrieve EntityContext.");
+        }
+    }
+
+    @NotNull
     public static EntityModel getEntityModel(@NotNull EntityDataStore entityDataStore) {
         try {
             Field f = entityDataStore.getClass().getDeclaredField("entityModel");
@@ -35,8 +49,7 @@ public final class EntityDataStoreUtils {
             log.debug("Get EntityModel. entityModel name={}", entityModel.getName());
             return entityModel;
         } catch (Exception e) {
-            log.warn("Fail to retrive entity model.", e);
-            return null;
+            throw new IllegalStateException("Fail to retrieve entity model.");
         }
     }
 

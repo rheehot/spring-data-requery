@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.Modifying;
+import com.coupang.springframework.data.requery.annotation.QueryOptions;
 import com.coupang.springframework.data.requery.provider.QueryExtractor;
 import com.coupang.springframework.data.requery.repository.Query;
 import com.coupang.springframework.data.requery.repository.QueryHints;
@@ -145,5 +146,24 @@ public class RequeryQueryMethod extends QueryMethod {
     @Override
     public boolean isCollectionQuery() {
         return super.isCollectionQuery() && !NATIVE_ARRAY_TYPES.contains(method.getReturnType());
+    }
+
+
+    public RequeryQueryOptions getAnnotatedQueryOptions() {
+        final QueryOptions queryOptions = getQueryOptionsAnnotation();
+        if (queryOptions == null) {
+            return null;
+        }
+
+        final RequeryQueryOptions options = new RequeryQueryOptions();
+        options.setCache(queryOptions.cache());
+        options.setCount(queryOptions.count());
+        options.setFullCount(queryOptions.fullCount());
+
+        return options;
+    }
+
+    public QueryOptions getQueryOptionsAnnotation() {
+        return AnnotatedElementUtils.findMergedAnnotation(method, QueryOptions.class);
     }
 }

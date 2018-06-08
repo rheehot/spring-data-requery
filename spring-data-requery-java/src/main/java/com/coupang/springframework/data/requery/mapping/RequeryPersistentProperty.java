@@ -10,6 +10,12 @@ import org.springframework.data.mapping.PersistentProperty;
  */
 public interface RequeryPersistentProperty extends PersistentProperty<RequeryPersistentProperty> {
 
+    boolean isIdProperty();
+
     boolean isEmbedded();
+
+    boolean hasIndex();
+
+    String getFieldName();
 
 }
