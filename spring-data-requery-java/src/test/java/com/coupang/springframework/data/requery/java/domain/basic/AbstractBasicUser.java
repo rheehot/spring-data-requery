@@ -20,7 +20,7 @@ import static com.coupang.kotlinx.core.HashxKt.hashOf;
  * @since 18. 6. 4
  */
 @Getter
-@Entity(copyable = true)
+@Entity(name = "BasicUser", copyable = true)
 @Table(name = "basic_user")
 public abstract class AbstractBasicUser extends AuditableLongEntity {
 

@@ -12,6 +12,10 @@ public interface RequeryPersistentProperty extends PersistentProperty<RequeryPer
 
     boolean isIdProperty();
 
+    boolean isTransient();
+
+    boolean isAssociation();
+
     boolean isEmbedded();
 
     boolean hasIndex();

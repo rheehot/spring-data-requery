@@ -53,6 +53,24 @@ public class DefaultRequeryPersistentProperty
     }
 
     @Override
+    public boolean isAssociation() {
+        return findAnnotation(io.requery.OneToOne.class) != null ||
+               findAnnotation(io.requery.OneToMany.class) != null ||
+               findAnnotation(io.requery.ManyToOne.class) != null ||
+               findAnnotation(io.requery.ManyToMany.class) != null;
+    }
+
+    @Override
+    public boolean isTransient() {
+        return findAnnotation(io.requery.Transient.class) != null;
+    }
+
+    @Override
+    public boolean isVersionProperty() {
+        return findAnnotation(io.requery.Version.class) != null;
+    }
+
+    @Override
     public String getFieldName() {
         final String fieldName;
         if (isIdProperty()) {

@@ -3,6 +3,7 @@ package com.coupang.springframework.data.requery.repository.query;
 import io.requery.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -16,6 +17,7 @@ public class DefaultRequeryEntityMetadata<T> implements RequeryEntityMetadata<T>
     private final Class<T> domainType;
 
     public DefaultRequeryEntityMetadata(@NotNull Class<T> domainType) {
+        Assert.notNull(domainType, "domainType must not be null!");
         this.domainType = domainType;
     }
 

@@ -50,6 +50,7 @@ dependencies {
     testAnnotationProcessor "io.requery:requery-processor"
 
     implementation "org.jetbrains:annotations"
+    implementation "com.google.code.findbugs:jsr305"
 
     implementation "javax.inject:javax.inject:1"
     implementation "javax.cache:cache-api"
