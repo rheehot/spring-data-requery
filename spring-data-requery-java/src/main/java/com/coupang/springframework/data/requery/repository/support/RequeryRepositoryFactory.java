@@ -1,12 +1,19 @@
 package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import com.coupang.springframework.data.requery.provider.QueryExtractor;
+import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
+import com.coupang.springframework.data.requery.repository.query.RequeryQueryLookupStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+import org.springframework.data.repository.query.EvaluationContextProvider;
+import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.util.Assert;
+
+import java.util.Optional;
 
 /**
  * RequeryRepositoryFactory
@@ -17,15 +24,17 @@ import org.springframework.util.Assert;
 @Slf4j
 public class RequeryRepositoryFactory extends RepositoryFactorySupport {
 
-    private final RequeryOperations requeryOperations;
+    private final RequeryOperations operations;
+    private final QueryExtractor extractor;
     private final CrudMethodMetadataPostProcessor crudMethodMetadataPostProcessor;
 
-    public RequeryRepositoryFactory(RequeryOperations requeryOperations) {
-        Assert.notNull(requeryOperations, "requeryOperations must not be null!");
+    public RequeryRepositoryFactory(RequeryOperations operations) {
+        Assert.notNull(operations, "operations must not be null!");
         log.info("Create RequeryRepositoryFactory");
 
+        this.operations = operations;
+        this.extractor = new RequeryPersistenceProvider(operations);
         this.crudMethodMetadataPostProcessor = new CrudMethodMetadataPostProcessor();
-        this.requeryOperations = requeryOperations;
     }
 
     @Override
@@ -37,7 +46,7 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
     @Override
     protected final RequeryRepositoryImplementation<?, ?> getTargetRepository(RepositoryInformation metadata) {
 
-        RequeryRepositoryImplementation<?, ?> repository = getTargetRepository(metadata, requeryOperations);
+        RequeryRepositoryImplementation<?, ?> repository = getTargetRepository(metadata, operations);
         repository.setRepositoryMethodMetadata(crudMethodMetadataPostProcessor.getCrudMethodMetadata());
 
         Assert.isInstanceOf(RequeryRepositoryImplementation.class, repository);
@@ -45,17 +54,37 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
         return repository;
     }
 
-    protected SimpleRequeryRepository<?, ?> getTargetRepository(@NotNull RepositoryInformation information,
-                                                                RequeryOperations operations) {
-        return new SimpleRequeryRepository(requeryOperations, information.getDomainType());
+    protected RequeryRepositoryImplementation<?, ?> getTargetRepository(RepositoryInformation information,
+                                                                        RequeryOperations operations) {
+
+        RequeryEntityInformation<?, ?> entityInformation = getEntityInformation(information.getDomainType());
+
+        Object repository = getTargetRepositoryViaReflection(information, entityInformation, operations);
+
+        Assert.isInstanceOf(RequeryRepositoryImplementation.class, repository);
+
+        return (RequeryRepositoryImplementation<?, ?>) repository;
+
+        // return new SimpleRequeryRepository(operations, entityInformation);
     }
 
+    @NotNull
     @Override
-    protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
+    protected Class<?> getRepositoryBaseClass(@NotNull RepositoryMetadata metadata) {
         return SimpleRequeryRepository.class;
     }
 
+    @Override
+    protected Optional<QueryLookupStrategy> getQueryLookupStrategy(QueryLookupStrategy.Key key,
+                                                                   EvaluationContextProvider evaluationContextProvider) {
+
+        return Optional.of(RequeryQueryLookupStrategy.create(operations, key, extractor, evaluationContextProvider));
+        // return super.getQueryLookupStrategy(key, evaluationContextProvider);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public <T, ID> RequeryEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
-        return (RequeryEntityInformation<T, ID>) RequeryEntityInformationSupport.getEntityInformation(domainClass, requeryOperations);
+        return (RequeryEntityInformation<T, ID>) RequeryEntityInformationSupport.getEntityInformation(domainClass, operations);
     }
 }

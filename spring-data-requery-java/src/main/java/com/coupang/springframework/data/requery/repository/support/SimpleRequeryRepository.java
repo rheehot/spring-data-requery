@@ -30,11 +30,13 @@ import java.util.Optional;
 public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplementation<T, ID> {
 
     private final RequeryOperations operations;
+    private final RequeryEntityInformation<T, ID> entityInformation;
     private final Class<T> domainType;
 
-    public SimpleRequeryRepository(@NotNull RequeryOperations operations, @NotNull Class<T> domainType) {
+    public SimpleRequeryRepository(@NotNull RequeryEntityInformation<T, ID> entityInformation, @NotNull RequeryOperations operations) {
+        this.entityInformation = entityInformation;
+        this.domainType = entityInformation.getJavaType();
         this.operations = operations;
-        this.domainType = domainType;
     }
 
     @Override
