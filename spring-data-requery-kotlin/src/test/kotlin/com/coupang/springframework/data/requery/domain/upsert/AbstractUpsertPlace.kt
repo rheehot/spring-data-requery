@@ -4,6 +4,7 @@ import com.coupang.kotlinx.core.hashOf
 import com.coupang.kotlinx.objectx.ToStringBuilder
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.*
+import io.requery.query.MutableResult
 
 
 @Entity
@@ -16,12 +17,7 @@ abstract class AbstractUpsertPlace: AbstractPersistable<String>() {
     abstract var name: String
 
     @get:OneToMany(mappedBy = "place", cascade = [CascadeAction.SAVE])
-    abstract val events: MutableSet<AbstractUpsertEvent>
-
-    fun addEvent(event: AbstractUpsertEvent) {
-        this.events.add(event)
-        event.place = this
-    }
+    abstract val events: MutableResult<AbstractUpsertEvent>
 
     override fun hashCode(): Int {
         return hashOf(name)

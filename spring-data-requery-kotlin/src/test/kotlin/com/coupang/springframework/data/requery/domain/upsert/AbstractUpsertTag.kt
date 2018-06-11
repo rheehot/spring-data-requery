@@ -3,6 +3,7 @@ package com.coupang.springframework.data.requery.domain.upsert
 import com.coupang.kotlinx.objectx.ToStringBuilder
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import io.requery.*
+import io.requery.query.MutableResult
 import java.util.*
 
 /**
@@ -21,7 +22,7 @@ abstract class AbstractUpsertTag: AbstractPersistable<UUID>() {
     abstract var name: String?
 
     @get:ManyToMany(cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
-    abstract val events: MutableSet<AbstractUpsertEvent>
+    abstract val events: MutableResult<AbstractUpsertEvent>
 
 
     override fun hashCode(): Int {

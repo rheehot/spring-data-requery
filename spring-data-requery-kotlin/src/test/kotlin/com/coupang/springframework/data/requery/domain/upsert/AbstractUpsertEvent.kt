@@ -4,6 +4,7 @@ import com.coupang.kotlinx.objectx.ToStringBuilder
 import com.coupang.springframework.data.requery.domain.AbstractPersistable
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.requery.*
+import io.requery.query.MutableResult
 import java.util.*
 
 @Entity(copyable = true)
@@ -24,13 +25,6 @@ abstract class AbstractUpsertEvent: AbstractPersistable<UUID>() {
     @get:JunctionTable
     @get:ManyToMany(cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     abstract val tags: MutableSet<AbstractUpsertTag>
-
-    fun addTag(tag: AbstractUpsertTag) {
-        this.tags.add(tag)
-
-        // NOTE: 이 것을 넣으면 무한루프에 빠진다. 
-        // tag.events.add(this)
-    }
 
     override fun hashCode(): Int {
         return name?.hashCode() ?: System.identityHashCode(this)

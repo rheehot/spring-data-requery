@@ -69,6 +69,7 @@ class UpsertTest: AbstractDomainTest() {
             assertThat(loaded.tags).hasSize(2).containsOnly(tag1, tag2)
 
             delete(loaded)
+            refreshAll(loaded)
 
             assertThat(count(UpsertEvent::class).get().value()).isEqualTo(0)
             assertThat(count(UpsertTag::class).get().value()).isEqualTo(0)
@@ -108,7 +109,7 @@ class UpsertTest: AbstractDomainTest() {
             name = "place"
         }
 
-        place.addEvent(event)
+        place.events.add(event)
 
         with(requeryKotlin) {
 
@@ -167,7 +168,7 @@ class UpsertTest: AbstractDomainTest() {
             name = "place"
         }
 
-        place.addEvent(event)
+        place.events.add(event)
 
         with(requeryKotlin) {
 
@@ -194,8 +195,8 @@ class UpsertTest: AbstractDomainTest() {
             id = UUID.randomUUID().toString()
             name = "place"
         }
-        place.addEvent(event)
-        place.events.clear()
+        place.events.add(event)
+        place.events.remove(event)
 
         with(requeryKotlin) {
 
