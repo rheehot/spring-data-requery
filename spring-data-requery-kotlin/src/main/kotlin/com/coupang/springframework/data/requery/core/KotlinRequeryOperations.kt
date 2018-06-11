@@ -20,7 +20,7 @@ interface KotlinRequeryOperations {
 
     val dataStore: KotlinEntityDataStore<Any>
 
-    fun <T: Any> select(entityType: KClass<T>): Selection<out Result<T>> =
+    infix fun <T: Any> select(entityType: KClass<T>): Selection<out Result<T>> =
         dataStore.select(entityType)
 
     fun <T: Any> select(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): Selection<out Result<T>> =
@@ -32,10 +32,10 @@ interface KotlinRequeryOperations {
     fun <T: Any, ID> findById(entityType: KClass<T>, id: ID): T? =
         dataStore.findByKey(entityType, id)
 
-    fun <T: Any> findAll(entityType: KClass<T>): Iterable<T> =
+    infix fun <T: Any> findAll(entityType: KClass<T>): Iterable<T> =
         dataStore.select(entityType).get().toList()
 
-    fun <T: Any> refresh(entity: T): T =
+    infix fun <T: Any> refresh(entity: T): T =
         dataStore.refresh(entity)
 
     fun <T: Any> refresh(entity: T, vararg attributes: Attribute<*, *>): T =
@@ -44,28 +44,28 @@ interface KotlinRequeryOperations {
     fun <T: Any> refresh(entities: Iterable<T>, vararg attributes: Attribute<*, *>): Iterable<T> =
         dataStore.refresh<T>(entities, *attributes)
 
-    fun <T: Any> refreshAll(entity: T): T =
+    infix fun <T: Any> refreshAll(entity: T): T =
         dataStore.refreshAll(entity)
 
-    fun <T: Any> refreshAll(entities: Iterable<T>): Iterable<T> =
+    infix fun <T: Any> refreshAll(entities: Iterable<T>): Iterable<T> =
         entities.map { dataStore.refreshAll(it) }
 
-    fun <T: Any> upsert(entity: T): T =
+    infix fun <T: Any> upsert(entity: T): T =
         dataStore.upsert(entity)
 
-    fun <T: Any> upsertAll(entities: Iterable<T>): Iterable<T> =
+    infix fun <T: Any> upsertAll(entities: Iterable<T>): Iterable<T> =
         dataStore.upsert<T>(entities)
 
-    fun <T: Any> insert(entity: T): T =
+    infix fun <T: Any> insert(entity: T): T =
         dataStore.insert(entity)
 
-    fun <T: Any> insert(entityType: KClass<T>): Insertion<Result<Tuple>> =
+    infix fun <T: Any> insert(entityType: KClass<T>): Insertion<Result<Tuple>> =
         dataStore.insert<T>(entityType)
 
     fun <T: Any> insert(entityType: KClass<T>, vararg attributes: QueryableAttribute<T, *>): InsertInto<out Result<Tuple>> =
         dataStore.insert(entityType, *attributes)
 
-    fun <T: Any> insertAll(entities: Iterable<T>): Iterable<T> =
+    infix fun <T: Any> insertAll(entities: Iterable<T>): Iterable<T> =
         dataStore.insert<T>(entities)
 
     fun <T: Any, K: Any> insertAll(entities: Iterable<T>, keyClass: KClass<K>): Iterable<K> =
@@ -74,33 +74,33 @@ interface KotlinRequeryOperations {
     fun <T: Any> update(): Update<Scalar<Int>> =
         dataStore.update()
 
-    fun <T: Any> update(entity: T): T =
+    infix fun <T: Any> update(entity: T): T =
         dataStore.update(entity)
 
-    fun <T: Any> update(entityType: KClass<T>): Update<Scalar<Int>> =
+    infix fun <T: Any> update(entityType: KClass<T>): Update<Scalar<Int>> =
         dataStore.update<T>(entityType)
 
-    fun <T: Any> updateAll(entities: Iterable<T>): Iterable<T> =
+    infix fun <T: Any> updateAll(entities: Iterable<T>): Iterable<T> =
         dataStore.update<T>(entities)
 
     fun delete(): Deletion<Scalar<Int>> =
         dataStore.delete()
 
-    fun <T: Any> delete(entity: T) {
+    infix fun <T: Any> delete(entity: T) {
         dataStore.delete(entity)
     }
 
-    fun <T: Any> delete(entityType: KClass<T>): Deletion<Scalar<Int>> =
+    infix fun <T: Any> delete(entityType: KClass<T>): Deletion<Scalar<Int>> =
         dataStore.delete<T>(entityType)
 
-    fun <T: Any> deleteAll(entities: Iterable<T>) {
+    infix fun <T: Any> deleteAll(entities: Iterable<T>) {
         dataStore.delete<T>(entities)
     }
 
-    fun <T: Any> deleteAll(entityType: KClass<T>): Long =
+    infix fun <T: Any> deleteAll(entityType: KClass<T>): Long =
         dataStore.delete<T>(entityType).get().value().toLong()
 
-    fun <T: Any> count(entityType: KClass<T>): Selection<Scalar<Int>> =
+    infix fun <T: Any> count(entityType: KClass<T>): Selection<Scalar<Int>> =
         dataStore.count(entityType)
 
     fun raw(query: String, vararg parameters: Any): Result<Tuple> =
@@ -114,5 +114,6 @@ interface KotlinRequeryOperations {
 
     fun <T: Any> withTransaction(isolation: TransactionIsolation?, block: KotlinRequeryOperations.() -> T): T
 
-    fun <T: Any> withDataStore(block: KotlinEntityDataStore<Any>.() -> T): T
+    fun <T: Any> withDataStore(block: KotlinEntityDataStore<Any>.() -> T): T =
+        block.invoke(dataStore)
 }

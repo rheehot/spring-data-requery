@@ -67,7 +67,7 @@ class CompletableFutureTest: AbstractDomainTest() {
             insert(user)
                 .thenApply { savedUser ->
                     val group = BasicGroup().apply { name = "group" }
-                    savedUser.groups.add(group)
+                    group.members.add(savedUser)
                     group
                 }
                 .thenCompose { group ->

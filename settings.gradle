@@ -7,7 +7,7 @@
  * in the user guide at https://docs.gradle.org/4.7/userguide/multi_project_builds.html
  */
 
-rootProject.name = 'spring-data-requery-parent'
+rootProject.name = 'spring-data-requery'
 
 include 'spring-data-requery-java'
 include 'spring-data-requery-kotlin'

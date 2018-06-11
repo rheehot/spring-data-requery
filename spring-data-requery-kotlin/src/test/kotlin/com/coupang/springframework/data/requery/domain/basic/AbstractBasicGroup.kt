@@ -27,7 +27,6 @@ abstract class AbstractBasicGroup: AbstractPersistable<Long>() {
     @get:ManyToMany
     abstract val members: MutableResult<AbstractBasicUser>
 
-
     override fun hashCode(): Int {
         return hashOf(name)
     }

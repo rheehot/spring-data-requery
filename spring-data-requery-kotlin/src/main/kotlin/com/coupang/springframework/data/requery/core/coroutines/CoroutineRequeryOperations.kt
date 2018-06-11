@@ -1,6 +1,5 @@
 package com.coupang.springframework.data.requery.core.coroutines
 
-import com.coupang.springframework.data.requery.core.KotlinRequeryOperations
 import io.requery.TransactionIsolation
 import io.requery.kotlin.*
 import io.requery.meta.Attribute
@@ -109,11 +108,12 @@ interface CoroutineRequeryOperations {
     suspend fun <T: Any> raw(entityType: KClass<T>, query: String, vararg parameters: Any): Result<T> =
         dataStore.raw(entityType, query, *parameters)
 
-    suspend fun <T: Any> withTransaction(block: KotlinRequeryOperations.() -> T): T =
+    suspend fun <T: Any> withTransaction(block: CoroutineRequeryOperations.() -> T): T =
         withTransaction(null, block)
 
-    suspend fun <T: Any> withTransaction(isolation: TransactionIsolation?, block: KotlinRequeryOperations.() -> T): T
+    suspend fun <T: Any> withTransaction(isolation: TransactionIsolation?, block: CoroutineRequeryOperations.() -> T): T
 
-    suspend fun <T: Any> withDataStore(block: KotlinEntityDataStore<Any>.() -> T): T
+    suspend fun <T: Any> withDataStore(block: KotlinEntityDataStore<Any>.() -> T): T =
+        block.invoke(dataStore)
 
 }
