@@ -38,7 +38,7 @@ class BasicEntityTest: AbstractDomainTest() {
             val user = randomUser()
             insert(user)
 
-            // NOTE: 특정 컬럼만 가지고 온 후, 다른 컬럼을 참조하면, Lazy loading을 수행해준다.
+            // HINT: 특정 컬럼만 가지고 온 후, 다른 컬럼을 참조하면, Lazy loading을 수행해준다.
             val result =
                 select(BasicUser::class, BasicUser.ID, BasicUser.NAME)
                     .limit(10)
@@ -48,7 +48,7 @@ class BasicEntityTest: AbstractDomainTest() {
             assertThat(first.id).isEqualTo(user.id)
             assertThat(first.name).isEqualTo(user.name)
 
-            // NOTE: Lazy loading을 수행합니다 !!!
+            // HINT: Lazy loading을 수행합니다 !!!
             assertThat(first.age).isEqualTo(user.age)
         }
     }

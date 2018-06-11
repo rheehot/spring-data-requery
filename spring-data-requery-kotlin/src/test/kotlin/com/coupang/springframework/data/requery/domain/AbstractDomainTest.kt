@@ -29,18 +29,17 @@ abstract class AbstractDomainTest: AbstractSpringDataRequeryTest() {
         val rnd = Random(System.currentTimeMillis())
     }
 
-
     @Inject lateinit var dataStore: EntityDataStore<Any>
     @Inject lateinit var kotlinDataStore: KotlinEntityDataStore<Any>
     @Inject lateinit var requeryTemplate: RequeryTemplate
     @Inject lateinit var requeryKotlin: KotlinRequeryTemplate
 
-    @Test
-    fun `context loading`() {
-        assertThat(dataStore).isNotNull
-        assertThat(kotlinDataStore).isNotNull
-        assertThat(requeryTemplate).isNotNull
-        assertThat(requeryKotlin).isNotNull
-    }
+    //    @Test
+    //    fun `context loading`() {
+    //        assertThat(dataStore).isNotNull
+    //        assertThat(kotlinDataStore).isNotNull
+    //        assertThat(requeryTemplate).isNotNull
+    //        assertThat(requeryKotlin).isNotNull
+    //    }
 
 }

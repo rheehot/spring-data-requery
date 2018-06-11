@@ -7,6 +7,7 @@ import com.coupang.springframework.data.requery.domain.basic.BasicUser
 import com.coupang.springframework.data.requery.domain.basic.RandomData
 import com.coupang.springframework.data.requery.domain.basic.RandomData.randomUser
 import com.coupang.springframework.data.requery.domain.basic.RandomData.randomUsers
+import kotlinx.coroutines.experimental.Unconfined
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -26,9 +27,9 @@ class CoroutineTemplateTest: AbstractDomainTest() {
     fun setup() {
         runBlocking {
             with(coroutineTemplate) {
-                val result1 = async { deleteAll(BasicLocation::class) }
-                val result2 = async { deleteAll(BasicGroup::class) }
-                val result3 = async { deleteAll(BasicUser::class) }
+                val result1 = async(Unconfined) { deleteAll(BasicLocation::class) }
+                val result2 = async(Unconfined) { deleteAll(BasicGroup::class) }
+                val result3 = async(Unconfined) { deleteAll(BasicUser::class) }
 
                 result1.await()
                 result2.await()
@@ -38,35 +39,30 @@ class CoroutineTemplateTest: AbstractDomainTest() {
     }
 
     @Test
-    fun `async insert`() {
+    fun `async insert`() = runBlocking<Unit> {
         val user = randomUser()
-        runBlocking {
-            with(coroutineTemplate) {
-                val savedUser = async { insert(user) }
+        with(coroutineTemplate) {
+            val savedUser = async(Unconfined) { insert(user) }
 
-                val loaded = async {
-                    select(BasicUser::class).where(BasicUser.ID.eq(savedUser.await().id)).get().firstOrNull()
-                }
-                assertThat(loaded.await()).isEqualTo(user)
+            val loaded = async(Unconfined) {
+                select(BasicUser::class).where(BasicUser.ID.eq(savedUser.await().id)).get().firstOrNull()
             }
+            assertThat(loaded.await()).isEqualTo(user)
         }
     }
 
     @Test
-    fun `async insert and count`() {
-        runBlocking {
-            with(coroutineTemplate) {
-                val user = randomUser()
+    fun `async insert and count`() = runBlocking<Unit> {
+        with(coroutineTemplate) {
+            val user = randomUser()
 
-                val count = async {
-                    insert(user)
-
-                    assertThat(user.id).isNotNull()
-                    count(BasicUser::class).get().value()
-                }
-
-                assertThat(count.await()).isEqualTo(1)
+            val count = async(Unconfined) {
+                insert(user)
+                assertThat(user.id).isNotNull()
+                count(BasicUser::class).get().value()
             }
+
+            assertThat(count.await()).isEqualTo(1)
         }
     }
 
@@ -93,10 +89,12 @@ class CoroutineTemplateTest: AbstractDomainTest() {
         val user = randomUser().apply { age = 100 }
 
         with(coroutineTemplate) {
-            async { insert(user) }.await()
-            async { insert(randomUser().apply { age = 10 }) }.await()
+            async(Unconfined) {
+                insert(user)
+                insert(randomUser().apply { age = 10 })
+            }.await()
 
-            val affectedCount = async {
+            val affectedCount = async(Unconfined) {
                 update(BasicUser::class)
                     .set(BasicUser.ABOUT, "nothing")
                     .set(BasicUser.AGE, 50)
@@ -105,7 +103,17 @@ class CoroutineTemplateTest: AbstractDomainTest() {
                     .value()
             }
 
+            val affectedCount2 = async(Unconfined) {
+                update(BasicUser::class)
+                    .set(BasicUser.ABOUT, "twenty")
+                    .set(BasicUser.AGE, 20)
+                    .where(BasicUser.AGE eq 10)
+                    .get()
+                    .value()
+            }
+
             assertThat(affectedCount.await()).isEqualTo(1)
+            assertThat(affectedCount2.await()).isEqualTo(1)
         }
     }
 
@@ -114,9 +122,9 @@ class CoroutineTemplateTest: AbstractDomainTest() {
         val users = randomUsers(100)
 
         with(coroutineTemplate) {
-            async { insertAll(users) }.await()
+            async(Unconfined) { insertAll(users) }.await()
 
-            val loadedUsers = async {
+            val loadedUsers = async(Unconfined) {
                 select(BasicUser::class)
                     .orderBy(BasicUser.NAME.asc().nullsFirst())
                     .limit(200)
