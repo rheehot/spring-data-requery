@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class EntityDataStoreUtilsTest extends AbstractDomainTest {
 
-
     @Test
     public void retrieveEntityModel() {
         EntityModel entityModel = EntityDataStoreUtils.getEntityModel(requeryTemplate.getDataStore());

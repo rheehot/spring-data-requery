@@ -5,6 +5,7 @@ import com.coupang.springframework.data.requery.repository.query.DefaultRequeryE
 import com.coupang.springframework.data.requery.repository.query.RequeryEntityMetadata;
 import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
 import io.requery.meta.EntityModel;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.core.support.AbstractEntityInformation;
 import org.springframework.util.Assert;
@@ -15,6 +16,7 @@ import org.springframework.util.Assert;
  * @author debop@coupang.com
  * @since 18. 6. 7
  */
+@Slf4j
 public abstract class RequeryEntityInformationSupport<T, ID>
     extends AbstractEntityInformation<T, ID> implements RequeryEntityInformation<T, ID> {
 
@@ -36,8 +38,12 @@ public abstract class RequeryEntityInformationSupport<T, ID>
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> RequeryEntityInformation<T, ?> getEntityInformation(@NotNull Class<T> domainClass,
                                                                           @NotNull RequeryOperations operations) {
-        EntityModel entityModel = EntityDataStoreUtils.getEntityModel(operations.getDataStore());
+        Assert.notNull(domainClass, "Domain class must not be null.");
+        Assert.notNull(operations, "RequeryOperations must not be null.");
+
+        EntityModel entityModel = operations.getEntityModel();
         Assert.notNull(entityModel, "EntityModel must not be null!");
+        log.debug("entityModel={}", entityModel);
 
         if (org.springframework.data.domain.Persistable.class.isAssignableFrom(domainClass)) {
             return new RequeryPersistableEntityInformation(domainClass, entityModel);

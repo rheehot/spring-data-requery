@@ -34,6 +34,8 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     private final Class<T> domainType;
 
     public SimpleRequeryRepository(@NotNull RequeryEntityInformation<T, ID> entityInformation, @NotNull RequeryOperations operations) {
+        log.debug("Create SimpleRequeryRepository. domainType={}", entityInformation.getJavaType());
+
         this.entityInformation = entityInformation;
         this.domainType = entityInformation.getJavaType();
         this.operations = operations;

@@ -8,10 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-
-import static com.coupang.kotlinx.core.HashxKt.hashOf;
 
 /**
  * AbstractBasicUser
@@ -51,7 +50,7 @@ public abstract class AbstractBasicUser extends AuditableLongEntity {
 
     @Override
     public int hashCode() {
-        return hashOf(name, email);
+        return Objects.hash(name, email, birthday);
     }
 
     @Transient

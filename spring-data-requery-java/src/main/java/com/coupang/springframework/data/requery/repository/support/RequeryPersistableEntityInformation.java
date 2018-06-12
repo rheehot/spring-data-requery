@@ -22,11 +22,13 @@ public class RequeryPersistableEntityInformation<T extends Persistable<ID>, ID>
 
     @Override
     public boolean isNew(@NotNull T entity) {
+        log.trace("is new entity. entity={}", entity);
         return entity.isNew();
     }
 
     @Override
     public ID getId(@NotNull T entity) {
+        log.trace("get id of entity. entity={}", entity);
         return entity.getId();
     }
 }

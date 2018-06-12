@@ -36,6 +36,8 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
     public RequeryEntityModelEntityInformation(@NotNull Class<T> domainClass, @NotNull EntityModel entityModel) {
         super(domainClass);
 
+        log.debug("Construct RequeryEntityModelEntityInformation, domainClass={}, entityModel={}", domainClass.getName(), entityModel.getName());
+
         this.entityModel = entityModel;
 
         Type<T> type = entityModel.typeOf(domainClass);
@@ -66,14 +68,13 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
         Class<?> baseClass = type.getBaseType();
         try {
             Type<?> baseType = entityModel.typeOf(baseClass);
-            if (baseType.getKeyAttributes().isEmpty()) {
+            if (!baseType.getKeyAttributes().isEmpty()) {
                 return Optional.empty();
             }
             return findVersionAttribute((Type<T>) baseType, entityModel);
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
-
     }
 
 
@@ -84,7 +85,7 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
 
     @Override
     public ID getId(T entity) {
-        log.trace("Get id value. entity={}", entity);
+        log.debug("Get id value. entity={}", entity);
 
         BeanWrapper entityWrapper = new DirectFieldAccessFallbackBeanWrapper(entity);
         if (idMetadata.hasSimpleId()) {
@@ -103,6 +104,7 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
             idWrapper.setPropertyValue(attribute.getName(), propertyValue);
         }
 
+        log.debug("partialValueFound={}", partialValueFound);
         return partialValueFound ? (ID) idWrapper.getWrappedInstance() : null;
 
     }
@@ -141,6 +143,8 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
 
     @Override
     public boolean isNew(T entity) {
+        log.trace("is new entity? ... entity={}", entity);
+
         if (!versionAttribute.isPresent() ||
             versionAttribute.map(Attribute::getClassType).map(Class::isPrimitive).orElse(false)) {
             return super.isNew(entity);
@@ -151,6 +155,7 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
         return versionAttribute.map(it -> wrapper.getPropertyValue(it.getName()) == null).orElse(true);
     }
 
+    @Slf4j
     private static class IdMetadata<T> implements Iterable<Attribute<? super T, ?>> {
 
         private final Type<T> domainType;
@@ -205,6 +210,7 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
 
     }
 
+    @Slf4j
     private static class IdentifierDerivingDirectFieldAccessFallbackBeanWrapper extends DirectFieldAccessFallbackBeanWrapper {
 
         private final EntityModel entityModel;

@@ -18,8 +18,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.aop.framework.Advised;
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 
 import java.io.IOException;
@@ -108,6 +113,26 @@ public class RequeryRepositoryFactoryTest {
         UserCustomExtendedRepository repository = factory.getRepository(UserCustomExtendedRepository.class);
 
         repository.customMethod(1L);
+    }
+
+    @Test
+    public void usesConfiguredRepositoryBaseClass() {
+
+        factory.setRepositoryBaseClass(CustomRequeryRepository.class);
+
+        SampleRepository repository = factory.getRepository(SampleRepository.class);
+        assertThat(((Advised) repository).getTargetClass()).isEqualTo(CustomRequeryRepository.class);
+    }
+
+    @Test
+    public void crudMethodMetadataPostProcessorUsesBeanClassLoader() {
+
+        ClassLoader classLoader = new OverridingClassLoader(ClassUtils.getDefaultClassLoader());
+
+        factory.setBeanClassLoader(classLoader);
+
+        Object processor = ReflectionTestUtils.getField(factory, "crudMethodMetadataPostProcessor");
+        assertThat(ReflectionTestUtils.getField(processor, "classLoader")).isEqualTo(classLoader);
     }
 
 

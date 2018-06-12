@@ -32,6 +32,7 @@ public class RequeryPersistenceProvider implements QueryExtractor, ProxyIdAccess
 
     @Override
     public String extractQueryString(Query query) {
+        // TODO: Requery의 QueryBuilder 를 이용하여 구현해야 한다.
         throw new NotImplementedException("구현 중");
     }
 

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
@@ -30,9 +31,13 @@ public final class EntityDataStoreUtils {
     @NotNull
     public static <T> EntityContext getEntityContext(@NotNull EntityDataStore entityDataStore) {
         try {
-            Field f = entityDataStore.getClass().getDeclaredField("context");
-            f.setAccessible(true);
-            EntityContext entityContext = (EntityContext) f.get(entityDataStore);
+//            Field f = entityDataStore.getClass().getDeclaredField("context");
+//            f.setAccessible(true);
+//            EntityContext entityContext = (EntityContext) f.get(entityDataStore);
+
+            Field f = ReflectionUtils.findField(entityDataStore.getClass(), "context");
+            EntityContext entityContext = (EntityContext) ReflectionUtils.getField(f, entityDataStore);
+
             log.debug("Get EntityContext. entityContext={}", entityContext);
             return entityContext;
         } catch (Exception e) {
@@ -43,9 +48,9 @@ public final class EntityDataStoreUtils {
     @NotNull
     public static EntityModel getEntityModel(@NotNull EntityDataStore entityDataStore) {
         try {
-            Field f = entityDataStore.getClass().getDeclaredField("entityModel");
+            Field f = ReflectionUtils.findField(entityDataStore.getClass(), "entityModel");
             f.setAccessible(true);
-            EntityModel entityModel = (EntityModel) f.get(entityDataStore);
+            EntityModel entityModel = (EntityModel) ReflectionUtils.getField(f, entityDataStore);
             log.debug("Get EntityModel. entityModel name={}", entityModel.getName());
             return entityModel;
         } catch (Exception e) {

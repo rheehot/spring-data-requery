@@ -1,7 +1,9 @@
 package com.coupang.springframework.data.requery.core;
 
+import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
 import io.requery.TransactionIsolation;
 import io.requery.meta.Attribute;
+import io.requery.meta.EntityModel;
 import io.requery.meta.QueryAttribute;
 import io.requery.query.*;
 import io.requery.sql.EntityDataStore;
@@ -20,6 +22,10 @@ import java.util.function.Function;
 public interface RequeryOperations {
 
     EntityDataStore<Object> getDataStore();
+
+    default EntityModel getEntityModel() {
+        return EntityDataStoreUtils.getEntityModel(getDataStore());
+    }
 
     default <E> Selection<? extends Result<E>> select(Class<E> entityType) {
         return getDataStore().select(entityType);

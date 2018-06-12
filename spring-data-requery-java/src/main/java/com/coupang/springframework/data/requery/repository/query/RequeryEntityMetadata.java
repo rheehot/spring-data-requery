@@ -12,11 +12,11 @@ public interface RequeryEntityMetadata<T> extends EntityMetadata<T> {
 
     /**
      * Returns the name of the entity
-     *
-     * @return
      */
     String getEntityName();
 
-
+    /**
+     * Return the name of model
+     */
     String getModelName();
 }
