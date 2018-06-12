@@ -51,9 +51,9 @@ public abstract class AbstractRequeryConfiguration {
     }
 
     @Bean
-    io.requery.sql.Configuration requeryConfiguration() {
+    public io.requery.sql.Configuration requeryConfiguration() {
         return new ConfigurationBuilder(dataSource, getEntityModel())
-            .useDefaultLogging()
+            // .useDefaultLogging()
             .setEntityCache(new EmptyEntityCache())
             .setStatementCacheSize(1024)
             .setBatchUpdateSize(100)
@@ -62,13 +62,13 @@ public abstract class AbstractRequeryConfiguration {
     }
 
     @Bean
-    EntityDataStore entityDataStore() {
+    public EntityDataStore entityDataStore() {
         log.info("Create EntityDataStore instance.");
         return new EntityDataStore(requeryConfiguration());
     }
 
     @Bean
-    RequeryTemplate requeryTemplate() {
+    public RequeryTemplate requeryTemplate() {
         log.info("Create RequeryTemplate instance.");
         return new RequeryTemplate(entityDataStore());
     }

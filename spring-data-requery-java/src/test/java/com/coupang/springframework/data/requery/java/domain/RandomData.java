@@ -51,7 +51,6 @@ public class RandomData {
             BasicUser user = randomUser();
             if (users.add(user)) {
                 userCount++;
-                log.trace("Add user. user={}", user);
             }
         }
         return users;

@@ -2,7 +2,6 @@ package com.coupang.springframework.data.requery.java.mapping;
 
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.mapping.RequeryPersistentEntity;
-import io.requery.Entity;
 import io.requery.Key;
 import io.requery.Version;
 import org.junit.Test;
@@ -22,6 +21,8 @@ public class RequeryMappingContextTest {
 
         RequeryMappingContext context = new RequeryMappingContext();
         RequeryPersistentEntity entity = context.getRequiredPersistentEntity(Sample.class);
+
+        assertThat(entity).isNotNull();
 
         assertThat(entity.getRequiredPersistentProperty("id").isIdProperty()).isTrue();
         assertThat(entity.getRequiredPersistentProperty("springId").isIdProperty()).isFalse();
