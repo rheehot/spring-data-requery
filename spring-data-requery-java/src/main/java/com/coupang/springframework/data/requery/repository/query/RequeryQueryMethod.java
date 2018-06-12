@@ -1,10 +1,9 @@
 package com.coupang.springframework.data.requery.repository.query;
 
-import com.coupang.springframework.data.requery.Modifying;
+import com.coupang.springframework.data.requery.annotation.Modifying;
 import com.coupang.springframework.data.requery.annotation.QueryOptions;
 import com.coupang.springframework.data.requery.provider.QueryExtractor;
-import com.coupang.springframework.data.requery.repository.Query;
-import com.coupang.springframework.data.requery.repository.QueryHints;
+import com.coupang.springframework.data.requery.annotation.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,6 @@ import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.QueryHint;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -85,13 +83,6 @@ public class RequeryQueryMethod extends QueryMethod {
         return null != AnnotationUtils.findAnnotation(method, Modifying.class);
     }
 
-    List<QueryHint> getHints() {
-        QueryHints hints = AnnotatedElementUtils.findMergedAnnotation(method, QueryHints.class);
-        if (hints != null) {
-            return Arrays.asList(hints.value());
-        }
-        return Collections.emptyList();
-    }
 
     QueryExtractor getQueryExtractor() {
         return extractor;

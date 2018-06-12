@@ -1,6 +1,5 @@
 package com.coupang.springframework.data.requery.repository.support;
 
-import com.coupang.springframework.data.requery.repository.QueryHints;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -9,19 +8,13 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.support.RepositoryProxyPostProcessor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-import javax.persistence.QueryHint;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -100,38 +93,13 @@ public class CrudMethodMetadataPostProcessor implements RepositoryProxyPostProce
     }
 
     private static class DefaultCrudMethodMetadata implements CrudMethodMetadata {
-
-        private final Map<String, Object> queryHints;
         private final Method method;
 
         DefaultCrudMethodMetadata(Method method) {
             Assert.notNull(method, "Method must not be null!");
 
-            this.queryHints = findQueryHints(method);
+
             this.method = method;
-        }
-
-        private static Map<String, Object> findQueryHints(Method method) {
-            HashMap<String, Object> queryHints = new HashMap<>();
-            QueryHints queryHintsAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, QueryHints.class);
-
-            if (queryHintsAnnotation != null) {
-                for (QueryHint hint : queryHintsAnnotation.value()) {
-                    queryHints.put(hint.name(), hint.value());
-                }
-            }
-
-            QueryHint queryHintAnnotation = AnnotationUtils.findAnnotation(method, QueryHint.class);
-            if (queryHintAnnotation != null) {
-                queryHints.put(queryHintAnnotation.name(), queryHintAnnotation.value());
-            }
-
-            return Collections.unmodifiableMap(queryHints);
-        }
-
-        @Override
-        public Map<String, Object> getQueryHints() {
-            return this.queryHints;
         }
 
         @Override

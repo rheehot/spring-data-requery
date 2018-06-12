@@ -14,11 +14,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-/**
- * com.coupang.springframework.data.requery.core.coroutines.CoroutineTemplateTest
- * @author debop
- * @since 18. 6. 2
- */
 class CoroutineTemplateTest: AbstractDomainTest() {
 
     private val coroutineTemplate by lazy { CoroutineRequeryTemplate(kotlinDataStore) }

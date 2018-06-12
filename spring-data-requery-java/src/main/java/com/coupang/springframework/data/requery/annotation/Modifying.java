@@ -1,4 +1,4 @@
-package com.coupang.springframework.data.requery;
+package com.coupang.springframework.data.requery.annotation;
 
 import java.lang.annotation.*;
 

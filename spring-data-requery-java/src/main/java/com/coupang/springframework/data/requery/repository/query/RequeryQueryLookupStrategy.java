@@ -3,7 +3,7 @@ package com.coupang.springframework.data.requery.repository.query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.provider.QueryExtractor;
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
-import com.coupang.springframework.data.requery.repository.Query;
+import com.coupang.springframework.data.requery.annotation.Query;
 import io.requery.sql.EntityDataStore;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.NotImplementedException;

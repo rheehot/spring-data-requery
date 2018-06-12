@@ -1,4 +1,6 @@
 spring-data-requery
 ----
 
-Spring Data with [requery](http://requery.io) for RDBMS (MySQL, PostgreSQL ...)
+Spring Data for [requery](http://requery.io)
+
+requery provide ORM for RDBMS (MySQL, PostgreSql, H2 ...)
