@@ -1,6 +1,5 @@
 package com.coupang.springframework.data.requery.repository.query;
 
-import io.requery.query.Selection;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.ParameterAccessor;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
@@ -8,15 +7,17 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 
 import java.util.Iterator;
-import java.util.function.Predicate;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.RequeryQueryCreator
+ * // 참고: arango-spring-data의 DerivedQueryCreator
+ * <p>
+ * Query creator to create a {@link io.requery.sql.QueryBuilder} from a {@link PartTree}.
  *
  * @author debop
  * @since 18. 6. 7
  */
-public class RequeryQueryCreator extends AbstractQueryCreator<Selection<? extends Object>, Predicate> {
+public class RequeryQueryCreator extends AbstractQueryCreator<String, ConjunctionBuilder> {
+
 
     public RequeryQueryCreator(PartTree tree) {
         super(tree);
@@ -27,22 +28,22 @@ public class RequeryQueryCreator extends AbstractQueryCreator<Selection<? extend
     }
 
     @Override
-    protected Predicate create(Part part, Iterator<Object> iterator) {
+    protected ConjunctionBuilder create(Part part, Iterator<Object> iterator) {
         return null;
     }
 
     @Override
-    protected Predicate and(Part part, Predicate base, Iterator<Object> iterator) {
+    protected ConjunctionBuilder and(Part part, ConjunctionBuilder base, Iterator<Object> iterator) {
         return null;
     }
 
     @Override
-    protected Predicate or(Predicate base, Predicate criteria) {
+    protected ConjunctionBuilder or(ConjunctionBuilder base, ConjunctionBuilder criteria) {
         return null;
     }
 
     @Override
-    protected Selection<? extends Object> complete(Predicate criteria, Sort sort) {
+    protected String complete(ConjunctionBuilder criteria, Sort sort) {
         return null;
     }
 }

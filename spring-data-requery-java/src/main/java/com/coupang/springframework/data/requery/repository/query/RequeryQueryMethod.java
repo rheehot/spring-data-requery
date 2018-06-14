@@ -1,24 +1,27 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.annotation.Modifying;
+import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.annotation.QueryOptions;
 import com.coupang.springframework.data.requery.provider.QueryExtractor;
-import com.coupang.springframework.data.requery.annotation.Query;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.RepositoryMetadata;
+import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.Parameters;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Requery specific extension of {@link QueryMethod}.
@@ -68,7 +71,27 @@ public class RequeryQueryMethod extends QueryMethod {
     }
 
     private void assertParamterNamesInAnnotatedQuery() {
-        throw new NotImplementedException("구현 중");
+
+        String annotatedQuery = getAnnotatedQuery();
+
+        if (!DeclaredQuery.of(annotatedQuery).hasNamedParameter()) {
+            return;
+        }
+
+        for (Parameter parameter : getParameters()) {
+            if (!parameter.isNamedParameter()) {
+                continue;
+            }
+
+            String paramName = parameter.getName().get();
+            if (StringUtils.isEmpty(annotatedQuery)
+                || !annotatedQuery.contains(":" + paramName)
+                   && !annotatedQuery.contains("#" + paramName)) {
+                throw new IllegalStateException(
+                    String.format("Using named parameters for method %s but parameter '%s' not found in annotated query '%s'!",
+                                  method, parameter.getName(), annotatedQuery));
+            }
+        }
     }
 
     @NotNull
@@ -119,8 +142,15 @@ public class RequeryQueryMethod extends QueryMethod {
         return getMergedOrDefaultAnnotationValue(attribute, Query.class, type);
     }
 
-    private <T> T getMergedOrDefaultAnnotationValue(String attribute, Class annotationType, Class<T> targetType) {
-        throw new NotImplementedException("구현 중");
+    private <T> T getMergedOrDefaultAnnotationValue(String attribute,
+                                                    Class annotationType,
+                                                    Class<T> targetType) {
+        Annotation annotation = AnnotatedElementUtils.findMergedAnnotation(method, annotationType);
+        if (annotation == null) {
+            return targetType.cast(AnnotationUtils.getDefaultValue(annotationType, attribute));
+        }
+
+        return targetType.cast(AnnotationUtils.getValue(annotation, attribute));
     }
 
     @NotNull

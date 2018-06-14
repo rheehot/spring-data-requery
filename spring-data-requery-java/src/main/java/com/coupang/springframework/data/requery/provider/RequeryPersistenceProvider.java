@@ -5,6 +5,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.Query;
+import java.util.Collection;
 
 /**
  * com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider
@@ -39,5 +40,9 @@ public class RequeryPersistenceProvider implements QueryExtractor, ProxyIdAccess
     @Override
     public boolean canExtractQuery() {
         throw new NotImplementedException("구현 중");
+    }
+
+    public <T> Collection<T> potentiallyConvertEmptyCollection(@org.springframework.lang.Nullable Collection<T> collection) {
+        return collection == null || collection.isEmpty() ? null : collection;
     }
 }

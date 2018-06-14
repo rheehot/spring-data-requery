@@ -33,17 +33,4 @@ public @interface Query {
      */
     String countProjection() default "";
 
-    /**
-     * The named query to be used. If not defined, a {@link javax.persistence.NamedQuery} with name of
-     * {@code $ domainClass}.${queryMethodName}} will be used.
-     */
-    String name() default "";
-
-    /**
-     * Returns the name of the {@link javax.persistence.NamedQuery} to be used to execute count queries when pagination is
-     * used. Will default to the named query name configured suffixed by {@code .count}.
-     *
-     * @see #name()
-     */
-    String countName() default "";
 }

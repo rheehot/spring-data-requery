@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.ResultProcessor;
 
 
 /**
- * com.coupang.springframework.data.requery.repository.query.AbstractRequeryQuery
+ *  Abstract base class to implement {@link RepositoryQuery}s.
  *
  * @author debop
  * @since 18. 6. 7
