@@ -5,7 +5,8 @@ import io.requery.TransactionIsolation
 import io.requery.sql.KotlinEntityDataStore
 
 /**
- * com.coupang.springframework.data.requery.core.coroutines.CoroutineRequeryTemplate
+ * [CoroutineRequeryOperations] 의 구현체 입니다.
+ * 
  * @author debop
  * @since 18. 6. 2
  */

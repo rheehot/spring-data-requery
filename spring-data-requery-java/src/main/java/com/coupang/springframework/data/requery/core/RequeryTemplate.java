@@ -2,7 +2,9 @@ package com.coupang.springframework.data.requery.core;
 
 import io.requery.TransactionIsolation;
 import io.requery.sql.EntityDataStore;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.util.Assert;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -13,6 +15,7 @@ import java.util.function.Function;
  * @author debop@coupang.com
  * @since 18. 6. 4
  */
+@Slf4j
 public class RequeryTemplate implements RequeryOperations {
 
     private final EntityDataStore<Object> dataStore;
@@ -22,13 +25,14 @@ public class RequeryTemplate implements RequeryOperations {
     }
 
     public EntityDataStore<Object> getDataStore() {
-        return (EntityDataStore<Object>) dataStore;
+        return dataStore;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <V> V runInTransaction(Callable<V> callable, @Nullable TransactionIsolation isolation) {
-        return (V) dataStore.runInTransaction(callable, isolation);
+        Assert.notNull(callable, "Callable must not be null.");
+        return dataStore.runInTransaction(callable, isolation);
     }
 
     @Override
