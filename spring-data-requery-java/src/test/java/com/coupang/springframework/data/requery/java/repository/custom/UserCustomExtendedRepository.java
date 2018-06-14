@@ -1,6 +1,6 @@
 package com.coupang.springframework.data.requery.java.repository.custom;
 
-import com.coupang.springframework.data.requery.java.domain.basic.AbstractBasicUser;
+import com.coupang.springframework.data.requery.java.domain.basic.BasicUser;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -12,13 +12,13 @@ import java.util.Optional;
  * @author debop
  * @since 18. 6. 9
  */
-public interface UserCustomExtendedRepository extends CustomGenericRepository<AbstractBasicUser, Long> {
+public interface UserCustomExtendedRepository extends CustomGenericRepository<BasicUser, Long> {
 
     @Transactional(readOnly = false, timeout = 10)
-    List<AbstractBasicUser> findAll();
+    List<BasicUser> findAll();
 
 
     @Transactional(readOnly = false, timeout = 10)
-    Optional<AbstractBasicUser> findById(Long id);
+    Optional<BasicUser> findById(Long id);
 
 }

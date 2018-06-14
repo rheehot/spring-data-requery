@@ -47,10 +47,10 @@ idea {
 dependencies {
 
     implementation project(":spring-data-requery-java")
-    
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$kotlinx_coroutines_version"
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2"
 
     compile "com.coupang.kotlinx:kotlinx-data-requery"
 
@@ -78,7 +78,7 @@ compileKotlin {
 
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs = ["-Xjsr305=strict", "-Xenable-jvm-default"]
+        freeCompilerArgs = ["-Xjsr305=strict", "-Xenable-jvm-default" /*,"-Xjvm-default=compatibility"*/]
         javaParameters = true
         apiVersion = "1.2"
         languageVersion = "1.2"

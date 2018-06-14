@@ -1,12 +1,12 @@
 package com.coupang.springframework.data.requery.java.repository.config;
 
 import com.coupang.springframework.data.requery.configs.AbstractRequeryConfiguration;
+import com.coupang.springframework.data.requery.core.RequeryTransactionManager;
 import com.coupang.springframework.data.requery.java.domain.Models;
 import io.requery.meta.EntityModel;
 import io.requery.sql.TableCreationMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -44,6 +44,6 @@ public class InfrastructureConfig extends AbstractRequeryConfiguration {
 
     @Bean
     public PlatformTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(dataSource());
+        return new RequeryTransactionManager(entityDataStore(), dataSource());
     }
 }

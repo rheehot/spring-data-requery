@@ -15,7 +15,7 @@ import java.util.UUID;
 import static com.coupang.kotlinx.core.HashxKt.hashOf;
 
 /**
- * com.coupang.springframework.data.requery.java.domain.model2.AbstractEvent
+ * com.coupang.springframework.data.requery.java.domain.model2.AbstractModel2Event
  *
  * @author debop
  * @since 18. 6. 4
@@ -24,7 +24,7 @@ import static com.coupang.kotlinx.core.HashxKt.hashOf;
 @Setter
 @Entity
 @Table(name = "model2_event")
-public class AbstractEvent extends AbstractPersistable<UUID> {
+public class AbstractModel2Event extends AbstractPersistable<UUID> {
 
     private static final long serialVersionUID = 3671180738904090633L;
 

@@ -16,7 +16,7 @@ class CoroutineRequeryTemplate(override val dataStore: KotlinEntityDataStore<Any
 
     override suspend fun <T: Any> withTransaction(isolation: TransactionIsolation?, block: CoroutineRequeryOperations.() -> T): T {
         return isolation?.let {
-            dataStore.withTransaction(isolation!!) {
+            dataStore.withTransaction(isolation) {
                 block.invoke(this@CoroutineRequeryTemplate)
             }
         } ?: dataStore.withTransaction { block.invoke(this@CoroutineRequeryTemplate) }

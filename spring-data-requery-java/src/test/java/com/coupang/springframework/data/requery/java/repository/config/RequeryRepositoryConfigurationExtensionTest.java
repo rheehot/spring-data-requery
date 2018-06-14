@@ -1,6 +1,8 @@
 package com.coupang.springframework.data.requery.java.repository.config;
 
-import com.coupang.springframework.data.requery.repository.config.RequeryRepositoryConfigExtension;
+import com.coupang.springframework.data.requery.repository.config.RequeryRepositoryConfigurationExtension;
+import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -8,37 +10,33 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.data.repository.config.RepositoryConfigurationExtension;
 import org.springframework.data.repository.config.RepositoryConfigurationSource;
-
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * RequeryRepositoryConfigExtensionTest
+ * RequeryRepositoryConfigurationExtensionTest
  *
  * @author debop@coupang.com
  * @since 18. 6. 12
  */
+@Slf4j
 @RunWith(MockitoJUnitRunner.class)
-public class RequeryRepositoryConfigExtensionTest {
+public class RequeryRepositoryConfigurationExtensionTest {
 
     @Mock RepositoryConfigurationSource configSource;
 
     public @Rule ExpectedException exception = ExpectedException.none();
 
     @Test
-    public void registerDefaultBeanPostProcessorsByDefault() {
+    public void requeryRepositoryClasses() {
 
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-
-        RepositoryConfigurationExtension extension = new RequeryRepositoryConfigExtension();
+        RepositoryConfigurationExtension extension = new RequeryRepositoryConfigurationExtension();
         extension.registerBeansForRoot(factory, configSource);
 
-        Iterable<String> names = Arrays.asList(factory.getBeanDefinitionNames());
-
-        assertThat(names).contains(AnnotationConfigUtils.PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME);
+        assertThat(extension.getModuleName()).isEqualTo("REQUERY");
+        assertThat(extension.getRepositoryFactoryBeanClassName()).isEqualTo(RequeryRepositoryFactoryBean.class.getName());
     }
 }

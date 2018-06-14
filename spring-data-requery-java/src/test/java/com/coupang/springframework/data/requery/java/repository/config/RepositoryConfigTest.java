@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.java.repository.config;
 
-import com.coupang.springframework.data.requery.java.configs.RequeryTestConfiguration;
 import com.coupang.springframework.data.requery.java.repository.sample.basic.BasicUserRepositoryImpl;
+import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -17,7 +17,8 @@ public class RepositoryConfigTest extends AbstractRepositoryConfigTest {
 
 
     @Configuration
-    static class TestConfiguration extends RequeryTestConfiguration {
+    @EnableRequeryRepositories(basePackages = { "com.coupang.**.repository.sample.basic" })
+    static class TestConfiguration extends InfrastructureConfig {
 
         @Bean
         BasicUserRepositoryImpl basicUserRepositoryImpl() {

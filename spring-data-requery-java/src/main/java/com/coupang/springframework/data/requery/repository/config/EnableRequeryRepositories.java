@@ -40,5 +40,7 @@ public @interface EnableRequeryRepositories {
 
     String transactionManagerRef() default "transactionManager";
 
+    boolean considerNestedRepositories() default false;
+
     boolean enableDefaultTransactions() default true;
 }

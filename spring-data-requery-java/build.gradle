@@ -39,6 +39,8 @@ dependencies {
     compile "com.coupang.kotlinx:kotlinx-data-requery"
     compile "io.requery:requery"
 
+    compile "org.springframework:spring-jdbc"
+
     compile "org.apache.commons:commons-lang3:3.7"
 
     // lombok을 gradle 에서 사용하기 위해 annotation process를 설정해주어야 합니다.

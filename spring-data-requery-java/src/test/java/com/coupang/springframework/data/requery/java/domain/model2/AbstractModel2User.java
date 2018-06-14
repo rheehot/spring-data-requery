@@ -22,7 +22,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "model2_user")
 @ReadOnly
-public class AbstractUser extends AbstractPersistable<UUID> {
+public class AbstractModel2User extends AbstractPersistable<UUID> {
 
     private static final long serialVersionUID = 325822952757166210L;
 

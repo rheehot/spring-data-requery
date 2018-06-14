@@ -17,7 +17,7 @@ public class RequeryRepositoryNameSpaceHandler extends NamespaceHandlerSupport {
     public void init() {
         log.debug("Init and regist BeanDefinitionParser for repositories.");
 
-        RequeryRepositoryConfigExtension extension = new RequeryRepositoryConfigExtension();
+        RequeryRepositoryConfigurationExtension extension = new RequeryRepositoryConfigurationExtension();
         RepositoryBeanDefinitionParser definitionParser = new RepositoryBeanDefinitionParser(extension);
 
         registerBeanDefinitionParser("repositories", definitionParser);

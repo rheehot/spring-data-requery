@@ -36,6 +36,7 @@ public final class EntityDataStoreUtils {
 //            EntityContext entityContext = (EntityContext) f.get(entityDataStore);
 
             Field f = ReflectionUtils.findField(entityDataStore.getClass(), "context");
+            f.setAccessible(true);
             EntityContext entityContext = (EntityContext) ReflectionUtils.getField(f, entityDataStore);
 
             log.debug("Get EntityContext. entityContext={}", entityContext);
