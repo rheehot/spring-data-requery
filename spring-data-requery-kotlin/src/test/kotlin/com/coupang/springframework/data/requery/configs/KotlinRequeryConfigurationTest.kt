@@ -3,9 +3,7 @@ package com.coupang.springframework.data.requery.configs
 import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.AbstractSpringDataRequeryTest
 import com.coupang.springframework.data.requery.core.KotlinRequeryOperations
-import com.coupang.springframework.data.requery.core.KotlinRequeryTemplate
 import com.coupang.springframework.data.requery.core.RequeryOperations
-import com.coupang.springframework.data.requery.core.RequeryTemplate
 import io.requery.meta.EntityModel
 import io.requery.sql.EntityDataStore
 import io.requery.sql.KotlinEntityDataStore

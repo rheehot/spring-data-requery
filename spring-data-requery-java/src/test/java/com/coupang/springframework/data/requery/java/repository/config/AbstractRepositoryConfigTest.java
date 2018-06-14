@@ -35,6 +35,13 @@ public class AbstractRepositoryConfigTest {
 
     @Test
     public void repositoriesHaveExceptionTranslationApplied() {
+        RequeryRepositoriesRegistrarIntegrationTests.assertExceptionTranslationActive(userRepository);
+        RequeryRepositoriesRegistrarIntegrationTests.assertExceptionTranslationActive(groupRepository);
+        RequeryRepositoriesRegistrarIntegrationTests.assertExceptionTranslationActive(locationRepository);
+    }
 
+    @Test
+    public void exposesRequeryMappingContext() {
+        assertThat(mappingContext).isNotNull();
     }
 }

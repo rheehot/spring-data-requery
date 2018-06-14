@@ -66,6 +66,19 @@ subprojects {
 
         dependencies {
 
+            dependency "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+            dependency "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+            dependency "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+            dependency "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+
+            dependency "org.jetbrains.kotlinx:atomicfu-maven-plugin:0.10.0"
+
+            dependency "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_coroutines_version"
+            dependency "org.jetbrains.kotlinx:kotlinx-coroutines-io:$kotlinx_coroutines_version"
+            dependency "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$kotlinx_coroutines_version"
+            dependency "org.jetbrains.kotlinx:kotlinx-coroutines-nio:$kotlinx_coroutines_version"
+            dependency "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$kotlinx_coroutines_version"
+
             dependency "com.coupang.kotlinx:kotlinx-logging:$coupang_kotlinx_version"
             dependency "com.coupang.kotlinx:kotlinx-core:$coupang_kotlinx_version"
             dependency "com.coupang.kotlinx:kotlinx-io:$coupang_kotlinx_version"

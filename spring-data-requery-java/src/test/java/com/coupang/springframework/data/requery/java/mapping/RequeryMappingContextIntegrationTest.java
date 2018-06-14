@@ -2,12 +2,11 @@ package com.coupang.springframework.data.requery.java.mapping;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.java.configs.RequeryTestConfiguration;
-import com.coupang.springframework.data.requery.java.domain.basic.BasicUser;
+import com.coupang.springframework.data.requery.java.domain.basic.AbstractBasicUser;
 import com.coupang.springframework.data.requery.java.repository.sample.basic.BasicUserRepository;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.mapping.RequeryPersistentEntity;
 import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.inject.Inject;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * RequeryMappingContextIntegrationTest
@@ -53,7 +52,7 @@ public class RequeryMappingContextIntegrationTest {
     @Test
     public void setupMappingContextCorrectly() {
 
-        RequeryPersistentEntity<?> entity = context.getRequiredPersistentEntity(BasicUser.class);
+        RequeryPersistentEntity<?> entity = context.getRequiredPersistentEntity(AbstractBasicUser.class);
         assertThat(entity).isNotNull();
     }
 }

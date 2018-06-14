@@ -1,13 +1,14 @@
 package com.coupang.springframework.data.requery.repository.config;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.data.repository.config.RepositoryBeanDefinitionRegistrarSupport;
 import org.springframework.data.repository.config.RepositoryConfigurationExtension;
 
 import java.lang.annotation.Annotation;
 
 /**
- * com.coupang.springframework.data.requery.repository.config.RequeryRepositoriesRegistar
+ * {@link ImportBeanDefinitionRegistrar} to enable {@link EnableRequeryRepositories} annotation.
  *
  * @author debop
  * @since 18. 6. 6
@@ -23,7 +24,7 @@ public class RequeryRepositoriesRegistar extends RepositoryBeanDefinitionRegistr
     @NotNull
     @Override
     protected RepositoryConfigurationExtension getExtension() {
-        return new RequeryRepositoryConfigExtension();
+        return new RequeryRepositoryConfigurationExtension();
     }
 
 }

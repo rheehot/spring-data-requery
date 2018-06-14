@@ -11,7 +11,7 @@ import org.springframework.instrument.classloading.ShadowingClassLoader;
  */
 public class InspectionClassLoader extends ShadowingClassLoader {
 
-    InspectionClassLoader(ClassLoader parent) {
+    public InspectionClassLoader(ClassLoader parent) {
         super(parent, true);
         excludePackage("org.springframework.");
     }
