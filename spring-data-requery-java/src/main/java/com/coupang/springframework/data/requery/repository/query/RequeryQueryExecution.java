@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.repository.query;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -43,7 +44,7 @@ public abstract class RequeryQueryExecution {
      */
     @Nullable
     public Object execute(AbstractRequeryQuery query, Object[] values) {
-
+        throw new NotImplementedException("구현 중");
     }
 
     /**

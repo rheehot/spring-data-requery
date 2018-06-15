@@ -33,6 +33,7 @@ import static javax.persistence.metamodel.Attribute.PersistentAttributeType.*;
  * @author debop
  * @since 18. 6. 14
  */
+@Deprecated
 public abstract class QueryUtils {
 
     public static final String COUNT_QUERY_STRING = "select count(%s) from %s x";

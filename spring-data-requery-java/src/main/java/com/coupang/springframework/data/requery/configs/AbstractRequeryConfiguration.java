@@ -75,7 +75,7 @@ public abstract class AbstractRequeryConfiguration {
     @Bean
     public RequeryTemplate requeryTemplate() {
         log.info("Create RequeryTemplate instance.");
-        return new RequeryTemplate(entityDataStore());
+        return new RequeryTemplate(entityDataStore(), requeryMappingContext());
     }
 
     @Bean

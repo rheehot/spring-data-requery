@@ -4,7 +4,7 @@ import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
 import com.coupang.springframework.data.requery.utils.RequeryMetamodel;
 import io.requery.query.Result;
-import io.requery.query.Selection;
+import io.requery.query.element.QueryElement;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.ResultProcessor;
 
 
 /**
- *  Abstract base class to implement {@link RepositoryQuery}s.
+ * Abstract base class to implement {@link RepositoryQuery}s.
  *
  * @author debop
  * @since 18. 6. 7
@@ -22,10 +22,10 @@ import org.springframework.data.repository.query.ResultProcessor;
 @Slf4j
 public abstract class AbstractRequeryQuery implements RepositoryQuery {
 
-    private final RequeryQueryMethod method;
-    private final RequeryOperations operations;
-    private final RequeryMetamodel metamodel;
-    private final Class<?> domainClass;
+    protected final RequeryQueryMethod method;
+    protected final RequeryOperations operations;
+    protected final RequeryMetamodel metamodel;
+    protected final Class<?> domainClass;
 
 
     public AbstractRequeryQuery(@NotNull final RequeryQueryMethod method,
@@ -47,7 +47,7 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
         final ResultProcessor processor = method.getResultProcessor().withDynamicProjection(accessor);
         final Class<?> typeToRead = getTypeToRead(processor);
 
-        Selection<Result<?>> query = createQuery(accessor, options);
+        QueryElement<?> query = createQuery(accessor, options);
 
         return typeToRead.cast(query.get());
     }
@@ -57,8 +57,8 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
         return method;
     }
 
-    protected abstract Selection<Result<?>> createQuery(RequeryParameterAccessor accessor,
-                                                        RequeryQueryOptions options);
+    protected abstract QueryElement<?> createQuery(RequeryParameterAccessor accessor,
+                                                   RequeryQueryOptions options);
 
     protected abstract boolean isCountQuery();
 

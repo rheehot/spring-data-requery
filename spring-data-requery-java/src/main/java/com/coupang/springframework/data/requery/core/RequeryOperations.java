@@ -1,11 +1,13 @@
 package com.coupang.springframework.data.requery.core;
 
+import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
 import io.requery.TransactionIsolation;
 import io.requery.meta.Attribute;
 import io.requery.meta.EntityModel;
 import io.requery.meta.QueryAttribute;
 import io.requery.query.*;
+import io.requery.sql.EntityContext;
 import io.requery.sql.EntityDataStore;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,8 +25,14 @@ public interface RequeryOperations {
 
     EntityDataStore<Object> getDataStore();
 
+    RequeryMappingContext getMappingContext();
+
     default EntityModel getEntityModel() {
         return EntityDataStoreUtils.getEntityModel(getDataStore());
+    }
+
+    default <E> EntityContext<E> getEntityContext() {
+        return EntityDataStoreUtils.getEntityContext(getDataStore());
     }
 
     default <E> Selection<? extends Result<E>> select(Class<E> entityType) {

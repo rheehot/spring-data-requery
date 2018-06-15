@@ -1,16 +1,21 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
+import io.requery.query.Expression;
+import io.requery.query.NamedExpression;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Parameter;
+import org.springframework.data.repository.query.Parameters;
+import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.criteria.ParameterExpression;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Helper class to allow easy creation of {@link ParameterMetadata}s.
@@ -18,7 +23,77 @@ import java.util.Collections;
  * @author debop
  * @since 18. 6. 14
  */
+@Slf4j
 public class ParameterMetadataProvider {
+
+    private final Iterator<? extends Parameter> parameters;
+    private final List<ParameterMetadata<?>> expressions;
+    private final @Nullable Iterator<Object> bindableParameterValues;
+    private final RequeryPersistenceProvider persistenceProvider;
+
+    public ParameterMetadataProvider(ParametersParameterAccessor accessor,
+                                     RequeryPersistenceProvider provider) {
+        this(accessor.iterator(), accessor.getParameters(), provider);
+    }
+
+    public ParameterMetadataProvider(Parameters<?, ?> parameters,
+                                     RequeryPersistenceProvider provider) {
+        this(null, parameters, provider);
+    }
+
+    public ParameterMetadataProvider(@Nullable Iterator<Object> bindableParameterValues,
+                                     Parameters<?, ?> parameters,
+                                     RequeryPersistenceProvider provider) {
+
+        Assert.notNull(parameters, "Parameters must not be null!");
+        Assert.notNull(provider, "Provider must not be null!");
+
+        this.parameters = parameters.getBindableParameters().iterator();
+        this.expressions = new ArrayList<>();
+        this.bindableParameterValues = bindableParameterValues;
+        this.persistenceProvider = provider;
+    }
+
+    public List<ParameterMetadata<?>> getExpressions() { return Collections.unmodifiableList(expressions); }
+
+    public <T> ParameterMetadata<T> next(Part part) {
+
+        Assert.isTrue(parameters.hasNext(), "No parameter available for part. part=" + part);
+
+        Parameter parameter = parameters.next();
+        return (ParameterMetadata<T>) next(part, parameter.getType(), parameter);
+    }
+
+    public <T> ParameterMetadata<T> next(Part part, Class<T> type) {
+        Parameter parameter = parameters.next();
+        Class<?> typeToUse = ClassUtils.isAssignable(type, parameter.getType()) ? parameter.getType() : type;
+        return (ParameterMetadata<T>) next(part, typeToUse, parameter);
+    }
+
+    private <T> ParameterMetadata<T> next(Part part, Class<T> type, Parameter parameter) {
+        log.debug("get next parameter ... part={}, type={}, parameter={}", part, type, parameter);
+
+        Assert.notNull(type, "Type must not be null!");
+
+        /*
+         * We treat Expression types as Object vales since the real value to be bound as a parameter is determined at query time.
+         */
+        Class<T> reifiedType = Expression.class.equals(type) ? (Class<T>) Object.class : type;
+
+        Supplier<String> name = () -> parameter.getName()
+            .orElseThrow(() -> new IllegalArgumentException("Parameter needs to be named"));
+
+        NamedExpression<T> expression = parameter.isExplicitlyNamed()
+                                        ? NamedExpression.of(name.get(), reifiedType)
+                                        : NamedExpression.of(String.valueOf(parameter.getIndex()), reifiedType);
+
+        Object value = bindableParameterValues == null ? ParameterMetadata.PLACEHOLDER : bindableParameterValues.next();
+
+        ParameterMetadata metadata = new ParameterMetadata(expression, part.getType(), value, persistenceProvider);
+        expressions.add(metadata);
+
+        return metadata;
+    }
 
 
     /**
@@ -26,18 +101,20 @@ public class ParameterMetadataProvider {
      * @author Oliver Gierke
      * @author Thomas Darimont
      */
+    @Slf4j
     static class ParameterMetadata<T> {
 
         static final Object PLACEHOLDER = new Object();
 
-        private final Part.Type type;
-        private final ParameterExpression<T> expression;
+        private final NamedExpression<T> expression;
         private final RequeryPersistenceProvider persistenceProvider;
+        private final Part.Type type;
+        private final Object value;
 
         /**
          * Creates a new {@link ParameterMetadata}.
          */
-        public ParameterMetadata(ParameterExpression<T> expression,
+        public ParameterMetadata(NamedExpression<T> expression,
                                  Part.Type type,
                                  @Nullable Object value,
                                  RequeryPersistenceProvider provider) {
@@ -45,6 +122,7 @@ public class ParameterMetadataProvider {
             this.expression = expression;
             this.persistenceProvider = provider;
             this.type = value == null && Part.Type.SIMPLE_PROPERTY.equals(type) ? Part.Type.IS_NULL : type;
+            this.value = value;
         }
 
         /**
@@ -52,8 +130,12 @@ public class ParameterMetadataProvider {
          *
          * @return the expression
          */
-        public ParameterExpression<T> getExpression() {
+        public NamedExpression<T> getExpression() {
             return expression;
+        }
+
+        public Object getValue() {
+            return value;
         }
 
         /**
@@ -70,10 +152,11 @@ public class ParameterMetadataProvider {
          */
         @Nullable
         public Object prepare(Object value) {
-
             Assert.notNull(value, "Value must not be null!");
 
-            Class<? extends T> expressionType = expression.getJavaType();
+            Class<? extends T> expressionType = expression.getClassType();
+
+            log.debug("Prepare value... type={}, value={}, expressionType={}", type, value, expressionType);
 
             if (String.class.equals(expressionType)) {
 

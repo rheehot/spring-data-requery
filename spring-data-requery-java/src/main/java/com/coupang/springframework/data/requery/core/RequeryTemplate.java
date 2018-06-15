@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.core;
 
+import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import io.requery.TransactionIsolation;
 import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
@@ -19,14 +20,19 @@ import java.util.function.Function;
 public class RequeryTemplate implements RequeryOperations {
 
     private final EntityDataStore<Object> dataStore;
+    private final RequeryMappingContext mappingContext;
 
-    public RequeryTemplate(EntityDataStore<Object> dataStore) {
+    public RequeryTemplate(EntityDataStore<Object> dataStore,
+                           RequeryMappingContext mappingContext) {
         this.dataStore = dataStore;
+        this.mappingContext = mappingContext;
     }
 
     public EntityDataStore<Object> getDataStore() {
         return dataStore;
     }
+
+    public RequeryMappingContext getMappingContext() { return mappingContext; }
 
     @SuppressWarnings("unchecked")
     @Override
