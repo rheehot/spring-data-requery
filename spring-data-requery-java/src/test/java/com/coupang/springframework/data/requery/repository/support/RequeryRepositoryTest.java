@@ -91,18 +91,6 @@ public class RequeryRepositoryTest {
         assertThat(deleted).isEqualTo(userCount);
     }
 
-    @Test
-    public void executeDeclaredQuery() {
-
-        BasicUser user = RandomData.randomUser();
-        repository.save(user);
-
-        BasicUser loaded = repository.findByAnnotatedQuery(user.getEmail());
-
-        log.debug("loaded user={}", loaded);
-        assertThat(loaded).isNotNull();
-    }
-
     private static interface SampleEntityRepository extends RequeryRepository<BasicUser, Long> {
 
         @Query("select * from basic_user u where u.email = ?")
