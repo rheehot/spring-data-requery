@@ -57,7 +57,9 @@ public abstract class AbstractBasicUser extends AuditableLongEntity {
     @Override
     protected @NotNull ToStringBuilder buildStringHelper() {
         return super.buildStringHelper()
-            .add("name", name);
+            .add("name", name)
+            .add("email", email)
+            .add("birthday", birthday);
     }
 
     private static final long serialVersionUID = -2693264826800934057L;

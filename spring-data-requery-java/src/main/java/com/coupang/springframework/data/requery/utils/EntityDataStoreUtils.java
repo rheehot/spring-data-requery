@@ -30,15 +30,11 @@ public final class EntityDataStoreUtils {
 
     public static <T> EntityContext getEntityContext(EntityDataStore entityDataStore) {
         try {
-//            Field f = entityDataStore.getClass().getDeclaredField("context");
-//            f.setAccessible(true);
-//            EntityContext entityContext = (EntityContext) f.get(entityDataStore);
-
             Field f = ReflectionUtils.findField(entityDataStore.getClass(), "context");
             f.setAccessible(true);
             EntityContext entityContext = (EntityContext) ReflectionUtils.getField(f, entityDataStore);
 
-            log.debug("Get EntityContext. entityContext={}", entityContext);
+            log.trace("Get EntityContext. entityContext={}", entityContext);
             return entityContext;
         } catch (Exception e) {
             throw new IllegalStateException("Fail to retrieve EntityContext.");
@@ -51,7 +47,7 @@ public final class EntityDataStoreUtils {
             Field f = ReflectionUtils.findField(entityDataStore.getClass(), "entityModel");
             f.setAccessible(true);
             EntityModel entityModel = (EntityModel) ReflectionUtils.getField(f, entityDataStore);
-            log.debug("Get EntityModel. entityModel name={}", entityModel.getName());
+            log.trace("Get EntityModel. entityModel name={}", entityModel.getName());
             return entityModel;
         } catch (Exception e) {
             throw new IllegalStateException("Fail to retrieve entity model.");

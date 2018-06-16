@@ -7,15 +7,16 @@ import com.coupang.springframework.data.requery.domain.RandomData;
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
 import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactory;
+import io.requery.query.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -79,10 +80,51 @@ public class DeclaredRequeryQueryTest {
         assertThat(results).hasSize(5);
     }
 
-    private static interface DeclaredQueryRepository extends RequeryRepository<BasicUser, Long> {
+    @Test
+    public void multipleParameterQuery() {
+        Set<BasicUser> users = RandomData.randomUsers(4);
+        repository.saveAll(users);
+
+        BasicUser user = RandomData.randomUser();
+        repository.save(user);
+
+        BasicUser loaded = repository.findAllBy(user.getName(), user.getEmail());
+
+        assertThat(loaded).isEqualTo(user);
+    }
+
+    @Test
+    public void queryTuples() {
+//        Set<BasicUser> users = RandomData.randomUsers(4);
+//        repository.saveAll(users);
+
+        BasicUser user = RandomData.randomUser();
+        repository.save(user);
+
+        List<Tuple> loaded = repository.findAllIds(user.getEmail());
+        assertThat(loaded).hasSize(1);
+        assertThat(loaded.get(0).<Long>get("id")).isEqualTo(user.getId());
+        assertThat(loaded.get(0).<String>get("name")).isEqualTo(user.getName());
+    }
+
+
+    @Test
+    public void queryByLocalData() {
+
+        BasicUser user = RandomData.randomUser();
+        repository.save(user);
+
+        List<BasicUser> loaded = repository.findByBirthday(user.getBirthday());
+        assertThat(loaded).hasSize(1);
+        assertThat(loaded.get(0)).isEqualTo(user);
+
+        List<BasicUser> notexists = repository.findByBirthday(LocalDate.ofEpochDay(0));
+        assertThat(notexists).isEmpty();
+    }
+
+    interface DeclaredQueryRepository extends RequeryRepository<BasicUser, Long> {
 
         @Query("select * from basic_user u where u.email = ?")
-        @Transactional(readOnly = true)
         BasicUser findByAnnotatedQuery(String email);
 
         @Query("select * from basic_user u where u.email like ?")
@@ -90,6 +132,15 @@ public class DeclaredRequeryQueryTest {
 
         @Query("select * from basic_user u limit ?")
         List<BasicUser> findWithLimits(int limit);
+
+        @Query("select * from basic_user u where u.name=? and u.email=? limit 1")
+        BasicUser findAllBy(String name, String email);
+
+        @Query("select u.id, u.name from basic_user u where u.email=?")
+        List<Tuple> findAllIds(String email);
+
+        @Query("select * from basic_user u where u.birthday = ?")
+        List<BasicUser> findByBirthday(LocalDate birthday);
     }
 
 }
