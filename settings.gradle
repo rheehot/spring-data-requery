@@ -12,3 +12,4 @@ rootProject.name = 'spring-data-requery'
 include 'spring-data-requery-java'
 include 'spring-data-requery-kotlin'
 
+include 'spring-boot-starter-data-requery'

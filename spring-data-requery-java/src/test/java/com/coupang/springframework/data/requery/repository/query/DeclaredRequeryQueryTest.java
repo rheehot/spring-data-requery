@@ -86,6 +86,7 @@ public class DeclaredRequeryQueryTest {
         repository.saveAll(users);
 
         BasicUser user = RandomData.randomUser();
+        user.setName("배성혁");
         repository.save(user);
 
         BasicUser loaded = repository.findAllBy(user.getName(), user.getEmail());
@@ -95,10 +96,11 @@ public class DeclaredRequeryQueryTest {
 
     @Test
     public void queryTuples() {
-//        Set<BasicUser> users = RandomData.randomUsers(4);
-//        repository.saveAll(users);
+        Set<BasicUser> users = RandomData.randomUsers(4);
+        repository.saveAll(users);
 
         BasicUser user = RandomData.randomUser();
+        user.setEmail("debop@coupang.com");
         repository.save(user);
 
         List<Tuple> loaded = repository.findAllIds(user.getEmail());

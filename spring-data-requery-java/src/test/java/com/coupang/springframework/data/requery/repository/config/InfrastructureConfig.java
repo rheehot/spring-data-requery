@@ -21,7 +21,7 @@ import javax.sql.DataSource;
  * @since 18. 6. 12
  */
 @Configuration
-@EnableTransactionManagement(proxyTargetClass = true)
+@EnableTransactionManagement
 public class InfrastructureConfig extends AbstractRequeryConfiguration {
 
     @Override

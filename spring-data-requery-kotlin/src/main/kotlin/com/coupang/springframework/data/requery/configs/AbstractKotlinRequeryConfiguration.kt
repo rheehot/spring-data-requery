@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.configs
 
+import com.coupang.kotlinx.data.requery.spring.config.AbstractRequeryConfiguration
 import com.coupang.springframework.data.requery.core.KotlinRequeryTemplate
 import io.requery.sql.KotlinEntityDataStore
 import org.springframework.context.annotation.Bean

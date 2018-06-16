@@ -44,13 +44,21 @@ public class RequeryTransactionManager extends DataSourceTransactionManager {
 
     @Override
     protected void doCommit(DefaultTransactionStatus status) {
-        entityDataStore.transaction().commit();
+        try {
+            entityDataStore.transaction().commit();
+        } catch (Throwable ignored) {
+            log.trace("Fail to commit in requery transaction", ignored);
+        }
         super.doCommit(status);
     }
 
     @Override
     protected void doRollback(DefaultTransactionStatus status) {
-        entityDataStore.transaction().rollback();
+        try {
+            entityDataStore.transaction().rollback();
+        } catch (Throwable ignored) {
+            log.trace("Fail to rollback in requery transaction", ignored);
+        }
         super.doRollback(status);
     }
 

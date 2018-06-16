@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,9 +30,9 @@ public class CustomRepositoryFactoryConfigTest {
     @EnableRequeryRepositories(basePackageClasses = { UserCustomExtendedRepository.class })
     static class TestConfiguration extends RequeryTestConfiguration {
 
-        @Bean
-        public TransactionalRepositoryTest.DelegatingTransactionManager delegatingTransactionManager() {
-            return new TransactionalRepositoryTest.DelegatingTransactionManager(transactionManager());
+        @Override
+        public PlatformTransactionManager transactionManager() {
+            return new TransactionalRepositoryTest.DelegatingTransactionManager(super.transactionManager());
         }
     }
 
@@ -44,7 +45,7 @@ public class CustomRepositoryFactoryConfigTest {
         transactionManager.resetCount();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = IllegalStateException.class)
     public void testCustomFactoryUsed() {
         userRepository.customMethod(1L);
     }

@@ -41,16 +41,13 @@ public final class EntityDataStoreUtils {
         }
     }
 
-    @NotNull
     public static EntityModel getEntityModel(@NotNull EntityDataStore entityDataStore) {
         try {
             Field f = ReflectionUtils.findField(entityDataStore.getClass(), "entityModel");
             f.setAccessible(true);
-            EntityModel entityModel = (EntityModel) ReflectionUtils.getField(f, entityDataStore);
-            log.trace("Get EntityModel. entityModel name={}", entityModel.getName());
-            return entityModel;
+            return (EntityModel) ReflectionUtils.getField(f, entityDataStore);
         } catch (Exception e) {
-            throw new IllegalStateException("Fail to retrieve entity model.");
+            throw new IllegalStateException("Fail to retrieve entity model.", e);
         }
     }
 
