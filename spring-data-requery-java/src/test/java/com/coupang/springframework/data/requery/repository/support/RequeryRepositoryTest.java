@@ -1,20 +1,19 @@
 package com.coupang.springframework.data.requery.repository.support;
 
-import com.coupang.springframework.data.requery.core.RequeryTemplate;
+import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.configs.RequeryTestConfiguration;
+import com.coupang.springframework.data.requery.core.RequeryTemplate;
 import com.coupang.springframework.data.requery.domain.RandomData;
 import com.coupang.springframework.data.requery.domain.basic.BasicGroup;
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
-import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -36,8 +35,8 @@ public class RequeryRepositoryTest {
 
     @Inject RequeryTemplate operations;
 
-    RequeryRepository<BasicUser, Long> repository;
-    CrudRepository<BasicGroup, Integer> groupRepository;
+    SampleEntityRepository repository;
+    GroupEntityRepository groupRepository;
 
     @Before
     public void setup() {
@@ -92,7 +91,23 @@ public class RequeryRepositoryTest {
         assertThat(deleted).isEqualTo(userCount);
     }
 
+    @Test
+    public void executeDeclaredQuery() {
+
+        BasicUser user = RandomData.randomUser();
+        repository.save(user);
+
+        BasicUser loaded = repository.findByAnnotatedQuery(user.getEmail());
+
+        log.debug("loaded user={}", loaded);
+        assertThat(loaded).isNotNull();
+    }
+
     private static interface SampleEntityRepository extends RequeryRepository<BasicUser, Long> {
+
+        @Query("select * from basic_user u where u.email = ?")
+        @Transactional(readOnly = true)
+        BasicUser findByAnnotatedQuery(String email);
 
     }
 

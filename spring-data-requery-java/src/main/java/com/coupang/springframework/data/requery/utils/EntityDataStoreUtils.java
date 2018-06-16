@@ -28,8 +28,7 @@ public final class EntityDataStoreUtils {
 
     private EntityDataStoreUtils() {}
 
-    @NotNull
-    public static <T> EntityContext getEntityContext(@NotNull EntityDataStore entityDataStore) {
+    public static <T> EntityContext getEntityContext(EntityDataStore entityDataStore) {
         try {
 //            Field f = entityDataStore.getClass().getDeclaredField("context");
 //            f.setAccessible(true);

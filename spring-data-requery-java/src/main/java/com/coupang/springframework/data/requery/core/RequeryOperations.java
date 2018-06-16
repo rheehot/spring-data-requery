@@ -31,6 +31,7 @@ public interface RequeryOperations {
         return EntityDataStoreUtils.getEntityModel(getDataStore());
     }
 
+    @SuppressWarnings("unchecked")
     default <E> EntityContext<E> getEntityContext() {
         return EntityDataStoreUtils.getEntityContext(getDataStore());
     }
@@ -87,11 +88,11 @@ public interface RequeryOperations {
         return getDataStore().insert(entity, keyClass);
     }
 
-    default <E> Insertion<? extends Result<Tuple>> isnert(Class<E> entityType) {
+    default <E> Insertion<? extends Result<Tuple>> insert(Class<E> entityType) {
         return getDataStore().insert(entityType);
     }
 
-    default <E> InsertInto<? extends Result<Tuple>> isnert(Class<E> entityType, QueryAttribute<E, ?>... attributes) {
+    default <E> InsertInto<? extends Result<Tuple>> insert(Class<E> entityType, QueryAttribute<E, ?>... attributes) {
         return getDataStore().insert(entityType, attributes);
     }
 

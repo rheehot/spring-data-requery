@@ -19,7 +19,7 @@ import java.util.List;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = { InfrastructureConfig.class })
-public class AbstractRequeryQueryTest {
+public abstract class AbstractRequeryQueryTest {
 
     @Inject RequeryOperations operations;
 

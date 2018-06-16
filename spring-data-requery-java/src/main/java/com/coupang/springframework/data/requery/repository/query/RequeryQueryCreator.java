@@ -18,7 +18,9 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.springframework.data.repository.query.parser.Part.Type.LIKE;
 import static org.springframework.data.repository.query.parser.Part.Type.NOT_CONTAINING;
@@ -31,13 +33,6 @@ import static org.springframework.data.repository.query.parser.Part.Type.NOT_CON
  */
 @Slf4j
 public class RequeryQueryCreator extends AbstractQueryCreator<Return<?>, QueryElement<?>> {
-
-    private static final Set<Part.Type> UNSUPPORTED_IGNORE_CASE = new HashSet<>();
-
-    static {
-        UNSUPPORTED_IGNORE_CASE.addAll(Arrays.asList(Part.Type.NEAR,
-                                                     Part.Type.WITHIN));
-    }
 
     private final RequeryOperations operations;
     private final RequeryMappingContext context;
@@ -111,11 +106,9 @@ public class RequeryQueryCreator extends AbstractQueryCreator<Return<?>, QueryEl
         return QueryElementUtils.addSort(returnedType.getDomainType(), select, sort);
     }
 
-
     private Return<?> toQueryElement(Part part, QueryElement<?> root) {
         return new QueryElementBuilder(part, root).build();
     }
-
 
     private class QueryElementBuilder {
 
@@ -131,9 +124,8 @@ public class RequeryQueryCreator extends AbstractQueryCreator<Return<?>, QueryEl
 
         /**
          * Build Requery {@link QueryElement} from the underlying {@link Part}
-         *
-         * @return
          */
+        @SuppressWarnings("unchecked")
         public Return<?> build() {
 
             PropertyPath property = part.getProperty();

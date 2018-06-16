@@ -74,18 +74,15 @@ public class RequeryQueryMethod extends QueryMethod {
 
         String annotatedQuery = getAnnotatedQuery();
 
-        if (!DeclaredQuery.of(annotatedQuery).hasNamedParameter()) {
-            return;
-        }
-
         for (Parameter parameter : getParameters()) {
             if (!parameter.isNamedParameter()) {
                 continue;
             }
 
-            String paramName = parameter.getName().get();
+            String paramName = parameter.getName().orElse("");
             if (StringUtils.isEmpty(annotatedQuery)
-                || !annotatedQuery.contains(":" + paramName)
+                || StringUtils.hasText(paramName)
+                   && !annotatedQuery.contains(":" + paramName)
                    && !annotatedQuery.contains("#" + paramName)) {
                 throw new IllegalStateException(
                     String.format("Using named parameters for method %s but parameter '%s' not found in annotated query '%s'!",
@@ -122,13 +119,12 @@ public class RequeryQueryMethod extends QueryMethod {
     }
 
     String getRequiredAnnotatedQuery() throws IllegalStateException {
-
         String query = getAnnotatedQuery();
         if (query != null) {
             return query;
         }
 
-        throw new IllegalStateException(String.format("No annotated query found for query method %s!", getName()));
+        throw new IllegalStateException("No annotated query found for query method " + getName());
     }
 
     @Nullable
@@ -138,10 +134,12 @@ public class RequeryQueryMethod extends QueryMethod {
     }
 
 
+    @SuppressWarnings("SameParameterValue")
     private String getAnnotationValue(String attribute, Class<String> type) {
         return getMergedOrDefaultAnnotationValue(attribute, Query.class, type);
     }
 
+    @SuppressWarnings({ "unchecked", "SameParameterValue" })
     private <T> T getMergedOrDefaultAnnotationValue(String attribute,
                                                     Class annotationType,
                                                     Class<T> targetType) {

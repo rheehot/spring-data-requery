@@ -1,12 +1,12 @@
 package com.coupang.springframework.data.requery.repository.query;
 
+import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.provider.QueryExtractor;
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
-import com.coupang.springframework.data.requery.annotation.Query;
 import io.requery.sql.EntityDataStore;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.NotImplementedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
  * @author debop
  * @since 18. 6. 9
  */
+@Slf4j
 @UtilityClass
 public final class RequeryQueryLookupStrategy {
 
@@ -29,6 +30,8 @@ public final class RequeryQueryLookupStrategy {
                                              QueryLookupStrategy.Key key,
                                              QueryExtractor extractor,
                                              EvaluationContextProvider evaluationContextProvider) {
+        log.debug("Create Query Lookup Strategy. key={}", key);
+
         switch (key != null ? key : QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND) {
             case CREATE:
                 return new CreateQueryLookupStrategy(operations, extractor);
@@ -86,6 +89,7 @@ public final class RequeryQueryLookupStrategy {
         protected RepositoryQuery resolveQuery(RequeryQueryMethod method,
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
+            log.debug("Create PartTreeRequeryQuery, method={}, namedQueries={}", method, namedQueries);
             return new PartTreeRequeryQuery(method, operations, persistenceProvider);
         }
     }
@@ -109,7 +113,9 @@ public final class RequeryQueryLookupStrategy {
         protected RepositoryQuery resolveQuery(RequeryQueryMethod method,
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
-            throw new NotImplementedException("구현 중");
+
+            log.debug("Create RawStringRequeryQueryt. method={}, namedQueries={}", method.getName(), namedQueries);
+            return new DeclaredRequeryQuery(method, operations);
         }
     }
 

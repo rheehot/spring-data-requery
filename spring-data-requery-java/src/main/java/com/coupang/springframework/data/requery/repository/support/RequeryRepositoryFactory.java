@@ -58,10 +58,11 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
                                                                         RequeryOperations operations) {
 
         RequeryEntityInformation<?, ?> entityInformation = getEntityInformation(information.getDomainType());
-
         Object repository = getTargetRepositoryViaReflection(information, entityInformation, operations);
 
         Assert.isInstanceOf(RequeryRepositoryImplementation.class, repository);
+
+        log.debug("Get target repository. repository={}", repository);
 
         return (RequeryRepositoryImplementation<?, ?>) repository;
 
@@ -77,9 +78,8 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
     @Override
     protected Optional<QueryLookupStrategy> getQueryLookupStrategy(QueryLookupStrategy.Key key,
                                                                    EvaluationContextProvider evaluationContextProvider) {
-
+        log.debug("Get QueryLookupStrategy. key={}", key);
         return Optional.of(RequeryQueryLookupStrategy.create(operations, key, extractor, evaluationContextProvider));
-        // return super.getQueryLookupStrategy(key, evaluationContextProvider);
     }
 
     @Override

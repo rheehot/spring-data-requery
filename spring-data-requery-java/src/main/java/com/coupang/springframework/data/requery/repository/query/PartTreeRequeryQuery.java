@@ -6,9 +6,8 @@ import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvi
 import io.requery.query.NamedExpression;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.repository.query.ResultProcessor;
-import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.data.repository.query.parser.PartTree;
 
 /**
@@ -53,32 +52,33 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
         }
     }
 
+
     @Override
-    protected QueryElement<?> createQuery(RequeryParameterAccessor accessor, RequeryQueryOptions options) {
-        RequeryPersistenceProvider persistenceProvider = null;
-        ParameterMetadataProvider provider = new ParameterMetadataProvider(accessor.getParameters(), persistenceProvider);
-
-        ResultProcessor processor = getQueryMethod().getResultProcessor();
-        ReturnedType returnedType = processor.withDynamicProjection(accessor).getReturnedType();
-
-        return (QueryElement<?>) new RequeryQueryCreator(operations,
-                                                         provider,
-                                                         returnedType,
-                                                         tree,
-                                                         accessor,
-                                                         null)
-            .createQuery();
+    protected QueryElement<?> doCreateQuery(Object[] values) {
+        throw new NotImplementedException("구현 중");
     }
 
     @Override
-    protected boolean isCountQuery() {
-        return tree.isCountProjection();
+    protected QueryElement<?> doCreateCountQuery(Object[] values) {
+        throw new NotImplementedException("구현 중");
     }
 
-    @Override
-    protected boolean isExistsQuery() {
-        return tree.isExistsProjection();
-    }
+//    @Override
+//    protected QueryElement<?> createQuery(RequeryParameterAccessor accessor, RequeryQueryOptions options) {
+//        RequeryPersistenceProvider persistenceProvider = null;
+//        ParameterMetadataProvider provider = new ParameterMetadataProvider(accessor.getParameters(), persistenceProvider);
+//
+//        ResultProcessor processor = getQueryMethod().getResultProcessor();
+//        ReturnedType returnedType = processor.withDynamicProjection(accessor).getReturnedType();
+//
+//        return (QueryElement<?>) new RequeryQueryCreator(operations,
+//                                                         provider,
+//                                                         returnedType,
+//                                                         tree,
+//                                                         accessor,
+//                                                         null)
+//            .createQuery();
+//    }
 
     // 아래 부분이 RequeryQueryCreator 로 이동해야 한다.
     //
@@ -114,6 +114,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
         }
         return selection;
     }
+
 
     /**
      * Query preparer to create {@link QueryElement} instances and potentially cache them.
