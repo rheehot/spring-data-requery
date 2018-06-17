@@ -46,7 +46,7 @@ idea {
 
 dependencies {
 
-    implementation project(":spring-data-requery-java")
+    compile project(":spring-data-requery-java")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
