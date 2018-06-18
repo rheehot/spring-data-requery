@@ -7,8 +7,6 @@ import com.coupang.springframework.data.requery.core.KotlinRequeryTemplate
 import com.coupang.springframework.data.requery.core.RequeryTemplate
 import io.requery.sql.EntityDataStore
 import io.requery.sql.KotlinEntityDataStore
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner

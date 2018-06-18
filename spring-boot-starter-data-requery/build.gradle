@@ -1,0 +1,8 @@
+
+apply plugin: 'java'
+
+dependencies {
+
+    compile project(":spring-data-requery-java")
+
+}

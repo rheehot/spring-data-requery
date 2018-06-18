@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.configs;
 
 import com.coupang.kotlinx.data.requery.listeners.LogbackListener;
+import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.core.RequeryTemplate;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.repository.RequeryContext;
@@ -65,13 +66,13 @@ public abstract class AbstractRequeryConfiguration {
     }
 
     @Bean
-    public EntityDataStore entityDataStore() {
+    public EntityDataStore<Object> entityDataStore() {
         log.info("Create EntityDataStore instance.");
-        return new EntityDataStore(requeryConfiguration());
+        return new EntityDataStore<>(requeryConfiguration());
     }
 
     @Bean
-    public RequeryTemplate requeryTemplate() {
+    public RequeryOperations requeryOperations() {
         log.info("Create RequeryTemplate instance.");
         return new RequeryTemplate(entityDataStore(), requeryMappingContext());
     }

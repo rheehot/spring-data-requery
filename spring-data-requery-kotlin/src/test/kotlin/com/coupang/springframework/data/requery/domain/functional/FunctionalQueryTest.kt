@@ -97,7 +97,8 @@ class FunctionalQueryTest: AbstractDomainTest() {
             requeryKotlin.insert(person)
         }
 
-        // TODO: not 연산자가 제대로 동작하지 않는다. (Java 와 Kotlin 모두)
+        // FIXME: not 연산자가 제대로 동작하지 않는다. (Java 와 Kotlin 모두)
+        //
         val result = requeryKotlin.select(FuncPerson::class)
             .where(
                 FuncPerson.NAME.ne(name).and(FuncPerson.EMAIL.ne(email))
@@ -330,7 +331,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
             val result =
                 select(NamedNumericExpression.ofInteger("avg_age").avg())
                     .from(subQuery)
-                .get()
+                    .get()
 
             assertThat(result.first().get<Int>(0)).isGreaterThanOrEqualTo(5)
         }
