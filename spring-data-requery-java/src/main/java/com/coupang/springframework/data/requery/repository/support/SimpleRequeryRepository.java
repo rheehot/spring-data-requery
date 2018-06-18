@@ -1,19 +1,23 @@
 package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import com.coupang.springframework.data.requery.utils.EntityUtils;
 import com.coupang.springframework.data.requery.utils.PagingUtils;
-import io.requery.query.*;
+import io.requery.query.NamedExpression;
+import io.requery.query.OrderingExpression;
+import io.requery.query.Result;
+import io.requery.query.Return;
 import io.requery.query.element.QueryElement;
 import io.requery.sql.EntityDataStore;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,8 +84,9 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
     @NotNull
     @Override
-    public Iterable<T> findAll(Sort sort) {
-        if (sort != null && sort.isSorted()) {
+    public Iterable<T> findAll(@NotNull Sort sort) {
+        log.debug("Find all {} with sort, sort={}", domainClass.getSimpleName(), sort);
+        if (sort.isSorted()) {
             OrderingExpression<?>[] orderingExprs = PagingUtils.toRequeryOrderExpression(domainClass, sort);
 
             if (orderingExprs.length > 0) {
@@ -102,9 +107,10 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @SuppressWarnings("unchecked")
     @NotNull
     @Override
-    public Page<T> findAll(Pageable pageable) {
-        if (pageable != null && pageable.isPaged()) {
+    public Page<T> findAll(@NotNull Pageable pageable) {
 
+        log.debug("Find all {} with paging, pageable={}", domainClass.getSimpleName(), pageable);
+        if (pageable.isPaged()) {
             Return<Result<T>> query = PagingUtils.applyPageable(domainClass,
                                                                 (QueryElement<Result<T>>) operations.select(domainClass),
                                                                 pageable);
@@ -141,6 +147,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         return Optional.ofNullable(operations.findById(domainClass, id));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean existsById(@NotNull ID id) {
         return findById(id).isPresent();
@@ -152,10 +159,21 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         return operations.findAll(domainClass);
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     @Override
     public Iterable<T> findAllById(@NotNull Iterable<ID> ids) {
-        throw new NotImplementedException("구현 중");
+        HashSet<ID> idSet = new HashSet<>();
+        for (ID id : ids) {
+            idSet.add(id);
+        }
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) EntityUtils.getKeyExpression(domainClass);
+
+        return operations
+            .select(domainClass)
+            .where(keyExpr.in(idSet))
+            .get()
+            .toList();
     }
 
     @Override
@@ -163,15 +181,21 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         return operations.count(domainClass).get().value().longValue();
     }
 
+    @SuppressWarnings("unchecked")
     @Transactional
     @Override
     public void deleteById(@NotNull ID id) {
-        // TODO: Entity의 @Key 에 해당하는 Field 의 이름과 수형을 알아야 한다.
-        //
-        NamedExpression idExpr = NamedExpression.of("id", Long.class);
-        operations.delete(domainClass)
-            .where(idExpr.eq(id))
-            .get();
+        log.debug("Delete {} by id. id={}", domainClass.getSimpleName(), id);
+
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) EntityUtils.getKeyExpression(domainClass);
+
+        Integer deletedCount = operations
+            .delete(domainClass)
+            .where(keyExpr.eq(id))
+            .get()
+            .value();
+
+        log.debug("Deleted count={}", deletedCount);
     }
 
     @Transactional
@@ -189,7 +213,11 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Transactional
     @Override
     public void deleteAll() {
-        operations.delete(domainClass).get().value();
+        log.debug("Delete All {} ...", domainClass.getSimpleName());
+
+        Integer deletedCount = operations.delete(domainClass).get().value();
+
+        log.debug("Delete All {}, deleted count={}", domainClass.getSimpleName(), deletedCount);
     }
 
     @NotNull
@@ -227,29 +255,4 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         throw new NotImplementedException("구현 중");
     }
 
-
-    @Override
-    public Optional<T> findOne(@Nullable WhereAndOr<T> predicate) {
-        return Optional.empty();
-    }
-
-    @Override
-    public List<T> findAll(@Nullable WhereAndOr<T> predicate) {
-        return null;
-    }
-
-    @Override
-    public Page<T> findAll(@Nullable WhereAndOr<T> predicate, Pageable pageable) {
-        return null;
-    }
-
-    @Override
-    public List<T> findAll(@Nullable WhereAndOr<T> predicate, Sort sort) {
-        return null;
-    }
-
-    @Override
-    public long count(@Nullable WhereAndOr<T> predicate) {
-        return 0;
-    }
 }

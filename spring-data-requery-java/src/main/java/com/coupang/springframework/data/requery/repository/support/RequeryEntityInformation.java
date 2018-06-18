@@ -15,8 +15,6 @@ public interface RequeryEntityInformation<T, ID> extends EntityInformation<T, ID
 
     /**
      * Returns the id attriute of the entity
-     *
-     * @return
      */
     @Nullable
     Attribute<? super T, ?> getIdAttribute();

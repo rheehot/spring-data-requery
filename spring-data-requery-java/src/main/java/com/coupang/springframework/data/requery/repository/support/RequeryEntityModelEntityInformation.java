@@ -109,6 +109,8 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
 
     }
 
+    @SuppressWarnings("unchecked")
+    @NotNull
     @Override
     public Class<ID> getIdType() {
         return (Class<ID>) idMetadata.getType();

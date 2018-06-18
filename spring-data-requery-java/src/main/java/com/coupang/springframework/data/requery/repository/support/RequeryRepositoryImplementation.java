@@ -1,6 +1,5 @@
 package com.coupang.springframework.data.requery.repository.support;
 
-import com.coupang.springframework.data.requery.repository.RequeryPredicatedExecutor;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
 
 /**
@@ -9,7 +8,8 @@ import com.coupang.springframework.data.requery.repository.RequeryRepository;
  * @author debop
  * @since 18. 6. 6
  */
-public interface RequeryRepositoryImplementation<T, ID> extends RequeryRepository<T, ID>, RequeryPredicatedExecutor<T> {
+public interface RequeryRepositoryImplementation<T, ID> extends RequeryRepository<T, ID> {
 
     void setRepositoryMethodMetadata(CrudMethodMetadata crudMethodMetadata);
+
 }
