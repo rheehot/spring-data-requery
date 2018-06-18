@@ -29,15 +29,9 @@ noArg {
     invokeInitializers = true
 }
 
-sourceSets {
-    generated {
-        "${buildDir}/generated/source/kapt/main/"
-    }
-}
 
 idea {
     module {
-        sourceDirs += file("${buildDir}/generated/source/kapt/main/")
         testSourceDirs += file("${buildDir}/generated/source/kapt/test/")
         generatedSourceDirs += file("${buildDir}/generated/source/kapt/main/")
     }

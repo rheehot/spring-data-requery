@@ -15,17 +15,18 @@ import org.springframework.data.domain.Sort
  * Spring Data 의 Sort 정보를 Requery용 OrderingExpression으로 표현합니다.
  */
 fun <T> Sort.toRequeryOrder(entityType: Class<T>): Array<OrderingExpression<T>> {
-    return this.map { order ->
+    return this
+        .map { order ->
 
-        val expr = NamedExpression.of(order.property, entityType)
-        val orderExpr = when {
-            order.isAscending  -> expr.asc()
-            order.isDescending -> expr.desc()
-            else               -> expr.asc()
+            val expr = NamedExpression.of(order.property, entityType)
+
+            when {
+                order.isAscending  -> expr.asc()
+                order.isDescending -> expr.desc()
+                else               -> expr.asc()
+            }
         }
-        orderExpr
-    }
-        .toList()
+        .toMutableList()
         .toTypedArray()
 }
 
