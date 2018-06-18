@@ -1,17 +1,16 @@
 package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
-import io.requery.query.WhereAndOr;
+import com.coupang.springframework.data.requery.utils.PagingUtils;
+import io.requery.query.*;
+import io.requery.query.element.QueryElement;
 import io.requery.sql.EntityDataStore;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,19 +32,21 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Getter
     private final RequeryOperations operations;
     private final RequeryEntityInformation<T, ID> entityInformation;
-    private final Class<T> domainType;
+    private final Class<T> domainClass;
+
+    private CrudMethodMetadata crudMethodMetadata;
 
     public SimpleRequeryRepository(@NotNull RequeryEntityInformation<T, ID> entityInformation, @NotNull RequeryOperations operations) {
-        log.debug("Create SimpleRequeryRepository. domainType={}", entityInformation.getJavaType());
+        log.debug("Create SimpleRequeryRepository. domainClass={}", entityInformation.getJavaType());
 
         this.entityInformation = entityInformation;
-        this.domainType = entityInformation.getJavaType();
+        this.domainClass = entityInformation.getJavaType();
         this.operations = operations;
     }
 
     @Override
     public void setRepositoryMethodMetadata(CrudMethodMetadata crudMethodMetadata) {
-        // TODO: 구현 중 
+        this.crudMethodMetadata = crudMethodMetadata;
     }
 
     @Transactional
@@ -69,24 +70,55 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Transactional
     @Override
     public int deleteAllInBatch() {
-        return operations.delete(domainType).get().value();
+        return operations.delete(domainClass).get().value();
     }
 
     @Override
     public T getOne(ID id) {
-        return operations.findById(domainType, id);
+        return operations.findById(domainClass, id);
     }
 
     @NotNull
     @Override
-    public Iterable<T> findAll(@NotNull Sort sort) {
-        throw new NotImplementedException("구현 중");
+    public Iterable<T> findAll(Sort sort) {
+        if (sort != null && sort.isSorted()) {
+            OrderingExpression<?>[] orderingExprs = PagingUtils.toRequeryOrderExpression(domainClass, sort);
+
+            if (orderingExprs.length > 0) {
+                return operations
+                    .select(domainClass)
+                    .orderBy(orderingExprs)
+                    .get()
+                    .toList();
+            }
+        }
+
+        return operations
+            .select(domainClass)
+            .get()
+            .toList();
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     @Override
-    public Page<T> findAll(@NotNull Pageable pageable) {
-        throw new NotImplementedException("구현 중");
+    public Page<T> findAll(Pageable pageable) {
+        if (pageable != null && pageable.isPaged()) {
+
+            Return<Result<T>> query = PagingUtils.applyPageable(domainClass,
+                                                                (QueryElement<Result<T>>) operations.select(domainClass),
+                                                                pageable);
+            List<T> content = query.get().toList();
+            long total = operations.count(domainClass).get().value().longValue();
+
+            return new PageImpl<>(content, pageable, total);
+        } else {
+            List<T> content = operations
+                .select(domainClass)
+                .get()
+                .toList();
+            return new PageImpl<>(content);
+        }
     }
 
     @Transactional
@@ -106,7 +138,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @NotNull
     @Override
     public Optional<T> findById(@NotNull ID id) {
-        return Optional.ofNullable(operations.findById(domainType, id));
+        return Optional.ofNullable(operations.findById(domainClass, id));
     }
 
     @Override
@@ -117,7 +149,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @NotNull
     @Override
     public Iterable<T> findAll() {
-        return operations.findAll(domainType);
+        return operations.findAll(domainClass);
     }
 
     @NotNull
@@ -128,13 +160,18 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
     @Override
     public long count() {
-        return operations.count(domainType).get().value().longValue();
+        return operations.count(domainClass).get().value().longValue();
     }
 
     @Transactional
     @Override
     public void deleteById(@NotNull ID id) {
-        findById(id).ifPresent(this::delete);
+        // TODO: Entity의 @Key 에 해당하는 Field 의 이름과 수형을 알아야 한다.
+        //
+        NamedExpression idExpr = NamedExpression.of("id", Long.class);
+        operations.delete(domainClass)
+            .where(idExpr.eq(id))
+            .get();
     }
 
     @Transactional
@@ -152,7 +189,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Transactional
     @Override
     public void deleteAll() {
-        operations.delete(domainType).get().value();
+        operations.delete(domainClass).get().value();
     }
 
     @NotNull
@@ -189,7 +226,6 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     public <S extends T> boolean exists(@NotNull Example<S> example) {
         throw new NotImplementedException("구현 중");
     }
-
 
 
     @Override
