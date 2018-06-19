@@ -6,6 +6,7 @@ import io.requery.query.Result;
 import io.requery.query.WhereAndOr;
 import io.requery.query.element.QueryElement;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.NullHandler;
@@ -15,7 +16,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,6 +25,7 @@ import java.util.List;
  * @author debop@coupang.com
  * @since 18. 6. 19
  */
+@Slf4j
 @UtilityClass
 public class QueryByExampleBuilder {
 
@@ -39,12 +40,10 @@ public class QueryByExampleBuilder {
 
         ExampleMatcher matcher = example.getMatcher();
 
-        List<Condition<E, ?>> conditions = getPredicates("",
-                                                         root,
+        List<Condition<E, ?>> conditions = getConditions(root,
                                                          example.getProbe(),
                                                          example.getProbeType(),
                                                          new ExampleMatcherAccessor(matcher));
-
         if (conditions.isEmpty()) {
             return (WhereAndOr<? extends Result<E>>) root;
         }
@@ -53,7 +52,8 @@ public class QueryByExampleBuilder {
         }
 
 
-        final List<WhereAndOr<? extends Result<E>>> whereClause = Arrays.asList(root.where(conditions.get(0)));
+        final List<WhereAndOr<? extends Result<E>>> whereClause = new ArrayList<>();
+        whereClause.add(root.where(conditions.get(0)));
 
         conditions.stream()
             .skip(1)
@@ -69,8 +69,7 @@ public class QueryByExampleBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    <E> List<Condition<E, ?>> getPredicates(String path,
-                                            QueryElement<? extends Result<E>> root,
+    <E> List<Condition<E, ?>> getConditions(QueryElement<? extends Result<E>> root,
                                             Object exampleValue,
                                             Class<E> probeType,
                                             ExampleMatcherAccessor exampleAccessor) {
@@ -82,11 +81,11 @@ public class QueryByExampleBuilder {
 
             String fieldName = field.getName();
             Class<?> fieldType = field.getType();
+            Object fieldValue = beanWrapper.getPropertyValue(fieldName);
+
+            log.trace("Get condition from Example. fieldName={}, fieldType={}, fieldValue={}", fieldName, fieldType, fieldValue);
 
             NamedExpression<?> expr = NamedExpression.of(fieldName, fieldType);
-
-
-            Object fieldValue = beanWrapper.getPropertyValue(fieldName);
 
             if (fieldValue == null) {
                 if (exampleAccessor.getNullHandler().equals(NullHandler.INCLUDE)) {
@@ -97,6 +96,7 @@ public class QueryByExampleBuilder {
 
                 Condition<E, ?> condition;
                 NamedExpression<String> stringExpr = (NamedExpression<String>) expr;
+
                 switch (exampleAccessor.getStringMatcherForPath(fieldName)) {
                     case DEFAULT:
                     case EXACT:
