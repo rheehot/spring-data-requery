@@ -8,7 +8,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * PagingUtils
@@ -38,20 +41,21 @@ public class PagingUtils {
             return new OrderingExpression[0];
         }
 
-        return (OrderingExpression<?>[])
-            sort.stream()
-                .map(order -> {
-                    String propertyName = order.getProperty();
-                    Field field = ReflectionUtils.findField(domainClass, propertyName);
-                    if (field != null) {
-                        NamedExpression<?> expr = NamedExpression.of(propertyName, field.getType());
+        List<OrderingExpression<?>> orderingExprs = new ArrayList<>();
 
-                        return (order.isAscending()) ? expr.asc() : expr.desc();
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .toArray();
+        for (Sort.Order order : sort) {
+            String propertyName = order.getProperty();
+            Field field = ReflectionUtils.findField(domainClass, propertyName);
+
+            if (field != null) {
+                NamedExpression<?> expr = NamedExpression.of(propertyName, field.getType());
+                OrderingExpression<?> orderingExpr = (order.isAscending()) ? expr.asc() : expr.desc();
+
+                orderingExprs.add(orderingExpr);
+            }
+        }
+
+        return orderingExprs.toArray(new OrderingExpression<?>[0]);
+
     }
 }

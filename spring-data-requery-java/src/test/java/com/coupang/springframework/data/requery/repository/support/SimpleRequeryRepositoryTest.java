@@ -10,19 +10,20 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
- * SimpleJpaRepositoryTest
+ * SimpleRequeryRepositoryTest
  *
  * @author debop@coupang.com
  * @since 18. 6. 12
  */
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class SimpleJpaRepositoryTest {
+public class SimpleRequeryRepositoryTest {
 
     SimpleRequeryRepository<BasicUser, Long> repo;
 
@@ -50,4 +51,5 @@ public class SimpleJpaRepositoryTest {
         assertThat(user.isPresent()).isFalse();
         // repo.findAll(PageRequest.of(2, 10));
     }
+
 }

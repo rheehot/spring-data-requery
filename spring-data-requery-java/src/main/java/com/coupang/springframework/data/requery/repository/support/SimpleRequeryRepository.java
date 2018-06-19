@@ -3,11 +3,9 @@ package com.coupang.springframework.data.requery.repository.support;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.utils.EntityUtils;
 import com.coupang.springframework.data.requery.utils.PagingUtils;
-import io.requery.query.NamedExpression;
-import io.requery.query.OrderingExpression;
-import io.requery.query.Result;
-import io.requery.query.Return;
+import io.requery.query.*;
 import io.requery.query.element.QueryElement;
+import io.requery.query.function.Count;
 import io.requery.sql.EntityDataStore;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -150,7 +148,15 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @SuppressWarnings("unchecked")
     @Override
     public boolean existsById(@NotNull ID id) {
-        return findById(id).isPresent();
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) EntityUtils.getKeyExpression(domainClass);
+
+        Tuple result = operations
+            .select(Count.count(domainClass))
+            .where(keyExpr.eq(id))
+            .get()
+            .first();
+
+        return result.<Integer>get(0) > 0;
     }
 
     @NotNull
