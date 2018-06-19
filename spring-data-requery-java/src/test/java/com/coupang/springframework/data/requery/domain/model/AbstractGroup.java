@@ -36,16 +36,20 @@ public class AbstractGroup extends AbstractPersistable<Long> {
     protected String description;
     protected GroupType type;
 
+    @Version
+    protected int version = 0;
+
     @Convert(ByteArrayBlobConverter.class)
     protected byte[] picture;
 
-    @JunctionTable
+    @JunctionTable(name = "Func_Group_Members")
     @ManyToMany
+    @OrderBy("name")
     protected MutableResult<AbstractPerson> members;
 
     @JunctionTable(name = "Group_Owners")
-    @OrderBy(value = "name", order = Order.ASC)
     @ManyToMany
+    @OrderBy(value = "name", order = Order.ASC)
     protected MutableResult<AbstractPerson> owners;
 
     protected LocalDateTime createdAt;

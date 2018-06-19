@@ -3,14 +3,12 @@ package com.coupang.springframework.data.requery.utils;
 import com.coupang.springframework.data.requery.core.EntityState;
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest;
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
-import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
 import io.requery.meta.EntityModel;
 import io.requery.meta.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

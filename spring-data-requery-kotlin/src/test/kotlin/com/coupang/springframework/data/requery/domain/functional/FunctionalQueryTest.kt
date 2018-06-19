@@ -4,7 +4,7 @@ import com.coupang.kotlinx.logging.KLogging
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomAddress
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPerson
-import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPersons
+import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPeople
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPhone
 import io.requery.PersistenceException
 import io.requery.query.NamedNumericExpression
@@ -60,7 +60,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     @Test
     fun `query function random`() {
         with(requeryKotlin) {
-            insertAll(randomPersons(10))
+            insertAll(randomPeople(10))
 
             val result = select(FuncPerson::class)
                 .orderBy(io.requery.query.function.Random())
@@ -111,7 +111,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     @Test
     fun `single query execute`() {
         with(requeryKotlin) {
-            insertAll(RandomData.randomPersons(10))
+            insertAll(RandomData.randomPeople(10))
 
             val result: Result<FuncPerson> = select(FuncPerson::class).get()
             assertThat(result.toList()).hasSize(10)
@@ -184,7 +184,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     @Test
     fun `delete batch`() {
         with(requeryKotlin) {
-            val people = randomPersons(COUNT)
+            val people = randomPeople(COUNT)
             insertAll(people)
             // refresh(people)
 
@@ -252,7 +252,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     @Test
     fun `query select count`() {
         with(requeryKotlin) {
-            val people = randomPersons(10)
+            val people = randomPeople(10)
             insertAll(people)
 
             // HINT: count 가져오기 : sql 함수를 사용하는구나 !!!
@@ -283,7 +283,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     fun `query select count where`() {
         with(requeryKotlin) {
             insert(randomPerson().apply { name = "countme" })
-            insertAll(randomPersons(9))
+            insertAll(randomPeople(9))
 
             assertThat(count(FuncPerson::class).where(FuncPerson.NAME.eq("countme")).get().value().toInt()).isEqualTo(1)
 
@@ -299,7 +299,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     @Test
     fun `query not null`() {
         with(requeryKotlin) {
-            insertAll(randomPersons(10))
+            insertAll(randomPeople(10))
 
             val result = select(FuncPerson::class).where(FuncPerson.NAME.notNull()).get()
             assertThat(result.toList()).hasSize(10)
@@ -557,7 +557,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     @Test
     fun `query consume`() {
         with(requeryKotlin) {
-            insertAll(randomPersons(10))
+            insertAll(randomPeople(10))
 
             var count = 0
             val result = select(FuncPerson::class).get()
@@ -572,7 +572,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     fun `query map`() {
         with(requeryKotlin) {
             insert(randomPerson().apply { email = "one@test.com" })
-            insertAll(randomPersons(9))
+            insertAll(randomPeople(9))
 
             val result = select(FuncPerson::class).get()
             var map = result.toMap(FuncPerson.EMAIL, ConcurrentHashMap<String, FuncPerson>())
@@ -859,7 +859,7 @@ class FunctionalQueryTest: AbstractDomainTest() {
     }
 
     @Test
-    fun `voilate unique constraint`() {
+    fun `violate unique constraint`() {
         assertThatThrownBy {
             with(requeryKotlin) {
 

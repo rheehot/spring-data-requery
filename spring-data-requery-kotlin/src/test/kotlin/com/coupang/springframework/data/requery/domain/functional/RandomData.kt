@@ -27,7 +27,7 @@ object RandomData {
         }
     }
 
-    fun randomPersons(count: Int): MutableSet<FuncPerson> {
+    fun randomPeople(count: Int): MutableSet<FuncPerson> {
         return List(count) { randomPerson() }.toMutableSet()
     }
 

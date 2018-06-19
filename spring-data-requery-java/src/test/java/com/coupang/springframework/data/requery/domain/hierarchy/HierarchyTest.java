@@ -59,7 +59,7 @@ public class HierarchyTest extends AbstractDomainTest {
     }
 
     @Test
-    public void insertRootNodeOnly() {
+    public void insert_root_node_only() {
         TreeNode root = treeNodeOf("root");
         requeryTemplate.insert(root);
 

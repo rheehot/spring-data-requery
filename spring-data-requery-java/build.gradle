@@ -38,6 +38,7 @@ dependencies {
 
     compile "com.coupang.kotlinx:kotlinx-data-requery"
     compile "io.requery:requery"
+    implementation "io.requery:requery-jackson"
 
     compile "org.springframework:spring-jdbc"
 

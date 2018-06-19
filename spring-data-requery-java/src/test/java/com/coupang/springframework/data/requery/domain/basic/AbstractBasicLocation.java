@@ -13,13 +13,13 @@ import lombok.Getter;
 @Getter
 @Entity
 @Table(name = "basic_address")
-public class AbstractBasicLocation extends AbstractPersistable<Integer> {
+public class AbstractBasicLocation extends AbstractPersistable<Long> {
 
     private static final long serialVersionUID = -4665641548712152873L;
 
     @Key
     @Generated
-    protected Integer id;
+    protected Long id;
 
     protected String line1;
     protected String line2;

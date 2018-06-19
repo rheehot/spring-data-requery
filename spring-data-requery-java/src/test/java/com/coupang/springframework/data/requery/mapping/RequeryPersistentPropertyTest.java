@@ -1,10 +1,6 @@
 package com.coupang.springframework.data.requery.mapping;
 
-import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
-import com.coupang.springframework.data.requery.mapping.RequeryPersistentEntity;
-import com.coupang.springframework.data.requery.mapping.RequeryPersistentProperty;
 import io.requery.Embedded;
-import io.requery.Entity;
 import io.requery.OneToOne;
 import io.requery.Transient;
 import io.requery.meta.EntityModel;

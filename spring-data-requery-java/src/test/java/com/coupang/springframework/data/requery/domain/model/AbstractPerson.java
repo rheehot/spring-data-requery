@@ -41,7 +41,10 @@ public class AbstractPerson extends AbstractPersistable<Long> {
     protected String email;
 
     @Convert(LocalDateConverter.class)
-    protected LocalDate birtyday;
+    protected LocalDate birthday;
+
+    @Column(value = "'empty'")
+    protected String description;
 
     @Nullable
     protected Integer age;
@@ -62,6 +65,9 @@ public class AbstractPerson extends AbstractPersistable<Long> {
     @ManyToMany(mappedBy = "members")
     protected MutableResult<AbstractGroup> groups;
 
+    @ManyToMany(mappedBy = "owners")
+    protected MutableResult<AbstractGroup> ownedGroups;
+
     @JunctionTable(name = "Person_Friends")
     @ManyToMany(mappedBy = "personId")
     protected Set<AbstractPerson> friends;
@@ -75,6 +81,7 @@ public class AbstractPerson extends AbstractPersistable<Long> {
 
     protected URL homepage;
 
+    protected String picture;
 
     @Override
     public int hashCode() {
