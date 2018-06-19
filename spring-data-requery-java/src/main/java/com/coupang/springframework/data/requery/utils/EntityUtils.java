@@ -1,13 +1,11 @@
 package com.coupang.springframework.data.requery.utils;
 
 import io.requery.Key;
-import io.requery.meta.QueryAttribute;
 import io.requery.query.NamedExpression;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;

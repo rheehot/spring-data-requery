@@ -2,20 +2,14 @@ package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.domain.basic.AbstractBasicGroup;
 import com.coupang.springframework.data.requery.domain.basic.AbstractBasicUser;
-import com.coupang.springframework.data.requery.domain.basic.BasicUser;
 import com.coupang.springframework.data.requery.repository.query.DefaultRequeryEntityMetadata;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * DefaultRequeryEntityMetadataTest
- *
- * @author debop@coupang.com
- * @since 18. 6. 12
- */
 public class DefaultRequeryEntityMetadataTest {
 
+    @SuppressWarnings("unchecked")
     @Test(expected = IllegalArgumentException.class)
     public void rejectsNullDomainType() {
         new DefaultRequeryEntityMetadata(null);

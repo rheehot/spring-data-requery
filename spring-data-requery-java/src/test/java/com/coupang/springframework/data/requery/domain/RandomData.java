@@ -39,7 +39,7 @@ public class RandomData {
 
             return user;
         } catch (Exception e) {
-            log.warn("Error when create user.", e);
+            log.warn("Error when create person.", e);
             return new BasicUser();
         }
     }

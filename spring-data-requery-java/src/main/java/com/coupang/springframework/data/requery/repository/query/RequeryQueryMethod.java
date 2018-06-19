@@ -85,7 +85,7 @@ public class RequeryQueryMethod extends QueryMethod {
                    && !annotatedQuery.contains(":" + paramName)
                    && !annotatedQuery.contains("#" + paramName)) {
                 throw new IllegalStateException(
-                    String.format("Using named parameters for method %s but parameter '%s' not found in annotated query '%s'!",
+                    String.format("Using named parameters for method [%s] but parameter '%s' not found in annotated query '%s'!",
                                   method, parameter.getName(), annotatedQuery));
             }
         }

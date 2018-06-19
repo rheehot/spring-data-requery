@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.repository.config;
 
-import com.coupang.springframework.data.requery.repository.sample.ClassWithNestedRepository;
-import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
+import com.coupang.springframework.data.requery.repository.sample.basic.BasicUserRepository;
+import com.coupang.springframework.data.requery.repository.sample.config.ClassWithNestedRepository;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AllowNestedRepositoriesRepositoryConfigTest extends AbstractRepositoryConfigTest {
 
     @Configuration
-    @EnableRequeryRepositories(basePackageClasses = { ClassWithNestedRepository.class },
+    @EnableRequeryRepositories(basePackageClasses = { BasicUserRepository.class, ClassWithNestedRepository.class },
                                considerNestedRepositories = true)
     static class TestConfiguration extends InfrastructureConfig {
 

@@ -1,7 +1,6 @@
 package com.coupang.springframework.data.requery.repository.config;
 
 import com.coupang.springframework.data.requery.repository.sample.basic.BasicUserRepository;
-import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,12 +72,13 @@ public class RequeryRepositoriesRegistrarIntegrationTests {
         List<Advisor> advisors = Arrays.asList(((Advised) repository).getAdvisors());
 
         for (Advisor advisor : advisors) {
-            log.debug("Advice={}", advisor.getAdvice());
+            log.trace("Advice={}", advisor.getAdvice());
         }
 
-        Boolean matched = advisors.stream().anyMatch(advisor -> {
-            return advisor.getAdvice() instanceof PersistenceExceptionTranslationInterceptor;
-        });
+        Boolean matched = advisors
+            .stream()
+            .anyMatch(advisor -> advisor.getAdvice() instanceof PersistenceExceptionTranslationInterceptor);
+
         assertThat(matched).isTrue();
     }
 }

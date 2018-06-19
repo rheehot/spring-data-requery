@@ -1,6 +1,5 @@
 package com.coupang.springframework.data.requery.repository.config;
 
-import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
