@@ -191,6 +191,13 @@ subprojects {
     test {
         useJUnitPlatform()
         // systemProperty 'java.util.logging.manager', 'ch.qos.logback.classic.Logger'
+        
+        ignoreFailures true
+        // maxParallelForks 4
+        // set heap size for the test JVM(s)
+        minHeapSize = "1G"
+        maxHeapSize = "4G"
+        jvmArgs "-XX:ReservedCodeCacheSize=2g"
     }
 
 //dokka {

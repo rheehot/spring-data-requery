@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.repository.query;
 
+import io.requery.*;
 import io.requery.query.Condition;
 import io.requery.query.NamedExpression;
 import io.requery.query.Result;
@@ -10,13 +11,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.NullHandler;
+import org.springframework.data.domain.ExampleMatcher.PropertySpecifier;
 import org.springframework.data.support.ExampleMatcherAccessor;
 import org.springframework.data.util.DirectFieldAccessFallbackBeanWrapper;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.data.domain.ExampleMatcher.StringMatcher;
 
 /**
  * Query by {@link org.springframework.data.domain.Example} 을 수행하기 위해, Example 을 이용하여
@@ -28,6 +35,8 @@ import java.util.List;
 @Slf4j
 @UtilityClass
 public class QueryByExampleBuilder {
+
+    private static final RequeryFieldFilter requeryFieldFilter = new RequeryFieldFilter();
 
     /**
      * {@link Example} 를 표현하는 {@link WhereAndOr} 조건절로 빌드합니다.
@@ -69,10 +78,10 @@ public class QueryByExampleBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    <E> List<Condition<E, ?>> getConditions(QueryElement<? extends Result<E>> root,
-                                            Object exampleValue,
-                                            Class<E> probeType,
-                                            ExampleMatcherAccessor exampleAccessor) {
+    private <E> List<Condition<E, ?>> getConditions(QueryElement<? extends Result<E>> root,
+                                                    Object exampleValue,
+                                                    Class<E> probeType,
+                                                    ExampleMatcherAccessor exampleAccessor) {
 
         List<Condition<E, ?>> conditions = new ArrayList<>();
         DirectFieldAccessFallbackBeanWrapper beanWrapper = new DirectFieldAccessFallbackBeanWrapper(exampleValue);
@@ -81,9 +90,10 @@ public class QueryByExampleBuilder {
 
             String fieldName = field.getName();
             Class<?> fieldType = field.getType();
+
             Object fieldValue = beanWrapper.getPropertyValue(fieldName);
 
-            log.trace("Get condition from Example. fieldName={}, fieldType={}, fieldValue={}", fieldName, fieldType, fieldValue);
+            log.trace("Get condition from Example. filed={}, fieldValue={}", field, fieldValue);
 
             NamedExpression<?> expr = NamedExpression.of(fieldName, fieldType);
 
@@ -93,41 +103,105 @@ public class QueryByExampleBuilder {
                     conditions.add(condition);
                 }
             } else if (fieldType.equals(String.class)) {
-
-                Condition<E, ?> condition;
-                NamedExpression<String> stringExpr = (NamedExpression<String>) expr;
-
-                switch (exampleAccessor.getStringMatcherForPath(fieldName)) {
-                    case DEFAULT:
-                    case EXACT:
-                        condition = (Condition<E, ?>) stringExpr.eq((String) fieldValue);
-                        break;
-
-                    case CONTAINING:
-                        condition = (Condition<E, ?>) stringExpr.like("%" + fieldValue + "%");
-                        break;
-
-                    case STARTING:
-                        condition = (Condition<E, ?>) stringExpr.like(fieldValue + "%");
-                        break;
-
-                    case ENDING:
-                        condition = (Condition<E, ?>) stringExpr.like("%" + fieldValue);
-                        break;
-
-                    default:
-                        throw new IllegalArgumentException("Unsupported StringMatcher " + exampleAccessor.getStringMatcherForPath(fieldName));
-                }
-
+                Condition<E, ?> condition = buildStringCondition(exampleAccessor,
+                                                                 (NamedExpression<String>) expr,
+                                                                 fieldName,
+                                                                 (String) fieldValue);
                 conditions.add(condition);
 
             } else {
                 Condition<E, ?> condition = (Condition<E, ?>) ((NamedExpression) expr).eq(fieldValue);
                 conditions.add(condition);
             }
-        });
+        }, requeryFieldFilter); // requeryFieldFilter 를 꼭 지정해주어야 합니다.
 
         return conditions;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <E> Condition<E, ?> buildStringCondition(ExampleMatcherAccessor exampleAccessor,
+                                                     NamedExpression<String> expression,
+                                                     String fieldName,
+                                                     String fieldValue) {
+
+        Boolean ignoreCase = false;
+        PropertySpecifier specifier = exampleAccessor.getPropertySpecifier(fieldName);
+        if (specifier != null) {
+            ignoreCase = Optional.ofNullable(specifier.getIgnoreCase()).orElse(false);
+        }
+        StringMatcher matcher = exampleAccessor.getStringMatcherForPath(fieldName);
+
+        switch (matcher) {
+            case DEFAULT:
+            case EXACT:
+                return (Condition<E, ?>) (ignoreCase
+                                          ? expression.function("Lower").eq(((String) fieldValue).toLowerCase())
+                                          : expression.eq((String) fieldValue));
+            case CONTAINING:
+                return (Condition<E, ?>) (ignoreCase
+                                          ? expression.function("Lower").like(("%" + fieldValue + "%").toLowerCase())
+                                          : expression.like("%" + fieldValue + "%"));
+            case STARTING:
+                return (Condition<E, ?>) (ignoreCase
+                                          ? expression.function("Lower").like((fieldValue + "%").toLowerCase())
+                                          : expression.like(fieldValue + "%"));
+
+            case ENDING:
+                return (Condition<E, ?>) (ignoreCase
+                                          ? expression.function("Lower").like(("%" + fieldValue).toLowerCase())
+                                          : expression.like("%" + fieldValue));
+            default:
+                throw new IllegalArgumentException("Unsupported StringMatcher " + exampleAccessor.getStringMatcherForPath(fieldName));
+        }
+    }
+
+
+    /**
+     * Example 의 비교 쿼리에 적용하지 말아야 할 Field 를 Filtering 합니다.
+     */
+    class RequeryFieldFilter implements ReflectionUtils.FieldFilter {
+
+        @Override
+        public boolean matches(Field field) {
+            if (isTransientField(field))
+                return false;
+            if (isEmbededField(field)) {
+                return false;
+            }
+            if (isAssociationField(field)) {
+                return false;
+            }
+            if (isRequeryField(field)) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        private boolean isTransientField(Field field) {
+            return field.isAnnotationPresent(Transient.class);
+        }
+
+        private boolean isEmbededField(Field field) {
+            return field.isAnnotationPresent(Embedded.class);
+        }
+
+        private boolean isAssociationField(Field field) {
+
+            return field.isAnnotationPresent(OneToOne.class) ||
+                   field.isAnnotationPresent(OneToMany.class) ||
+                   field.isAnnotationPresent(ManyToOne.class) ||
+                   field.isAnnotationPresent(ManyToMany.class);
+        }
+
+        private boolean isRequeryField(Field field) {
+            String fieldName = field.getName();
+
+            return (field.getModifiers() & Modifier.STATIC) > 0 ||
+                   "$proxy".equals(fieldName) ||
+                   (fieldName.startsWith("$") && fieldName.endsWith("_state"));
+        }
     }
 }
 
