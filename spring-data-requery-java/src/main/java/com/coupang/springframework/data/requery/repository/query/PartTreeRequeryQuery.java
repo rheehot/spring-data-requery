@@ -3,7 +3,9 @@ package com.coupang.springframework.data.requery.repository.query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.NamedExpression;
+import io.requery.query.Result;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -83,36 +85,42 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
     // 아래 부분이 RequeryQueryCreator 로 이동해야 한다.
     //
 
+    @SuppressWarnings("unchecked")
     protected QueryElement<?> prepareQuery(RequeryParameterAccessor accessor) {
-        QueryElement<?> query = (QueryElement<?>) getOperations().select(getDomainClass());
+        QueryElement<? extends Result<?>> query = (QueryElement<? extends Result<?>>) getOperations().select(getDomainClass());
 
         query = buildWhereClause(query, accessor);
 
         if (accessor.getParameters().hasPageableParameter()) {
-            query = QueryElementUtils.addPaging(getDomainClass(), query, accessor.getPageable());
+            query = RequeryUtils.applyPageable(getDomainClass(), query, accessor.getPageable());
         }
         if (accessor.getParameters().hasSortParameter()) {
-            query = QueryElementUtils.addSort(getDomainClass(), query, accessor.getSort());
+            query = RequeryUtils.applySort(getDomainClass(), query, accessor.getSort());
         }
 
         return query;
     }
 
-    protected QueryElement<?> buildWhereClause(QueryElement<?> selection, RequeryParameterAccessor accessor) {
+    @SuppressWarnings("unchecked")
+    protected QueryElement<? extends Result<?>> buildWhereClause(QueryElement<? extends Result<?>> selection,
+                                                                 RequeryParameterAccessor accessor) {
 
         final RequeryParameters bindableParams = accessor.getParameters().getBindableParameters();
         final int bindableParamsSize = bindableParams.getNumberOfParameters();
 
+        QueryElement<? extends Result<?>>[] selections = new QueryElement[1];
+
+        selections[0] = selection;
         for (int i = 0; i < bindableParamsSize; i++) {
             final RequeryParameters.RequeryParameter param = bindableParams.getParameter(i);
             final Object value = accessor.getBindableValue(i);
 
             if (param.isNamedParameter() && param.getName().isPresent()) {
                 NamedExpression expr = NamedExpression.of(param.getName().get(), value.getClass());
-                selection.where(expr.eq(value));
+                selections[0] = (QueryElement<? extends Result<?>>) selection.where(expr.eq(value));
             }
         }
-        return selection;
+        return selections[0];
     }
 
 

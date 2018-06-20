@@ -3,9 +3,11 @@ package com.coupang.springframework.data.requery.repository.support;
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest;
 import com.coupang.springframework.data.requery.domain.RandomData;
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
-import com.coupang.springframework.data.requery.utils.EntityUtils;
-import com.coupang.springframework.data.requery.utils.PagingUtils;
-import io.requery.query.*;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
+import io.requery.query.NamedExpression;
+import io.requery.query.OrderingExpression;
+import io.requery.query.Result;
+import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +46,7 @@ public class SimpleRequeryRepositoryQueryTest extends AbstractDomainTest {
     public void findAllByIds() {
         Set<Long> ids = users.stream().map(BasicUser::getId).collect(Collectors.toSet());
 
-        NamedExpression<Long> keyExpr = (NamedExpression<Long>) EntityUtils.getKeyExpression(BasicUser.class);
+        NamedExpression<Long> keyExpr = (NamedExpression<Long>) RequeryUtils.getKeyExpression(BasicUser.class);
 
         List<BasicUser> savedUsers = requeryTemplate
             .select(BasicUser.class)
@@ -60,7 +62,7 @@ public class SimpleRequeryRepositoryQueryTest extends AbstractDomainTest {
     public void deleteAllByIds() {
         Set<Long> ids = users.stream().map(BasicUser::getId).collect(Collectors.toSet());
 
-        NamedExpression<Long> keyExpr = (NamedExpression<Long>) EntityUtils.getKeyExpression(BasicUser.class);
+        NamedExpression<Long> keyExpr = (NamedExpression<Long>) RequeryUtils.getKeyExpression(BasicUser.class);
 
         Integer deletedCount = requeryTemplate
             .delete(BasicUser.class)
@@ -75,7 +77,7 @@ public class SimpleRequeryRepositoryQueryTest extends AbstractDomainTest {
     public void findAllWithSort() {
         Sort sort = Sort.by(Sort.Order.desc("birthday"), Sort.Order.asc("name"));
 
-        OrderingExpression<?>[] orderingExprs = PagingUtils.toRequeryOrderExpression(BasicUser.class, sort);
+        OrderingExpression<?>[] orderingExprs = RequeryUtils.getOrderingExpressions(BasicUser.class, sort);
 
         List<BasicUser> orderedUsers = requeryTemplate
             .select(BasicUser.class)
@@ -96,9 +98,10 @@ public class SimpleRequeryRepositoryQueryTest extends AbstractDomainTest {
     public void findAllWithPageableSlice() {
         Pageable pageable = PageRequest.of(1, 3);
 
-        Return<Result<BasicUser>> query = PagingUtils.applyPageable(BasicUser.class,
-                                                                    (QueryElement<Result<BasicUser>>) requeryTemplate.select(BasicUser.class),
-                                                                    pageable);
+        QueryElement<? extends Result<BasicUser>> query = (QueryElement<? extends Result<BasicUser>>)
+            RequeryUtils.applyPageable(BasicUser.class,
+                                       (QueryElement<? extends Result<BasicUser>>) requeryTemplate.select(BasicUser.class),
+                                       pageable);
 
         List<BasicUser> content = query.get().toList();
 
@@ -116,7 +119,7 @@ public class SimpleRequeryRepositoryQueryTest extends AbstractDomainTest {
     public void existsById() {
 
         Long userId = users.iterator().next().getId();
-        NamedExpression<Long> keyExpr = (NamedExpression<Long>) EntityUtils.getKeyExpression(BasicUser.class);
+        NamedExpression<Long> keyExpr = (NamedExpression<Long>) RequeryUtils.getKeyExpression(BasicUser.class);
 
         Tuple result = requeryTemplate
             .select(Count.count(BasicUser.class).as("count"))

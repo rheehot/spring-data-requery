@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.repository.RequeryContext;
-import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +28,7 @@ public class DefaultRequeryContext implements RequeryContext {
 
         this.entityDataStores = new LinkedMultiValueMap<>();
         for (EntityDataStore dataStore : entityDataStores) {
-            List<Class<?>> classes = EntityDataStoreUtils.getEntityClasses(dataStore);
+            List<Class<?>> classes = RequeryUtils.getEntityClasses(dataStore);
             for (Class<?> clazz : classes) {
                 this.entityDataStores.add(clazz, dataStore);
             }

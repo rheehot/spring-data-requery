@@ -20,7 +20,9 @@ import static org.springframework.beans.factory.BeanFactoryUtils.transformedBean
  *
  * @author debop@coupang.com
  * @since 18. 6. 14
+ * @deprecated Not used
  */
+@Deprecated
 public class BeanDefinitionUtils {
 
     private static final String JNDI_OBJECT_FACTORY_BEAN = "org.springframework.jndi.JndiObjectFactoryBean";

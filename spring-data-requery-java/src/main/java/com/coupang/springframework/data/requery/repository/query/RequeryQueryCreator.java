@@ -2,10 +2,8 @@ package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
-import io.requery.query.Condition;
-import io.requery.query.NamedExpression;
-import io.requery.query.Return;
-import io.requery.query.WhereAndOr;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
+import io.requery.query.*;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -103,7 +101,9 @@ public class RequeryQueryCreator extends AbstractQueryCreator<Return<?>, QueryEl
     protected Return<?> complete(QueryElement<?> criteria, Sort sort, QueryElement<?> root) {
         QueryElement<?> select = criteria != null ? criteria : root;
 
-        return QueryElementUtils.addSort(returnedType.getDomainType(), select, sort);
+        return RequeryUtils.applySort((Class<?>) returnedType.getDomainType(),
+                                      (QueryElement<? extends Result<?>>) select,
+                                      sort);
     }
 
     private Return<?> toQueryElement(Part part, QueryElement<?> root) {

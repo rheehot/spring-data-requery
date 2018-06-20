@@ -1,8 +1,7 @@
 package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
-import com.coupang.springframework.data.requery.utils.EntityUtils;
-import com.coupang.springframework.data.requery.utils.PagingUtils;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.*;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
@@ -44,7 +43,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
         this.entityInformation = entityInformation;
         this.domainClass = entityInformation.getJavaType();
-        this.domainClassName = domainClass.getSimpleName();
+        this.domainClassName = (domainClass != null) ? domainClass.getSimpleName() : "Unknown";
 
         this.operations = operations;
     }
@@ -90,7 +89,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         log.debug("Find all {} with sort, sort={}", domainClassName, sort);
 
         if (sort.isSorted()) {
-            OrderingExpression<?>[] orderingExprs = PagingUtils.toRequeryOrderExpression(domainClass, sort);
+            OrderingExpression<?>[] orderingExprs = RequeryUtils.getOrderingExpressions(domainClass, sort);
 
             if (orderingExprs.length > 0) {
                 return operations
@@ -115,9 +114,10 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         log.debug("Find all {} with paging, pageable={}", domainClassName, pageable);
 
         if (pageable.isPaged()) {
-            Return<Result<T>> query = PagingUtils.applyPageable(domainClass,
-                                                                (QueryElement<Result<T>>) operations.select(domainClass),
-                                                                pageable);
+            QueryElement<? extends Result<T>> query = (QueryElement<? extends Result<T>>)
+                RequeryUtils.applyPageable(domainClass,
+                                           (QueryElement<? extends Result<T>>) operations.select(domainClass),
+                                           pageable);
             List<T> content = query.get().toList();
             long total = operations.count(domainClass).get().value().longValue();
 
@@ -154,7 +154,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @SuppressWarnings("unchecked")
     @Override
     public boolean existsById(@NotNull ID id) {
-        NamedExpression<ID> keyExpr = (NamedExpression<ID>) EntityUtils.getKeyExpression(domainClass);
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) RequeryUtils.getKeyExpression(domainClass);
 
         Tuple result = operations
             .select(Count.count(domainClass))
@@ -179,7 +179,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         for (ID id : ids) {
             idSet.add(id);
         }
-        NamedExpression<ID> keyExpr = (NamedExpression<ID>) EntityUtils.getKeyExpression(domainClass);
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) RequeryUtils.getKeyExpression(domainClass);
 
         return operations
             .select(domainClass)
@@ -199,7 +199,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     public void deleteById(@NotNull ID id) {
         log.debug("Delete {} by id. id={}", domainClassName, id);
 
-        NamedExpression<ID> keyExpr = (NamedExpression<ID>) EntityUtils.getKeyExpression(domainClass);
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) RequeryUtils.getKeyExpression(domainClass);
 
         Integer deletedCount = operations
             .delete(domainClass)
@@ -279,13 +279,13 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
     @Override
     public Page<T> findAll(WhereAndOr<? extends Result<T>> whereClause, Pageable pageable) {
-        // HINT: PagingUtils 를 참고해서 구현 필요
+        // HINT: RequeryUtils#applyPaging 를 참고해서 구현 필요
         return null;
     }
 
     @Override
     public List<T> findAll(Iterable<Condition<T, ?>> conditions, Sort sort) {
-        // HINT: PagingUtils 를 참고해서 구현 필요
+        // HINT: RequeryUtils#getOrderingExpressions 를 참고해서 구현 필요
         return null;
     }
 

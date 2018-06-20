@@ -1,6 +1,6 @@
 package com.coupang.springframework.data.requery.provider;
 
-import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.meta.EntityModel;
 import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ public class RequeryProxyIdAccessor implements ProxyIdAccessor {
     private final EntityModel entityModel;
 
     public RequeryProxyIdAccessor(EntityDataStore entityDataStore) {
-        this.entityModel = EntityDataStoreUtils.getEntityModel(entityDataStore);
+        this.entityModel = RequeryUtils.getEntityModel(entityDataStore);
     }
 
     @Override

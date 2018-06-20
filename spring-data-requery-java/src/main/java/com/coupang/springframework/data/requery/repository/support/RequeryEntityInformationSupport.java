@@ -3,7 +3,6 @@ package com.coupang.springframework.data.requery.repository.support;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.repository.query.DefaultRequeryEntityMetadata;
 import com.coupang.springframework.data.requery.repository.query.RequeryEntityMetadata;
-import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
 import io.requery.meta.EntityModel;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;

@@ -1,8 +1,8 @@
 package com.coupang.springframework.data.requery.core;
 
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
-import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
-import com.coupang.springframework.data.requery.utils.Lists;
+import com.coupang.springframework.data.requery.utils.Iterables;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.TransactionIsolation;
 import io.requery.meta.Attribute;
 import io.requery.meta.EntityModel;
@@ -31,12 +31,12 @@ public interface RequeryOperations {
     RequeryMappingContext getMappingContext();
 
     default EntityModel getEntityModel() {
-        return EntityDataStoreUtils.getEntityModel(getDataStore());
+        return RequeryUtils.getEntityModel(getDataStore());
     }
 
     @SuppressWarnings("unchecked")
     default <E> EntityContext<E> getEntityContext() {
-        return EntityDataStoreUtils.getEntityContext(getDataStore());
+        return RequeryUtils.getEntityContext(getDataStore());
     }
 
     default <E> Selection<? extends Result<E>> select(Class<E> entityType) {
@@ -67,8 +67,8 @@ public interface RequeryOperations {
         return getDataStore().refresh(entity, attributes);
     }
 
-    default <E> Iterable<E> refresh(@NotNull Iterable<E> entities, Attribute<?, ?>... attributes) {
-        return getDataStore().refresh(entities, attributes);
+    default <E> List<E> refresh(@NotNull Iterable<E> entities, Attribute<?, ?>... attributes) {
+        return Iterables.toList(getDataStore().refresh(entities, attributes));
     }
 
     default <E> E refreshAll(@NotNull E entity) {
@@ -80,7 +80,7 @@ public interface RequeryOperations {
     }
 
     default <E> List<E> upsertAll(@NotNull Iterable<E> entities) {
-        return Lists.toList(getDataStore().upsert(entities));
+        return Iterables.toList(getDataStore().upsert(entities));
     }
 
     default <E> E insert(@NotNull E entity) {
@@ -100,13 +100,12 @@ public interface RequeryOperations {
     }
 
     default <E> List<E> insertAll(@NotNull Iterable<E> entities) {
-        return Lists.toList(getDataStore().insert(entities));
+        return Iterables.toList(getDataStore().insert(entities));
     }
 
     default <E, K> List<K> insertAll(@NotNull Iterable<E> entities, Class<K> keyClass) {
-        return Lists.toList(getDataStore().insert(entities, keyClass));
+        return Iterables.toList(getDataStore().insert(entities, keyClass));
     }
-
 
     default Update<? extends Scalar<Integer>> update() {
         return getDataStore().update();
@@ -125,7 +124,7 @@ public interface RequeryOperations {
     }
 
     default <E> List<E> updateAll(@NotNull Iterable<E> entities) {
-        return Lists.toList(getDataStore().update(entities));
+        return Iterables.toList(getDataStore().update(entities));
     }
 
     default <E> Deletion<? extends Scalar<Integer>> delete() {

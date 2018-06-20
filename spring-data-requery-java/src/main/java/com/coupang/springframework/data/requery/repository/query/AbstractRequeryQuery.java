@@ -1,15 +1,14 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
-import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
 import com.coupang.springframework.data.requery.utils.RequeryMetamodel;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.query.RepositoryQuery;
-import org.springframework.data.repository.query.ResultProcessor;
 import org.springframework.data.repository.query.ReturnedType;
 
 import java.util.Optional;
@@ -35,7 +34,7 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
                                 @NotNull final RequeryOperations operations) {
         this.method = method;
         this.operations = operations;
-        this.metamodel = new RequeryMetamodel(EntityDataStoreUtils.getEntityModel(operations.getDataStore()));
+        this.metamodel = new RequeryMetamodel(RequeryUtils.getEntityModel(operations.getDataStore()));
         this.domainClass = method.getEntityInformation().getJavaType();
     }
 

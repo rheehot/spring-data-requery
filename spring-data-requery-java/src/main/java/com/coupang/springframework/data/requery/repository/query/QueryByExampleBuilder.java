@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.repository.query;
 
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.*;
 import io.requery.query.Condition;
 import io.requery.query.NamedExpression;
@@ -53,28 +54,8 @@ public class QueryByExampleBuilder {
                                                          example.getProbe(),
                                                          example.getProbeType(),
                                                          new ExampleMatcherAccessor(matcher));
-        if (conditions.isEmpty()) {
-            return (WhereAndOr<? extends Result<E>>) root;
-        }
-        if (conditions.size() == 1) {
-            return root.where(conditions.iterator().next());
-        }
 
-
-        final List<WhereAndOr<? extends Result<E>>> whereClause = new ArrayList<>();
-        whereClause.add(root.where(conditions.get(0)));
-
-        conditions.stream()
-            .skip(1)
-            .forEach(condition -> {
-                if (matcher.isAllMatching()) {
-                    whereClause.set(0, whereClause.get(0).and(condition));
-                } else {
-                    whereClause.set(0, whereClause.get(0).or(condition));
-                }
-            });
-
-        return whereClause.get(0);
+        return RequeryUtils.buildWhereClause(root, conditions, matcher.isAllMatching());
     }
 
     @SuppressWarnings("unchecked")
