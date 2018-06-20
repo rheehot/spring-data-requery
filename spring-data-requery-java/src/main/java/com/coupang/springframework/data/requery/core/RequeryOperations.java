@@ -2,16 +2,19 @@ package com.coupang.springframework.data.requery.core;
 
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.utils.EntityDataStoreUtils;
+import com.coupang.springframework.data.requery.utils.Lists;
 import io.requery.TransactionIsolation;
 import io.requery.meta.Attribute;
 import io.requery.meta.EntityModel;
 import io.requery.meta.QueryAttribute;
 import io.requery.query.*;
+import io.requery.query.function.Count;
 import io.requery.sql.EntityContext;
 import io.requery.sql.EntityDataStore;
 import org.jetbrains.annotations.Nullable;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
@@ -52,7 +55,7 @@ public interface RequeryOperations {
         return getDataStore().findByKey(entityType, id);
     }
 
-    default <E> Iterable<E> findAll(Class<E> entityType) {
+    default <E> List<E> findAll(Class<E> entityType) {
         return getDataStore().select(entityType).get().toList();
     }
 
@@ -76,8 +79,8 @@ public interface RequeryOperations {
         return getDataStore().upsert(entity);
     }
 
-    default <E> Iterable<E> upsertAll(@NotNull Iterable<E> entities) {
-        return getDataStore().upsert(entities);
+    default <E> List<E> upsertAll(@NotNull Iterable<E> entities) {
+        return Lists.toList(getDataStore().upsert(entities));
     }
 
     default <E> E insert(@NotNull E entity) {
@@ -96,12 +99,12 @@ public interface RequeryOperations {
         return getDataStore().insert(entityType, attributes);
     }
 
-    default <E> Iterable<E> insertAll(@NotNull Iterable<E> entities) {
-        return getDataStore().insert(entities);
+    default <E> List<E> insertAll(@NotNull Iterable<E> entities) {
+        return Lists.toList(getDataStore().insert(entities));
     }
 
-    default <E, K> Iterable<K> insertAll(@NotNull Iterable<E> entities, Class<K> keyClass) {
-        return getDataStore().insert(entities, keyClass);
+    default <E, K> List<K> insertAll(@NotNull Iterable<E> entities, Class<K> keyClass) {
+        return Lists.toList(getDataStore().insert(entities, keyClass));
     }
 
 
@@ -121,8 +124,8 @@ public interface RequeryOperations {
         return getDataStore().update(entityType);
     }
 
-    default <E> Iterable<E> updateAll(@NotNull Iterable<E> entities) {
-        return getDataStore().update(entities);
+    default <E> List<E> updateAll(@NotNull Iterable<E> entities) {
+        return Lists.toList(getDataStore().update(entities));
     }
 
     default <E> Deletion<? extends Scalar<Integer>> delete() {
@@ -151,6 +154,15 @@ public interface RequeryOperations {
 
     default <E> Selection<? extends Scalar<Integer>> count(QueryAttribute<?, ?>... attributes) {
         return getDataStore().count(attributes);
+    }
+
+    default <E> int count(Class<E> entityType, WhereAndOr<? extends Result<E>> whereClause) {
+        Tuple tuple = select(Count.count(entityType)).where().exists(whereClause).get().first();
+        return tuple.<Integer>get(0);
+    }
+
+    default <E> boolean exists(Class<E> entityType, WhereAndOr<? extends Result<E>> whereClause) {
+        return whereClause.limit(1).get().firstOrNull() != null;
     }
 
     default Result<Tuple> raw(String query, Object... parameters) {

@@ -35,6 +35,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     private final RequeryOperations operations;
     private final RequeryEntityInformation<T, ID> entityInformation;
     private final Class<T> domainClass;
+    private final String domainClassName;
 
     private CrudMethodMetadata crudMethodMetadata;
 
@@ -43,6 +44,8 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
         this.entityInformation = entityInformation;
         this.domainClass = entityInformation.getJavaType();
+        this.domainClassName = domainClass.getSimpleName();
+
         this.operations = operations;
     }
 
@@ -59,13 +62,13 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
     @Transactional
     @Override
-    public <S extends T> Iterable<S> upsertAll(Iterable<S> entities) {
+    public <S extends T> List<S> upsertAll(Iterable<S> entities) {
         return operations.upsertAll(entities);
     }
 
     @Transactional
     @Override
-    public <S extends T> void deleteInBatch(Iterable<S> entities) {
+    public void deleteInBatch(Iterable<T> entities) {
         operations.deleteAll(entities);
     }
 
@@ -82,8 +85,10 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
     @NotNull
     @Override
-    public Iterable<T> findAll(@NotNull Sort sort) {
-        log.debug("Find all {} with sort, sort={}", domainClass.getSimpleName(), sort);
+    public List<T> findAll(@NotNull Sort sort) {
+
+        log.debug("Find all {} with sort, sort={}", domainClassName, sort);
+
         if (sort.isSorted()) {
             OrderingExpression<?>[] orderingExprs = PagingUtils.toRequeryOrderExpression(domainClass, sort);
 
@@ -107,7 +112,8 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Override
     public Page<T> findAll(@NotNull Pageable pageable) {
 
-        log.debug("Find all {} with paging, pageable={}", domainClass.getSimpleName(), pageable);
+        log.debug("Find all {} with paging, pageable={}", domainClassName, pageable);
+
         if (pageable.isPaged()) {
             Return<Result<T>> query = PagingUtils.applyPageable(domainClass,
                                                                 (QueryElement<Result<T>>) operations.select(domainClass),
@@ -135,7 +141,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Transactional
     @NotNull
     @Override
-    public <S extends T> Iterable<S> saveAll(@NotNull Iterable<S> entities) {
+    public <S extends T> List<S> saveAll(@NotNull Iterable<S> entities) {
         return operations.upsertAll(entities);
     }
 
@@ -161,14 +167,14 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
     @NotNull
     @Override
-    public Iterable<T> findAll() {
+    public List<T> findAll() {
         return operations.findAll(domainClass);
     }
 
     @SuppressWarnings("unchecked")
     @NotNull
     @Override
-    public Iterable<T> findAllById(@NotNull Iterable<ID> ids) {
+    public List<T> findAllById(@NotNull Iterable<ID> ids) {
         HashSet<ID> idSet = new HashSet<>();
         for (ID id : ids) {
             idSet.add(id);
@@ -191,7 +197,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Transactional
     @Override
     public void deleteById(@NotNull ID id) {
-        log.debug("Delete {} by id. id={}", domainClass.getSimpleName(), id);
+        log.debug("Delete {} by id. id={}", domainClassName, id);
 
         NamedExpression<ID> keyExpr = (NamedExpression<ID>) EntityUtils.getKeyExpression(domainClass);
 
@@ -219,11 +225,11 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Transactional
     @Override
     public void deleteAll() {
-        log.debug("Delete All {} ...", domainClass.getSimpleName());
+        log.debug("Delete All {} ...", domainClassName);
 
         Integer deletedCount = operations.delete(domainClass).get().value();
 
-        log.debug("Delete All {}, deleted count={}", domainClass.getSimpleName(), deletedCount);
+        log.debug("Delete All {}, deleted count={}", domainClassName, deletedCount);
     }
 
     @NotNull
@@ -234,13 +240,13 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
     @NotNull
     @Override
-    public <S extends T> Iterable<S> findAll(@NotNull Example<S> example) {
+    public <S extends T> List<S> findAll(@NotNull Example<S> example) {
         throw new NotImplementedException("구현 중");
     }
 
     @NotNull
     @Override
-    public <S extends T> Iterable<S> findAll(@NotNull Example<S> example, @NotNull Sort sort) {
+    public <S extends T> List<S> findAll(@NotNull Example<S> example, @NotNull Sort sort) {
         throw new NotImplementedException("구현 중");
     }
 
@@ -261,4 +267,41 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         throw new NotImplementedException("구현 중");
     }
 
+    @Override
+    public Optional<T> findOne(Return<? extends Result<T>> whereClause) {
+        return Optional.ofNullable(whereClause.get().firstOrNull());
+    }
+
+    @Override
+    public List<T> findAll(Return<? extends Result<T>> whereClause) {
+        return whereClause.get().toList();
+    }
+
+    @Override
+    public Page<T> findAll(WhereAndOr<? extends Result<T>> whereClause, Pageable pageable) {
+        // HINT: PagingUtils 를 참고해서 구현 필요
+        return null;
+    }
+
+    @Override
+    public List<T> findAll(Iterable<Condition<T, ?>> conditions, Sort sort) {
+        // HINT: PagingUtils 를 참고해서 구현 필요
+        return null;
+    }
+
+    @Override
+    public List<T> findAll(Iterable<Condition<T, ?>> conditions) {
+        // HINT: QueryByExampleUtils 에서 List<Condition<T, ?>> 를 WhereOrAnd<? extends Result<T>> 로 빌드하는 코드 사용
+        return null;
+    }
+
+    @Override
+    public int count(WhereAndOr<? extends Result<T>> whereClause) {
+        return getOperations().count(domainClass, whereClause);
+    }
+
+    @Override
+    public boolean exists(WhereAndOr<? extends Result<T>> whereClause) {
+        return getOperations().exists(domainClass, whereClause);
+    }
 }
