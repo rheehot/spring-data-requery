@@ -99,8 +99,7 @@ public class QueryByExampleBuilder {
 
             if (fieldValue == null) {
                 if (exampleAccessor.getNullHandler().equals(NullHandler.INCLUDE)) {
-                    Condition<E, ?> condition = (Condition<E, ?>) expr.isNull();
-                    conditions.add(condition);
+                    conditions.add((Condition<E, ?>) expr.isNull());
                 }
             } else if (fieldType.equals(String.class)) {
                 Condition<E, ?> condition = buildStringCondition(exampleAccessor,
@@ -163,19 +162,17 @@ public class QueryByExampleBuilder {
 
         @Override
         public boolean matches(Field field) {
-            if (isTransientField(field))
+            if (isTransientField(field)) {
                 return false;
-            if (isEmbededField(field)) {
+            } else if (isEmbededField(field)) {
                 return false;
+            } else if (isAssociationField(field)) {
+                return false;
+            } else if (isRequeryField(field)) {
+                return false;
+            } else {
+                return true;
             }
-            if (isAssociationField(field)) {
-                return false;
-            }
-            if (isRequeryField(field)) {
-                return false;
-            }
-
-            return true;
         }
 
 
@@ -188,7 +185,6 @@ public class QueryByExampleBuilder {
         }
 
         private boolean isAssociationField(Field field) {
-
             return field.isAnnotationPresent(OneToOne.class) ||
                    field.isAnnotationPresent(OneToMany.class) ||
                    field.isAnnotationPresent(ManyToOne.class) ||

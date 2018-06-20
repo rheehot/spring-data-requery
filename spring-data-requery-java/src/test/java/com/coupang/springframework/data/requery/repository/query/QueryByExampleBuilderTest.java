@@ -15,6 +15,7 @@ import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.startsWith;
 import static org.springframework.data.domain.ExampleMatcher.matching;
 
 /**
@@ -73,8 +74,10 @@ public class QueryByExampleBuilderTest extends AbstractDomainTest {
         BasicUser exampleUser = new BasicUser();
         exampleUser.setName("EXA");
 
-        ExampleMatcher matcher = matching().withMatcher("name",
-                                                        GenericPropertyMatcher.of(StringMatcher.STARTING, true));
+        ExampleMatcher matcher = matching()
+            .withMatcher("name", startsWith().ignoreCase())
+            .withIgnoreNullValues();
+        
         Example<BasicUser> example = Example.of(exampleUser, matcher);
 
         Return<? extends Result<BasicUser>> query = buildQueryByExample(example);

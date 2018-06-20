@@ -3,6 +3,7 @@ package com.coupang.springframework.data.requery.configs;
 import com.coupang.kotlinx.data.requery.listeners.LogbackListener;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.core.RequeryTemplate;
+import com.coupang.springframework.data.requery.core.RequeryTransactionManager;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.repository.RequeryContext;
 import com.coupang.springframework.data.requery.repository.support.DefaultRequeryContext;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -92,6 +94,10 @@ public abstract class AbstractRequeryConfiguration {
         return new DefaultRequeryContext(entityDatastores);
     }
 
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        return new RequeryTransactionManager(entityDataStore(), dataSource);
+    }
 
     /**
      * 사용할 Database에 Requery Entity에 해당하는 Schema 를 생성하는 작업을 수행합니다.

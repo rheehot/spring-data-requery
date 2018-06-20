@@ -15,9 +15,11 @@ import java.util.Set;
 /**
  * com.coupang.springframework.data.requery.configs.RequeryEntityClassScanner
  *
+ * @deprecated No used
  * @author debop
  * @since 18. 6. 7
  */
+@Deprecated
 public class RequeryEntityClassScanner {
 
     private static final Class<? extends Annotation> ENTITY_ANNOTATION = Entity.class;

@@ -36,9 +36,5 @@ public class RequeryTestConfiguration extends AbstractRequeryConfiguration {
             .build();
     }
 
-    @Bean
-    public PlatformTransactionManager transactionManager() {
-        return new RequeryTransactionManager(entityDataStore(), dataSource());
-    }
 
 }
