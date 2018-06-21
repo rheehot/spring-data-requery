@@ -1,7 +1,6 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
-import io.requery.*;
 import io.requery.query.Condition;
 import io.requery.query.NamedExpression;
 import io.requery.query.Result;
@@ -16,10 +15,9 @@ import org.springframework.data.domain.ExampleMatcher.PropertySpecifier;
 import org.springframework.data.support.ExampleMatcherAccessor;
 import org.springframework.data.util.DirectFieldAccessFallbackBeanWrapper;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +35,7 @@ import static org.springframework.data.domain.ExampleMatcher.StringMatcher;
 @UtilityClass
 public class QueryByExampleBuilder {
 
-    private static final RequeryFieldFilter requeryFieldFilter = new RequeryFieldFilter();
+    private static final LinkedMultiValueMap<Class<?>, Field> entityFields = new LinkedMultiValueMap<>();
 
     /**
      * {@link Example} 를 표현하는 {@link WhereAndOr} 조건절로 빌드합니다.
@@ -67,11 +65,21 @@ public class QueryByExampleBuilder {
         List<Condition<E, ?>> conditions = new ArrayList<>();
         DirectFieldAccessFallbackBeanWrapper beanWrapper = new DirectFieldAccessFallbackBeanWrapper(exampleValue);
 
-        ReflectionUtils.doWithFields(probeType, field -> {
+        List<Field> fields = RequeryUtils.findEntityFields(probeType);
+
+        for (Field field : fields) {
+            // Query By Example 에서 지원하지 못하는 Field 들은 제외합니다.
+            boolean notSupportedField = RequeryUtils.isAssociationField(field) ||
+                                        RequeryUtils.isEmbededField(field) ||
+                                        RequeryUtils.isTransientField(field);
+            if (notSupportedField) {
+                continue;
+            }
+
+            log.trace("Build condition... field={}", field);
 
             String fieldName = field.getName();
             Class<?> fieldType = field.getType();
-
             Object fieldValue = beanWrapper.getPropertyValue(fieldName);
 
             log.trace("Get condition from Example. filed={}, fieldValue={}", field, fieldValue);
@@ -93,7 +101,7 @@ public class QueryByExampleBuilder {
                 Condition<E, ?> condition = (Condition<E, ?>) ((NamedExpression) expr).eq(fieldValue);
                 conditions.add(condition);
             }
-        }, requeryFieldFilter); // requeryFieldFilter 를 꼭 지정해주어야 합니다.
+        }
 
         return conditions;
     }
@@ -132,52 +140,6 @@ public class QueryByExampleBuilder {
                                           : expression.like("%" + fieldValue));
             default:
                 throw new IllegalArgumentException("Unsupported StringMatcher " + exampleAccessor.getStringMatcherForPath(fieldName));
-        }
-    }
-
-
-    /**
-     * Example 의 비교 쿼리에 적용하지 말아야 할 Field 를 Filtering 합니다.
-     */
-    class RequeryFieldFilter implements ReflectionUtils.FieldFilter {
-
-        @Override
-        public boolean matches(Field field) {
-            if (isTransientField(field)) {
-                return false;
-            } else if (isEmbededField(field)) {
-                return false;
-            } else if (isAssociationField(field)) {
-                return false;
-            } else if (isRequeryField(field)) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-
-
-        private boolean isTransientField(Field field) {
-            return field.isAnnotationPresent(Transient.class);
-        }
-
-        private boolean isEmbededField(Field field) {
-            return field.isAnnotationPresent(Embedded.class);
-        }
-
-        private boolean isAssociationField(Field field) {
-            return field.isAnnotationPresent(OneToOne.class) ||
-                   field.isAnnotationPresent(OneToMany.class) ||
-                   field.isAnnotationPresent(ManyToOne.class) ||
-                   field.isAnnotationPresent(ManyToMany.class);
-        }
-
-        private boolean isRequeryField(Field field) {
-            String fieldName = field.getName();
-
-            return (field.getModifiers() & Modifier.STATIC) > 0 ||
-                   "$proxy".equals(fieldName) ||
-                   (fieldName.startsWith("$") && fieldName.endsWith("_state"));
         }
     }
 }
