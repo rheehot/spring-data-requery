@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.utils;
 
+import com.coupang.springframework.data.requery.core.EntityState;
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest;
 import com.coupang.springframework.data.requery.domain.basic.BasicGroup;
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
@@ -20,12 +21,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * com.coupang.springframework.data.requery.utils.RequeryUtilsTest
- *
- * @author debop
- * @since 18. 6. 18
- */
 @Slf4j
 public class RequeryUtilsTest extends AbstractDomainTest {
 
@@ -60,6 +55,28 @@ public class RequeryUtilsTest extends AbstractDomainTest {
         EntityModel entityModel = RequeryUtils.getEntityModel(dataStore);
         assertThat(entityModel).isNotNull();
         assertThat(entityModel.getName()).isEqualTo("default");
+    }
+
+    @Test
+    public void retrieveEntityModel() {
+        EntityModel entityModel = RequeryUtils.getEntityModel(requeryTemplate.getDataStore());
+
+        assertThat(entityModel).isNotNull();
+
+        assertThat(entityModel.getName()).isEqualTo("default");
+        assertThat(entityModel.containsTypeOf(BasicUser.class)).isTrue();
+
+        for (Type type : entityModel.getTypes()) {
+            log.debug("Entity class={}", type.getClassType());
+        }
+    }
+
+    @Test
+    public void retrieveEntityClasses() {
+        List<Class<?>> classes = RequeryUtils.getEntityClasses(requeryTemplate.getDataStore());
+
+        assertThat(classes.contains(BasicUser.class)).isTrue();
+        assertThat(classes.contains(EntityState.class)).isFalse();
     }
 
     @Test
