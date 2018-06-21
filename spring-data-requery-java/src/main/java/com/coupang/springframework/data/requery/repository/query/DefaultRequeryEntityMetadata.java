@@ -16,29 +16,35 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class DefaultRequeryEntityMetadata<T> implements RequeryEntityMetadata<T> {
 
-    private final Class<T> domainType;
+    @NotNull
+    public static <T> DefaultRequeryEntityMetadata<T> of(@NotNull Class<T> domainClass) {
+        Assert.notNull(domainClass, "domainClass must not be null");
+        return new DefaultRequeryEntityMetadata<>(domainClass);
+    }
 
-    public DefaultRequeryEntityMetadata(@NotNull Class<T> domainType) {
-        Assert.notNull(domainType, "domainType must not be null!");
-        this.domainType = domainType;
+    private final Class<T> domainClass;
+
+    public DefaultRequeryEntityMetadata(@NotNull Class<T> domainClass) {
+        Assert.notNull(domainClass, "domainClass must not be null!");
+        this.domainClass = domainClass;
     }
 
     @Override
     public String getEntityName() {
-        Entity entity = AnnotatedElementUtils.findMergedAnnotation(domainType, Entity.class);
+        Entity entity = AnnotatedElementUtils.findMergedAnnotation(domainClass, Entity.class);
 
-        log.debug("Get entity name... domainType={}, entity={}", domainType.getName(), entity);
+        log.debug("Get entity name... domainClass={}, entity={}", domainClass.getName(), entity);
 
         return (entity != null) && StringUtils.hasText(entity.name())
                ? entity.name()
-               : domainType.getSimpleName();
+               : domainClass.getSimpleName();
     }
 
     @Override
     public String getModelName() {
-        Entity entity = AnnotatedElementUtils.findMergedAnnotation(domainType, Entity.class);
+        Entity entity = AnnotatedElementUtils.findMergedAnnotation(domainClass, Entity.class);
 
-        log.debug("Get model name... domainType={}, entity={}", domainType.getName(), entity);
+        log.debug("Get model name... domainClass={}, entity={}", domainClass.getName(), entity);
 
         return (entity != null) && StringUtils.hasText(entity.model())
                ? entity.model()
@@ -47,7 +53,7 @@ public class DefaultRequeryEntityMetadata<T> implements RequeryEntityMetadata<T>
 
     @Override
     public Class<T> getJavaType() {
-        return domainType;
+        return domainClass;
     }
 }
 

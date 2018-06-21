@@ -40,13 +40,13 @@ public abstract class AbstractUser extends AbstractPersistable<Integer> {
 
     @JunctionTable
     @ManyToMany
-    protected Set<AbstractUser> colleagues;
+    protected Set<User> colleagues;
 
     @ManyToMany
-    protected Set<AbstractRole> roles;
+    protected Set<Role> roles;
 
     @ManyToOne
-    protected AbstractUser manager;
+    protected User manager;
 
     @Embedded
     protected AbstractAddress address;
@@ -64,7 +64,7 @@ public abstract class AbstractUser extends AbstractPersistable<Integer> {
         this(null, null, null);
     }
 
-    public AbstractUser(String firstname, String lastname, String emailAddress, AbstractRole... roles) {
+    public AbstractUser(String firstname, String lastname, String emailAddress, Role... roles) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.emailAddress = emailAddress;

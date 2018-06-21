@@ -30,14 +30,19 @@ public final class RequeryQueryLookupStrategy {
                                              QueryLookupStrategy.Key key,
                                              QueryExtractor extractor,
                                              EvaluationContextProvider evaluationContextProvider) {
-        log.debug("Create Query Lookup Strategy. key={}", key);
+        log.debug("Create Query Lookup Strategy with key={}", key);
 
         switch (key != null ? key : QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND) {
             case CREATE:
+                log.trace("Create CreateQueryLookupStrategy instance.");
                 return new CreateQueryLookupStrategy(operations, extractor);
+
             case USE_DECLARED_QUERY:
+                log.trace("Create DeclaredQueryLookupStrategy instance.");
                 return new DeclaredQueryLookupStrategy(operations, extractor, evaluationContextProvider);
+
             case CREATE_IF_NOT_FOUND:
+                log.trace("Create CreateIfNotFoundQueryLookupStrategy instance.");
                 return new CreateIfNotFoundQueryLookupStrategy(operations,
                                                                extractor,
                                                                new CreateQueryLookupStrategy(operations, extractor),
@@ -142,6 +147,9 @@ public final class RequeryQueryLookupStrategy {
         protected RepositoryQuery resolveQuery(RequeryQueryMethod method,
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
+
+            log.debug("Resolve query ... method={}, namedQueries={}", method, namedQueries);
+
             try {
                 return lookupStrategy.resolveQuery(method, operations, namedQueries);
             } catch (IllegalStateException e) {

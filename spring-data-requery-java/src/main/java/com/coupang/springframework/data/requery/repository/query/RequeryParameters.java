@@ -3,16 +3,16 @@ package com.coupang.springframework.data.requery.repository.query;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.Parameters;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.RequeryParameters
+ * 메소드의 Parameter 정보를 나타냅니다.
  *
  * @author debop
  * @since 18. 6. 7
@@ -22,10 +22,12 @@ public class RequeryParameters extends Parameters<RequeryParameters, RequeryPara
 
     public RequeryParameters(Method method) {
         super(method);
+        log.debug("Ctor RequeryParameters. method={}", method);
     }
 
     public RequeryParameters(List<RequeryParameter> parameters) {
         super(parameters);
+        log.debug("Ctor RequeryParameters. parameters={}", parameters);
     }
 
     @NotNull
@@ -40,6 +42,18 @@ public class RequeryParameters extends Parameters<RequeryParameters, RequeryPara
         return new RequeryParameters(parameters);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        getBindableParameters().forEach(param -> {
+            builder.append(param.toString()).append(",");
+        });
+
+        return "(" + builder.substring(0, builder.length() - 1) + ")";
+    }
+
+    @Slf4j
     static class RequeryParameter extends Parameter {
 
         private final MethodParameter parameter;
@@ -52,12 +66,17 @@ public class RequeryParameters extends Parameters<RequeryParameters, RequeryPara
         public RequeryParameter(MethodParameter parameter) {
             super(parameter);
             this.parameter = parameter;
+
+            log.debug("Create RequeryParameter. parameter={}", parameter);
+        }
+
+        public boolean isDateParameter() {
+            return Objects.equals(getType(), Date.class);
         }
 
         @Override
-        public Optional<String> getName() {
-            Param annotation = parameter.getParameterAnnotation(Param.class);
-            return Optional.ofNullable(annotation == null ? null : annotation.value());
+        public String toString() {
+            return parameter.getParameter().toString();
         }
     }
 }

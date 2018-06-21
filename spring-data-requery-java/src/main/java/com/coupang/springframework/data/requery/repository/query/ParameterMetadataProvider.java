@@ -96,11 +96,6 @@ public class ParameterMetadataProvider {
     }
 
 
-    /**
-     * @param <T>
-     * @author Oliver Gierke
-     * @author Thomas Darimont
-     */
     @Slf4j
     static class ParameterMetadata<T> {
 

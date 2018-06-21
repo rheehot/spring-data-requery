@@ -44,8 +44,9 @@ public class RequeryQueryMethod extends QueryMethod {
         NATIVE_ARRAY_TYPES = Collections.unmodifiableSet(types);
     }
 
-    private final QueryExtractor extractor;
     private final Method method;
+    private final QueryExtractor extractor;
+    private final RequeryEntityMetadata<?> entityInformation;
 
     /**
      * Creates a new {@link QueryMethod} from the given parameters. Looks up the correct query to use for following
@@ -61,8 +62,12 @@ public class RequeryQueryMethod extends QueryMethod {
         Assert.notNull(method, "Method must not be null!");
         Assert.notNull(extractor, "Query extractor must not be null!");
 
+        log.debug("Create RequeryQueryMethod. repository={}, methodName={}, method={}",
+                  metadata.getRepositoryInterface(), method.getName(), method);
+
         this.method = method;
         this.extractor = extractor;
+        this.entityInformation = DefaultRequeryEntityMetadata.of(getDomainClass());
 
         Assert.isTrue(!(isModifyingQuery() && getParameters().hasSpecialParameter()),
                       String.format("Modifying method must not contains %s!", Parameters.TYPES));
@@ -95,7 +100,7 @@ public class RequeryQueryMethod extends QueryMethod {
     @SuppressWarnings("unchecked")
     @Override
     public RequeryEntityMetadata<?> getEntityInformation() {
-        return new DefaultRequeryEntityMetadata(getDomainClass());
+        return this.entityInformation;
     }
 
     @Override

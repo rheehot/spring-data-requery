@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.query.parser.PartTree;
+import org.springframework.util.Assert;
 
 /**
  * {@link PartTree} 정보를 바탕으로 Requery {@link QueryElement} 를 빌드합니다.
@@ -34,6 +35,8 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
                                 @NotNull RequeryOperations operations,
                                 @NotNull RequeryPersistenceProvider persistenceProvider) {
         super(method, operations);
+
+        Assert.notNull(persistenceProvider, "PersistenceProvider must not be null");
 
         this.operations = operations;
         this.context = operations.getMappingContext();

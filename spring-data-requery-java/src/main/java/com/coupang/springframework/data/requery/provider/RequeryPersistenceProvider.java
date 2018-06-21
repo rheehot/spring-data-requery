@@ -1,8 +1,11 @@
 package com.coupang.springframework.data.requery.provider;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.util.Assert;
 
 import javax.persistence.Query;
 import java.util.Collection;
@@ -13,22 +16,30 @@ import java.util.Collection;
  * @author debop
  * @since 18. 6. 9
  */
+@Slf4j
 public class RequeryPersistenceProvider implements QueryExtractor, ProxyIdAccessor {
+
+    public static RequeryPersistenceProvider of(@NotNull RequeryOperations operations) {
+        Assert.notNull(operations, "operation must not be null!");
+        return new RequeryPersistenceProvider(operations);
+    }
 
     private final RequeryOperations operations;
 
-    public RequeryPersistenceProvider(RequeryOperations operations) {
+    public RequeryPersistenceProvider(@NotNull RequeryOperations operations) {
+        Assert.notNull(operations, "operations must not be null!");
         this.operations = operations;
     }
 
     @Override
     public boolean shouldUseAccessorFor(Object entity) {
-        throw new NotImplementedException("구현 중");
+        return false;
     }
 
+    @Nullable
     @Override
-    public @Nullable Object getIdentifierFrom(Object entity) {
-        throw new NotImplementedException("구현 중");
+    public Object getIdentifierFrom(Object entity) {
+        return null;
     }
 
     @Override
@@ -42,7 +53,7 @@ public class RequeryPersistenceProvider implements QueryExtractor, ProxyIdAccess
         throw new NotImplementedException("구현 중");
     }
 
-    public <T> Collection<T> potentiallyConvertEmptyCollection(@org.springframework.lang.Nullable Collection<T> collection) {
+    public <T> Collection<T> potentiallyConvertEmptyCollection(@Nullable Collection<T> collection) {
         return collection == null || collection.isEmpty() ? null : collection;
     }
 }

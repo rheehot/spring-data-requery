@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.data.repository.query.ReturnedType;
+import org.springframework.util.Assert;
 
 import java.util.Optional;
 
@@ -33,6 +34,9 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
 
     public AbstractRequeryQuery(@NotNull final RequeryQueryMethod method,
                                 @NotNull final RequeryOperations operations) {
+        Assert.notNull(method, "method must not be null");
+        Assert.notNull(operations, "operations must not be null");
+
         this.method = method;
         this.operations = operations;
         this.metamodel = new RequeryMetamodel(RequeryUtils.getEntityModel(operations.getDataStore()));
@@ -94,6 +98,7 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
 
 
     protected QueryElement<? extends Result<?>> createQueryElement(Object[] values) {
+        log.debug("Create QueryElement with domainClass={}, values={}", domainClass.getName(), values);
         return doCreateQuery(values);
     }
 

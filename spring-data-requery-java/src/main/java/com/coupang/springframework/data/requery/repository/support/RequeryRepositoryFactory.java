@@ -30,7 +30,7 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
 
     public RequeryRepositoryFactory(RequeryOperations operations) {
         Assert.notNull(operations, "operations must not be null!");
-        log.info("Create RequeryRepositoryFactory");
+        log.info("Create RequeryRepositoryFactory with operations={}", operations);
 
         this.operations = operations;
         this.extractor = new RequeryPersistenceProvider(operations);
@@ -54,8 +54,11 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
         return repository;
     }
 
+    @SuppressWarnings("unchecked")
     protected RequeryRepositoryImplementation<?, ?> getTargetRepository(RepositoryInformation information,
                                                                         RequeryOperations operations) {
+
+        log.debug("Get target repository. information={}", information);
 
         RequeryEntityInformation<?, ?> entityInformation = getEntityInformation(information.getDomainType());
         Object repository = getTargetRepositoryViaReflection(information, entityInformation, operations);
@@ -65,8 +68,6 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
         log.debug("Get target repository. repository={}", repository);
 
         return (RequeryRepositoryImplementation<?, ?>) repository;
-
-        // return new SimpleRequeryRepository(operations, entityInformation);
     }
 
     @NotNull
@@ -78,7 +79,7 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
     @Override
     protected Optional<QueryLookupStrategy> getQueryLookupStrategy(QueryLookupStrategy.Key key,
                                                                    EvaluationContextProvider evaluationContextProvider) {
-        log.debug("Get QueryLookupStrategy. key={}", key);
+        log.debug("Create QueryLookupStrategy by key={}", key);
         return Optional.of(RequeryQueryLookupStrategy.create(operations, key, extractor, evaluationContextProvider));
     }
 
