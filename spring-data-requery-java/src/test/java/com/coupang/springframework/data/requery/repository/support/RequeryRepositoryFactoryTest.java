@@ -1,13 +1,10 @@
 package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
-import com.coupang.springframework.data.requery.domain.basic.AbstractBasicUser;
+import com.coupang.springframework.data.requery.domain.basic.BasicUser;
+import com.coupang.springframework.data.requery.repository.RequeryRepository;
 import com.coupang.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactory;
 import com.coupang.springframework.data.requery.repository.custom.UserCustomExtendedRepository;
-import com.coupang.springframework.data.requery.repository.RequeryRepository;
-import com.coupang.springframework.data.requery.repository.support.RequeryEntityInformation;
-import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactory;
-import com.coupang.springframework.data.requery.repository.support.SimpleRequeryRepository;
 import io.requery.meta.EntityModel;
 import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +21,6 @@ import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-
 
 import java.io.IOException;
 import java.util.Optional;
@@ -105,6 +100,13 @@ public class RequeryRepositoryFactoryTest {
         repository.throwingCheckedException();
     }
 
+    @Test
+    public void runDefaultMethods() {
+
+        SampleRepository repository = factory.getRepository(SampleRepository.class, new SampleCustomRepositoryImpl());
+        assertThat(repository.findByEmail("email")).isNotNull();
+    }
+
     @Test(expected = UnsupportedOperationException.class)
     public void createsProxyWithCustomBaseClass() {
 
@@ -136,10 +138,10 @@ public class RequeryRepositoryFactoryTest {
     }
 
 
-    private interface SimpleSampleRepository extends RequeryRepository<AbstractBasicUser, Long> {
+    private interface SimpleSampleRepository extends RequeryRepository<BasicUser, Long> {
 
         @Transactional
-        Optional<AbstractBasicUser> findById(Long id);
+        Optional<BasicUser> findById(Long id);
     }
 
     public interface SampleCustomRepository {
@@ -162,8 +164,13 @@ public class RequeryRepositoryFactoryTest {
         }
     }
 
-    private interface SampleRepository extends RequeryRepository<AbstractBasicUser, Long>, SampleCustomRepository {
+    private interface SampleRepository extends RequeryRepository<BasicUser, Long>, SampleCustomRepository {
 
+        default BasicUser findByEmail(String email) {
+            BasicUser user = new BasicUser();
+            user.setEmail(email);
+            return user;
+        }
     }
 
     static class CustomRequeryRepository<T, ID> extends SimpleRequeryRepository<T, ID> {
