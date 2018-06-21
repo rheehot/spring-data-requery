@@ -162,10 +162,12 @@ public class RequeryQueryMethodTest {
         assertThat(queryMethod.getNamedQueryName()).isEqualTo("User.findByLastname");
 
         Method method = UserRepository.class.getMethod("renameAllUsersTo", String.class);
+        assertThat(method).isNotNull();
         queryMethod = new RequeryQueryMethod(method, metadata, factory, extractor);
         assertThat(queryMethod.getNamedQueryName()).isEqualTo("User.renameAllUsersTo");
 
         method = UserRepository.class.getMethod("findSpecialUsersByLastname", String.class);
+        assertThat(method).isNotNull();
         queryMethod = new RequeryQueryMethod(method, metadata, factory, extractor);
         assertThat(queryMethod.getNamedQueryName()).isEqualTo("SpecialUser.findSpecialUsersByLastname");
     }

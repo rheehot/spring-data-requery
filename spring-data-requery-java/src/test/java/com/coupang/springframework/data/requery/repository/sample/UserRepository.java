@@ -23,6 +23,7 @@ import java.util.Set;
  * @author debop@coupang.com
  * @since 18. 6. 12
  */
+@SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
 public interface UserRepository extends RequeryRepository<User, Integer> {
 
     List<User> findByLastname(String lastname);
@@ -48,12 +49,9 @@ public interface UserRepository extends RequeryRepository<User, Integer> {
 
     /**
      * Method to check query creation and named parameter usage go well hand in hand.
-     *
-     * @param lastname
-     * @param firstname
-     * @return
      */
-    List<User> findByFirstnameOrLastname(@Param("lastname") String lastname, @Param("firstname") String firstname);
+    // BUG: @Param 이 있는 경우 @Query의 SQL문을 찾도록만 되어 있다. 이 부분을 수정해야 한다. 
+    // List<User> findByFirstnameOrLastname(@Param("lastname") String lastname, @Param("firstname") String firstname);
 
     List<User> findByLastnameLikeOrderByFirstnameDesc(String lastname);
 
@@ -63,7 +61,8 @@ public interface UserRepository extends RequeryRepository<User, Integer> {
 
     List<User> findByManagerLastname(String name);
 
-    List<User> findByColleaguesLastname(String lastname);
+    // NOTE: Not supported associated query, use direct join query instead.
+    // List<User> findByColleaguesLastname(String lastname);
 
     List<User> findByLastnameNotNull();
 
@@ -135,7 +134,7 @@ public interface UserRepository extends RequeryRepository<User, Integer> {
     List<String> findFirstnamesByLastname(String lastname);
 
     // DATAJPA-415
-    Collection<User> findByIdIn(@Param("ids") Integer... ids);
+    // Collection<User> findByIdIn(@Param("ids") Integer... ids);
 
     // DATAJPA-461
     @Query("select u from User u where u.id in ?1")

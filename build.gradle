@@ -144,6 +144,8 @@ subprojects {
 
     dependencies {
 
+        testImplementation "com.coupang.kotlinx:kotlinx-data"
+
         testImplementation "org.cache2k:cache2k-all"
         testImplementation "org.cache2k:cache2k-jcache"
 

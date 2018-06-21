@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.fail;
 @Slf4j
 public class FunctionalTest extends AbstractDomainTest {
 
-    private static final int COUNT = 100;
+    private static final int COUNT = 30;
 
     @Before
     public void setup() {
@@ -132,7 +132,7 @@ public class FunctionalTest extends AbstractDomainTest {
     @Test
     public void insert_many_people_with_transaction() {
         requeryTemplate.withTransaction(entityStore -> {
-            IntStream.range(0, COUNT).forEach( it -> {
+            IntStream.range(0, COUNT).forEach(it -> {
                 Person person = RandomData.randomPerson();
                 entityStore.insert(person);
             });
@@ -143,10 +143,12 @@ public class FunctionalTest extends AbstractDomainTest {
     }
 
     @Test
-    public void insert_many_people_with_batch() {
+    public void insert_many_people_with_batch() throws Exception {
         Set<Person> people = RandomData.randomPeople(COUNT);
         // Batch 방식으로 저장한다.
         requeryTemplate.insertAll(people);
+
+        Thread.sleep(100);
 
         int personCount = requeryTemplate.count(Person.class).get().value();
         assertThat(personCount).isEqualTo(COUNT);
@@ -170,7 +172,7 @@ public class FunctionalTest extends AbstractDomainTest {
                     assertThat(person.getId()).isGreaterThan(0L);
                     map.put(person.getId(), person);
                     latch.countDown();
-            }));
+                }));
             assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
 
             map.forEach((key, value) -> {
@@ -246,7 +248,6 @@ public class FunctionalTest extends AbstractDomainTest {
         requeryTemplate.insert(group);
 
 
-
         int count = dataStore.insert(Person.class, Person.NAME.get(), Person.DESCRIPTION.get())
             .query(dataStore.select(Group.NAME, Group.DESCRIPTION))
             .get()
@@ -263,7 +264,7 @@ public class FunctionalTest extends AbstractDomainTest {
     @Test
     public void insert_with_transaction_callable() {
         String result = requeryTemplate.withTransaction(entityStore -> {
-            IntStream.range(0, COUNT).forEach( it -> {
+            IntStream.range(0, COUNT).forEach(it -> {
                 Person person = RandomData.randomPerson();
                 entityStore.insert(person);
                 assertThat(person.getId()).isNotNull();
@@ -339,7 +340,7 @@ public class FunctionalTest extends AbstractDomainTest {
 
         try {
             requeryTemplate.withTransaction(entityStore -> {
-                IntStream.range(0, COUNT).forEach( it -> {
+                IntStream.range(0, COUNT).forEach(it -> {
                     Person person = RandomData.randomPerson();
                     entityStore.insert(person);
                     assertThat(person.getId()).isNotNull();
@@ -371,7 +372,7 @@ public class FunctionalTest extends AbstractDomainTest {
         EntityProxy<Person> proxy = Person.$TYPE.getProxyProvider().apply(person);
         AtomicInteger count = new AtomicInteger();
         Person.$TYPE.getAttributes().forEach(attr -> {
-            if(proxy.getState(attr).equals(PropertyState.MODIFIED)) {
+            if (proxy.getState(attr).equals(PropertyState.MODIFIED)) {
                 log.debug("modified attr={}", attr.getName());
                 // lambda 내에서 값을 변경하기 때문에 AtomicInteger를 사용했다.
                 count.getAndIncrement();
@@ -380,8 +381,8 @@ public class FunctionalTest extends AbstractDomainTest {
         assertThat(count.get()).isEqualTo(2);
         requeryTemplate.update(person);
 
-        Person.$TYPE.getAttributes().forEach( attr -> {
-            if(proxy.getState(attr).equals(PropertyState.MODIFIED)) {
+        Person.$TYPE.getAttributes().forEach(attr -> {
+            if (proxy.getState(attr).equals(PropertyState.MODIFIED)) {
                 fail("변경된 것이 없어야 합니다.");
             }
         });
@@ -501,11 +502,11 @@ public class FunctionalTest extends AbstractDomainTest {
         // refreshAll(people)
         // refresh(people, FuncPerson.NAME)
 
-        people.forEach( person -> {
+        people.forEach(person -> {
             requeryTemplate.refresh(person, Person.NAME);
             log.debug("person name={}", person.getName());
         });
-        assertThat(people.stream().allMatch( it -> it.getName().equals("fff"))).isTrue();
+        assertThat(people.stream().allMatch(it -> it.getName().equals("fff"))).isTrue();
     }
 
     @Test
@@ -792,7 +793,7 @@ public class FunctionalTest extends AbstractDomainTest {
         List<Group> addedGroups = new ArrayList<>();
 
         requeryTemplate.withTransaction(entityStore -> {
-            IntStream.range(0, 10).forEach( it -> {
+            IntStream.range(0, 10).forEach(it -> {
                 Group group = new Group();
                 group.setName("Group" + it);
                 group.setDescription("Some description");
@@ -806,7 +807,7 @@ public class FunctionalTest extends AbstractDomainTest {
 
         requeryTemplate.refresh(person, Person.GROUPS);
 
-        addedGroups.forEach( group -> assertThat(group.getMembers().toList()).contains(person));
+        addedGroups.forEach(group -> assertThat(group.getMembers().toList()).contains(person));
     }
 
     @Test
@@ -815,10 +816,10 @@ public class FunctionalTest extends AbstractDomainTest {
         requeryTemplate.insert(person);
 
         List<Person> addedPeople = new ArrayList<>();
-        IntStream.range(0, 10).forEach( it -> {
-           Person p = RandomData.randomPerson();
-           person.getFriends().add(p);
-           addedPeople.add(p);
+        IntStream.range(0, 10).forEach(it -> {
+            Person p = RandomData.randomPerson();
+            person.getFriends().add(p);
+            addedPeople.add(p);
         });
 
         requeryTemplate.update(person);
@@ -834,7 +835,7 @@ public class FunctionalTest extends AbstractDomainTest {
 
         Set<Group> toAdd = new HashSet<>();
 
-        IntStream.range(0, 10).forEach( it -> {
+        IntStream.range(0, 10).forEach(it -> {
             Group group = new Group();
             group.setName("Group" + it);
             person.getGroups().add(group);
@@ -842,7 +843,7 @@ public class FunctionalTest extends AbstractDomainTest {
         });
 
         AtomicInteger count = new AtomicInteger();
-        person.getGroups().forEach( it -> {
+        person.getGroups().forEach(it -> {
             assertThat(toAdd.contains(it)).isTrue();
             count.getAndIncrement();
         });
@@ -857,7 +858,7 @@ public class FunctionalTest extends AbstractDomainTest {
 
         Set<Group> groups = new HashSet<>();
 
-        requeryTemplate.withTransaction( entityStore -> {
+        requeryTemplate.withTransaction(entityStore -> {
             IntStream.range(0, 10).forEach(it -> {
                 Group group = new Group();
                 group.setName("DeleteGroup" + it);
@@ -867,7 +868,7 @@ public class FunctionalTest extends AbstractDomainTest {
             });
             return entityStore.update(person);
         });
-        groups.forEach( it -> person.getGroups().remove(it));
+        groups.forEach(it -> person.getGroups().remove(it));
         requeryTemplate.update(person);
         assertThat(person.getGroups().toList()).isEmpty();
 
@@ -881,7 +882,7 @@ public class FunctionalTest extends AbstractDomainTest {
         group.setName("Group");
         requeryTemplate.insert(group);
 
-        IntStream.iterate(3, i -> i-1).limit(4).forEach( it -> {
+        IntStream.iterate(3, i -> i - 1).limit(4).forEach(it -> {
             Person person = RandomData.randomPerson();
             char c = (char) (65 + it);
             person.setName(Character.toString(c));
