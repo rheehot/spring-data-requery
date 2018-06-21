@@ -78,7 +78,7 @@ public final class RequeryQueryLookupStrategy {
 
 
     /**
-     * {@link QueryLookupStrategy} to create a query from the method name.
+     * {@link QueryLookupStrategy} to create a query from the queryMethod name.
      */
     private static class CreateQueryLookupStrategy extends AbstractQueryLookupStrategy {
 
@@ -94,7 +94,7 @@ public final class RequeryQueryLookupStrategy {
         protected RepositoryQuery resolveQuery(RequeryQueryMethod method,
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
-            log.debug("Create PartTreeRequeryQuery, method={}, namedQueries={}", method, namedQueries);
+            log.debug("Create PartTreeRequeryQuery, queryMethod={}, namedQueries={}", method, namedQueries);
             return new PartTreeRequeryQuery(method, operations, persistenceProvider);
         }
     }
@@ -119,7 +119,7 @@ public final class RequeryQueryLookupStrategy {
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
 
-            log.debug("Create RawStringRequeryQueryt. method={}, namedQueries={}", method.getName(), namedQueries);
+            log.debug("Create RawStringRequeryQueryt. queryMethod={}, namedQueries={}", method.getName(), namedQueries);
             return new DeclaredRequeryQuery(method, operations);
         }
     }
@@ -148,7 +148,7 @@ public final class RequeryQueryLookupStrategy {
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
 
-            log.debug("Resolve query ... method={}, namedQueries={}", method, namedQueries);
+            log.debug("Resolve query ... queryMethod={}, namedQueries={}", method, namedQueries);
 
             try {
                 return lookupStrategy.resolveQuery(method, operations, namedQueries);

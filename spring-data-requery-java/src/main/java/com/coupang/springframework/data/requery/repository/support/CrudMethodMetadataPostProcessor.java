@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link RepositoryProxyPostProcessor} that sets up interceptors to read metadata information from the invoked method.
+ * {@link RepositoryProxyPostProcessor} that sets up interceptors to read metadata information from the invoked queryMethod.
  * This is necessary to allow redeclaration of CRUD methods in repository interfaces and configure locking information
  * or query hints on them.
  *

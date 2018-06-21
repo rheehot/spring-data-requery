@@ -16,7 +16,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 public interface CustomGenericRepository<T, ID> extends RequeryRepository<T, ID> {
 
     /**
-     * Custom sample method.
+     * Custom sample queryMethod.
      */
     T customMethod(ID id);
 }

@@ -9,6 +9,7 @@ import io.requery.query.NamedExpression;
 import io.requery.query.Result;
 import io.requery.query.WhereAndOr;
 import io.requery.query.element.QueryElement;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
@@ -34,16 +35,18 @@ import static org.springframework.data.repository.query.parser.Part.Type.NOT_CON
  * @since 18. 6. 7
  */
 @Slf4j
+@Getter
 public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? extends Result<?>>, QueryElement<? extends Result<?>>> {
 
     private final RequeryOperations operations;
     private final RequeryMappingContext context;
     private final ReturnedType returnedType;
+    private final Class<?> domainClass;
     private final String domainClassName;
     private final ParameterMetadataProvider provider;
     private final PartTree tree;
     private final RequeryParameterAccessor accessor;
-    private final List<Object> parameters;
+    private final Object[] parameters;
 
     private final QueryElement<? extends Result<?>> root;
 
@@ -52,7 +55,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
                                @NotNull ReturnedType returnedType,
                                @NotNull PartTree tree,
                                @NotNull RequeryParameterAccessor accessor,
-                               List<Object> parameters) {
+                               Object[] parameters) {
         super(tree, accessor);
 
         Assert.notNull(operations, "operation must not be null!");
@@ -65,6 +68,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
         this.provider = provider;
 
         this.returnedType = returnedType;
+        this.domainClass = returnedType.getDomainType();
         this.domainClassName = returnedType.getDomainType().getSimpleName();
 
         this.tree = tree;
@@ -121,10 +125,10 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
     protected QueryElement<? extends Result<?>> complete(QueryElement<? extends Result<?>> criteria,
                                                          Sort sort,
                                                          QueryElement<? extends Result<?>> root) {
-        QueryElement<?> select = criteria != null ? criteria : root;
+        QueryElement<?> queryElement = criteria != null ? criteria : root;
 
         return RequeryUtils.applySort(returnedType.getDomainType(),
-                                      (QueryElement<? extends Result<?>>) select,
+                                      (QueryElement<? extends Result<?>>) queryElement,
                                       sort);
     }
 

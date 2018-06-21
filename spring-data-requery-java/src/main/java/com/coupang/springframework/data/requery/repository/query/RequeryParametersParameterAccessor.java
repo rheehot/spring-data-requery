@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 
 /**
- * This class provides access to parameters of a user-defined method. It wraps ParametersParameterAccessor which catches
+ * This class provides access to parameters of a user-defined queryMethod. It wraps ParametersParameterAccessor which catches
  * special parameters Sort and Pageable, and catches Arango-specific parameters e.g. AqlQueryOptions.
  *
  * @author debop@coupang.com
@@ -16,10 +16,13 @@ public class RequeryParametersParameterAccessor extends ParametersParameterAcces
 
     private final RequeryParameters parameters;
 
-
     public RequeryParametersParameterAccessor(@NotNull RequeryQueryMethod method, Object[] values) {
-        super(method.getParameters(), values);
-        this.parameters = method.getParameters();
+        this(method.getParameters(), values);
+    }
+
+    public RequeryParametersParameterAccessor(RequeryParameters parameters, Object[] values) {
+        super(parameters, values);
+        this.parameters = parameters;
     }
 
     @Override

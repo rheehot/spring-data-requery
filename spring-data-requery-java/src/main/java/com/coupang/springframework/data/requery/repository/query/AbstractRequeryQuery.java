@@ -3,12 +3,14 @@ package com.coupang.springframework.data.requery.repository.query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.utils.RequeryMetamodel;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
-import io.requery.query.Result;
+import io.requery.query.Scalar;
 import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.util.Assert;
@@ -26,70 +28,48 @@ import java.util.Optional;
 @Slf4j
 public abstract class AbstractRequeryQuery implements RepositoryQuery {
 
-    protected final RequeryQueryMethod method;
+    protected final RequeryQueryMethod queryMethod;
     protected final RequeryOperations operations;
     protected final RequeryMetamodel metamodel;
     protected final Class<?> domainClass;
 
-
     public AbstractRequeryQuery(@NotNull final RequeryQueryMethod method,
                                 @NotNull final RequeryOperations operations) {
-        Assert.notNull(method, "method must not be null");
+        Assert.notNull(method, "queryMethod must not be null");
         Assert.notNull(operations, "operations must not be null");
 
-        this.method = method;
+        this.queryMethod = method;
         this.operations = operations;
         this.metamodel = new RequeryMetamodel(RequeryUtils.getEntityModel(operations.getDataStore()));
         this.domainClass = method.getEntityInformation().getJavaType();
     }
 
-    @Override
-    public RequeryQueryMethod getQueryMethod() {
-        return method;
-    }
-
     public Object execute(Object[] parameters) {
-
         return doExecute(getExecution(), parameters);
-
-//        final RequeryParameterAccessor accessor = new RequeryParametersParameterAccessor(method, parameters);
-//        final RequeryQueryOptions options = method.getAnnotatedQueryOptions();
-//
-//        if (method.isPageQuery()) {
-//            options.setCount(true);
-//        }
-//
-//        final ResultProcessor processor = method.getResultProcessor().withDynamicProjection(accessor);
-//        final Class<?> typeToRead = getTypeToRead(processor);
-//
-//        QueryElement<?> query = createQueryElement(accessor, options);
-//
-//        return typeToRead.cast(query.get());
     }
 
-    private Object doExecute(RequeryQueryExecution execution, Object[] values) {
+    @Nullable
+    private Object doExecute(@NotNull RequeryQueryExecution execution, Object[] values) {
 
         Object result = execution.execute(this, values);
-
-//        ParametersParameterAccessor accessor = new ParametersParameterAccessor(method.getParameters(), values);
-//        ResultProcessor withDynamicProjection = method.getResultProcessor().withDynamicProjection(accessor);
+        ParametersParameterAccessor accessor = new ParametersParameterAccessor(queryMethod.getParameters(), values);
 
         log.debug("doExecute ... result={}", result);
         return result;
     }
 
     protected RequeryQueryExecution getExecution() {
-        if (method.isStreamQuery()) {
+        if (queryMethod.isStreamQuery()) {
             return new RequeryQueryExecution.StreamExecution();
-        } else if (method.isCollectionQuery()) {
+        } else if (queryMethod.isCollectionQuery()) {
             return new RequeryQueryExecution.CollectionExecution();
-        } else if (method.isSliceQuery()) {
-            return new RequeryQueryExecution.SlicedExecution(method.getParameters());
-        } else if (method.isPageQuery()) {
-            return new RequeryQueryExecution.PagedExecution(method.getParameters());
+        } else if (queryMethod.isSliceQuery()) {
+            return new RequeryQueryExecution.SlicedExecution(queryMethod.getParameters());
+        } else if (queryMethod.isPageQuery()) {
+            return new RequeryQueryExecution.PagedExecution(queryMethod.getParameters());
 
             // TODO: UPSERT/INSERT/UPDATE 관련은 구현해야된다
-//        } else if (method.isModifyingQuery()) {
+//        } else if (queryMethod.isModifyingQuery()) {
 //            return new RequeryQueryExecution.ModifyingExecution();
         } else {
             return new RequeryQueryExecution.SingleEntityExecution();
@@ -97,12 +77,12 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
     }
 
 
-    protected QueryElement<? extends Result<?>> createQueryElement(Object[] values) {
+    protected QueryElement<?> createQueryElement(Object[] values) {
         log.debug("Create QueryElement with domainClass={}, values={}", domainClass.getName(), values);
         return doCreateQuery(values);
     }
 
-    protected QueryElement<? extends Result<?>> createCountQueryElement(Object[] values) {
+    protected QueryElement<? extends Scalar<Integer>> createCountQueryElement(Object[] values) {
         return doCreateCountQuery(values);
     }
 
@@ -112,9 +92,9 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
                : Optional.empty();
     }
 
-    protected abstract QueryElement<? extends Result<?>> doCreateQuery(Object[] values);
+    protected abstract QueryElement<?> doCreateQuery(Object[] values);
 
-    protected abstract QueryElement<? extends Result<?>> doCreateCountQuery(Object[] values);
+    protected abstract QueryElement<? extends Scalar<Integer>> doCreateCountQuery(Object[] values);
 
 
 }

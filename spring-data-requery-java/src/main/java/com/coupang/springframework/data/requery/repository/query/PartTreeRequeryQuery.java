@@ -6,10 +6,13 @@ import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvi
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.NamedExpression;
 import io.requery.query.Result;
+import io.requery.query.Scalar;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.ResultProcessor;
+import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
 
@@ -25,8 +28,8 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
     private final PartTree tree;
     private final RequeryParameters parameters;
 
-    // private final QueryPreparer query;
-    // private final QueryPreparer countQuery;
+    private final QueryPreparer queryPreparer;
+    private final CountQueryPreparer countQueryPreparer;
     private final RequeryOperations operations;
     private final RequeryMappingContext context;
 
@@ -44,86 +47,69 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
         Class<?> domainClass = method.getEntityInformation().getJavaType();
         this.parameters = method.getParameters();
 
-        boolean recreationRequired = parameters.hasDynamicProjection() || parameters.potentiallySortsDynamically();
-
         log.debug("Create PartTreeRequeryQuery. domainClass={}, parameters={}", domainClass, parameters);
 
         try {
             this.tree = new PartTree(method.getName(), domainClass);
-            // this.countQuery = new CountQueryPreparer(persistenceProvider, recreationRequired);
-            // this.query = tree.isCountProjection() ? countQuery : new QueryPreparer(persistenceProvider, recreationRequired);
+            this.countQueryPreparer = new CountQueryPreparer(persistenceProvider);
+            this.queryPreparer = tree.isCountProjection() ? countQueryPreparer : new QueryPreparer(persistenceProvider);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Fail to create PartTreeRequeryQuery for method " + method, e);
+            throw new IllegalArgumentException("Fail to create PartTreeRequeryQuery for queryMethod " + method, e);
         }
     }
 
 
     @Override
-    protected QueryElement<? extends Result<?>> doCreateQuery(Object[] values) {
-        throw new NotImplementedException("구현 중");
+    protected QueryElement<?> doCreateQuery(Object[] values) {
+        return queryPreparer.createQuery(values);
     }
-
-    @Override
-    protected QueryElement<? extends Result<?>> doCreateCountQuery(Object[] values) {
-        throw new NotImplementedException("구현 중");
-    }
-
-//    @Override
-//    protected QueryElement<?> createQuery(RequeryParameterAccessor accessor, RequeryQueryOptions options) {
-//        RequeryPersistenceProvider persistenceProvider = null;
-//        ParameterMetadataProvider provider = new ParameterMetadataProvider(accessor.getParameters(), persistenceProvider);
-//
-//        ResultProcessor processor = getQueryMethod().getResultProcessor();
-//        ReturnedType returnedType = processor.withDynamicProjection(accessor).getReturnedType();
-//
-//        return (QueryElement<?>) new RequeryQueryCreator(operations,
-//                                                         provider,
-//                                                         returnedType,
-//                                                         tree,
-//                                                         accessor,
-//                                                         null)
-//            .createQuery();
-//    }
-
-    // 아래 부분이 RequeryQueryCreator 로 이동해야 한다.
-    //
 
     @SuppressWarnings("unchecked")
-    protected QueryElement<? extends Result<?>> prepareQuery(RequeryParameterAccessor accessor) {
-        QueryElement<? extends Result<?>> query = (QueryElement<? extends Result<?>>) getOperations().select(getDomainClass());
+    @Override
+    protected QueryElement<? extends Scalar<Integer>> doCreateCountQuery(Object[] values) {
+        return (QueryElement<? extends Scalar<Integer>>) countQueryPreparer.createQuery(values);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected QueryElement<?> prepareQuery(RequeryParameterAccessor accessor) {
+        QueryElement<?> query = (QueryElement<?>) getOperations().select(getDomainClass());
 
         query = buildWhereClause(query, accessor);
 
         if (accessor.getParameters().hasPageableParameter()) {
-            query = RequeryUtils.applyPageable(getDomainClass(), query, accessor.getPageable());
+            query = RequeryUtils.applyPageable(getDomainClass(),
+                                               (QueryElement<? extends Result<?>>) query,
+                                               accessor.getPageable());
         }
         if (accessor.getParameters().hasSortParameter()) {
-            query = RequeryUtils.applySort(getDomainClass(), query, accessor.getSort());
+            query = RequeryUtils.applySort(getDomainClass(),
+                                           (QueryElement<? extends Result<?>>) query,
+                                           accessor.getSort());
         }
 
         return query;
     }
 
     @SuppressWarnings("unchecked")
-    protected QueryElement<? extends Result<?>> buildWhereClause(QueryElement<? extends Result<?>> selection,
-                                                                 RequeryParameterAccessor accessor) {
+    protected QueryElement<?> buildWhereClause(QueryElement<?> baseQuery,
+                                               RequeryParameterAccessor accessor) {
 
         final RequeryParameters bindableParams = accessor.getParameters().getBindableParameters();
         final int bindableParamsSize = bindableParams.getNumberOfParameters();
 
-        QueryElement<? extends Result<?>>[] selections = new QueryElement[1];
+        QueryElement<?>[] queries = new QueryElement[1];
 
-        selections[0] = selection;
+        queries[0] = baseQuery;
         for (int i = 0; i < bindableParamsSize; i++) {
             final RequeryParameters.RequeryParameter param = bindableParams.getParameter(i);
             final Object value = accessor.getBindableValue(i);
 
             if (param.isNamedParameter() && param.getName().isPresent()) {
                 NamedExpression expr = NamedExpression.of(param.getName().get(), value.getClass());
-                selections[0] = (QueryElement<? extends Result<?>>) selection.where(expr.eq(value));
+                queries[0] = (QueryElement<? extends Result<?>>) baseQuery.where(expr.eq(value));
             }
         }
-        return selections[0];
+        return queries[0];
     }
 
 
@@ -132,6 +118,68 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
      */
     private class QueryPreparer {
 
+        private final RequeryPersistenceProvider persistenceProvider;
+
+        QueryPreparer(RequeryPersistenceProvider persistenceProvider) {
+            this.persistenceProvider = persistenceProvider;
+        }
+
+        public QueryElement<?> createQuery(Object[] values) {
+
+            RequeryParametersParameterAccessor accessor = new RequeryParametersParameterAccessor(parameters, values);
+            RequeryQueryCreator creator = createCreator(persistenceProvider, accessor, values);
+
+            QueryElement<?> query = creator.createQuery(getDynamicSort(values));
+            return restrictMaxResultsIfNecessary(query);
+        }
+
+        private QueryElement<?> restrictMaxResultsIfNecessary(QueryElement<?> baseQuery) {
+            QueryElement<?> query = baseQuery;
+            if (tree.isLimiting()) {
+
+                if (query.getLimit() > 0) {
+                    /*
+                     * In order to return the correct results, we have to adjust the first result offset to be returned if:
+                     * - a Pageable parameter is present
+                     * - AND the requested page number > 0
+                     * - AND the requested page size was bigger than the derived result limitation via the First/Top keyword.
+                     */
+                    if (query.getLimit() > tree.getMaxResults() && query.getOffset() > 0) {
+                        query = (QueryElement<?>) query.offset(query.getOffset() - (query.getLimit() - tree.getMaxResults()));
+                    }
+                }
+                query = (QueryElement<?>) query.limit(tree.getMaxResults());
+            }
+
+            if (tree.isExistsProjection()) {
+                query = (QueryElement<?>) query.limit(1);
+            }
+
+            return query;
+        }
+
+        protected RequeryQueryCreator createCreator(final RequeryPersistenceProvider persistenceProvider,
+                                                    final RequeryParametersParameterAccessor accessor,
+                                                    Object[] values) {
+
+            ParameterMetadataProvider provider = (accessor != null)
+                                                 ? new ParameterMetadataProvider(accessor, persistenceProvider)
+                                                 : new ParameterMetadataProvider(parameters, persistenceProvider);
+
+            ResultProcessor processor = getQueryMethod().getResultProcessor();
+            ReturnedType returnedType = (accessor != null)
+                                        ? processor.withDynamicProjection(accessor).getReturnedType()
+                                        : processor.getReturnedType();
+
+            return new RequeryQueryCreator(operations, provider, returnedType, tree, accessor, values);
+        }
+
+        private Sort getDynamicSort(Object[] values) {
+            return parameters.potentiallySortsDynamically()
+                   ? new RequeryParametersParameterAccessor(parameters, values).getSort()
+                   : Sort.unsorted();
+        }
+
     }
 
     /**
@@ -139,5 +187,24 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
      */
     private class CountQueryPreparer extends QueryPreparer {
 
+        CountQueryPreparer(RequeryPersistenceProvider persistenceProvider) {
+            super(persistenceProvider);
+        }
+
+        @Override
+        protected RequeryCountQueryCreator createCreator(RequeryPersistenceProvider persistenceProvider,
+                                                         RequeryParametersParameterAccessor accessor,
+                                                         Object[] values) {
+            ParameterMetadataProvider provider = (accessor != null)
+                                                 ? new ParameterMetadataProvider(accessor, persistenceProvider)
+                                                 : new ParameterMetadataProvider(parameters, persistenceProvider);
+
+            return new RequeryCountQueryCreator(operations,
+                                                provider,
+                                                getQueryMethod().getResultProcessor().getReturnedType(),
+                                                tree,
+                                                accessor,
+                                                values);
+        }
     }
 }

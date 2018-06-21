@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +27,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 /**
  * com.coupang.springframework.data.requery.repository.query.RequeryQueryMethodTest
@@ -58,7 +57,7 @@ public class RequeryQueryMethodTest {
         pageableTwice = InvalidRepository.class.getMethod(METHOD_NAME, String.class, Pageable.class, Pageable.class);
         sortableTwice = InvalidRepository.class.getMethod(METHOD_NAME, String.class, Sort.class, Sort.class);
 
-//        findWithLockMethod = ValidRepository.class.getMethod("findOneLocked", Integer.class);
+//        findWithLockMethod = ValidRepository.class.getQueryMethod("findOneLocked", Integer.class);
 
         findsProjections = ValidRepository.class.getMethod("findsProjections");
         findsProjection = ValidRepository.class.getMethod("findsProjection");

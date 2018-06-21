@@ -23,11 +23,11 @@ public class BasicUserRepositoryImpl implements BasicUserRepositoryCustom {
 
     @Override
     public void findByOverridingMethod() {
-        log.debug("A method overridng a finder was invoked!");
+        log.debug("A queryMethod overridng a finder was invoked!");
     }
 
     @Override
     public void someCustomMethod(BasicUser user) {
-        log.debug("Some custom method was invoked!");
+        log.debug("Some custom queryMethod was invoked!");
     }
 }

@@ -50,7 +50,7 @@ public class RequeryQueryMethod extends QueryMethod {
 
     /**
      * Creates a new {@link QueryMethod} from the given parameters. Looks up the correct query to use for following
-     * invocations of the method given.
+     * invocations of the queryMethod given.
      *
      * @param method   must not be {@literal null}.
      * @param metadata must not be {@literal null}.
@@ -62,7 +62,7 @@ public class RequeryQueryMethod extends QueryMethod {
         Assert.notNull(method, "Method must not be null!");
         Assert.notNull(extractor, "Query extractor must not be null!");
 
-        log.debug("Create RequeryQueryMethod. repository={}, methodName={}, method={}",
+        log.debug("Create RequeryQueryMethod. repository={}, methodName={}, queryMethod={}",
                   metadata.getRepositoryInterface(), method.getName(), method);
 
         this.method = method;
@@ -70,7 +70,7 @@ public class RequeryQueryMethod extends QueryMethod {
         this.entityInformation = DefaultRequeryEntityMetadata.of(getDomainClass());
 
         Assert.isTrue(!(isModifyingQuery() && getParameters().hasSpecialParameter()),
-                      String.format("Modifying method must not contains %s!", Parameters.TYPES));
+                      String.format("Modifying queryMethod must not contains %s!", Parameters.TYPES));
 
         assertParamterNamesInAnnotatedQuery();
     }
@@ -90,7 +90,7 @@ public class RequeryQueryMethod extends QueryMethod {
                    && !annotatedQuery.contains(":" + paramName)
                    && !annotatedQuery.contains("#" + paramName)) {
                 throw new IllegalStateException(
-                    String.format("Using named parameters for method [%s] but parameter '%s' not found in annotated query '%s'!",
+                    String.format("Using named parameters for queryMethod [%s] but parameter '%s' not found in annotated query '%s'!",
                                   method, parameter.getName(), annotatedQuery));
             }
         }
@@ -129,7 +129,7 @@ public class RequeryQueryMethod extends QueryMethod {
             return query;
         }
 
-        throw new IllegalStateException("No annotated query found for query method " + getName());
+        throw new IllegalStateException("No annotated query found for query queryMethod " + getName());
     }
 
     @Nullable

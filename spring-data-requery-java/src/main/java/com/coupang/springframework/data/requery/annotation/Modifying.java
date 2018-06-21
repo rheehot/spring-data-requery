@@ -3,7 +3,7 @@ package com.coupang.springframework.data.requery.annotation;
 import java.lang.annotation.*;
 
 /**
- * Indicates a method should be regarded as modifying query.
+ * Indicates a queryMethod should be regarded as modifying query.
  *
  * @author debop
  * @since 18. 6. 7
