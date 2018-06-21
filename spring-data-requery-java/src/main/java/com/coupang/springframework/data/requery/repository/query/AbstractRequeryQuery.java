@@ -3,6 +3,7 @@ package com.coupang.springframework.data.requery.repository.query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.utils.RequeryMetamodel;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
+import io.requery.query.Result;
 import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import lombok.Getter;
@@ -92,11 +93,11 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
     }
 
 
-    protected QueryElement<?> createQueryElement(Object[] values) {
+    protected QueryElement<? extends Result<?>> createQueryElement(Object[] values) {
         return doCreateQuery(values);
     }
 
-    protected QueryElement<?> createCountQueryElement(Object[] values) {
+    protected QueryElement<? extends Result<?>> createCountQueryElement(Object[] values) {
         return doCreateCountQuery(values);
     }
 
@@ -106,9 +107,9 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
                : Optional.empty();
     }
 
-    protected abstract QueryElement<?> doCreateQuery(Object[] values);
+    protected abstract QueryElement<? extends Result<?>> doCreateQuery(Object[] values);
 
-    protected abstract QueryElement<?> doCreateCountQuery(Object[] values);
+    protected abstract QueryElement<? extends Result<?>> doCreateCountQuery(Object[] values);
 
 
 }

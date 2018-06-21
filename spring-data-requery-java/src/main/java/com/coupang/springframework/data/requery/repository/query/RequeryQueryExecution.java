@@ -6,7 +6,6 @@ import io.requery.query.Selection;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.convert.ConversionService;
@@ -25,7 +24,7 @@ import java.util.stream.Stream;
 
 /**
  * Set of classes to contain query execution strategies. Depending (mostly) on the return type of a
- * {@link org.springframework.data.repository.query.QueryMethod} a {@link AbstractStringBasedRequeryQuery} can be executed
+ * {@link org.springframework.data.repository.query.QueryMethod} a {@link DeclaredRequeryQuery} can be executed
  * in various flavors.
  *
  * @author debop
@@ -70,7 +69,7 @@ public abstract class RequeryQueryExecution {
     }
 
     /**
-     * Executes the given {@link AbstractStringBasedRequeryQuery} with the given {@link ParameterBinder}.
+     * Executes the given {@link DeclaredRequeryQuery} with the given {@link ParameterBinder}.
      */
     @Nullable
     public Object execute(@NotNull AbstractRequeryQuery query, @NotNull Object[] values) {
@@ -95,7 +94,7 @@ public abstract class RequeryQueryExecution {
     }
 
     /**
-     * Method to implement {@link AbstractStringBasedRequeryQuery} executions by single enum values.
+     * Method to implement {@link DeclaredRequeryQuery} executions by single enum values.
      */
     @Nullable
     protected abstract Object doExecute(AbstractRequeryQuery query, Object[] values);

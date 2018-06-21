@@ -56,12 +56,12 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
 
 
     @Override
-    protected QueryElement<?> doCreateQuery(Object[] values) {
+    protected QueryElement<? extends Result<?>> doCreateQuery(Object[] values) {
         throw new NotImplementedException("구현 중");
     }
 
     @Override
-    protected QueryElement<?> doCreateCountQuery(Object[] values) {
+    protected QueryElement<? extends Result<?>> doCreateCountQuery(Object[] values) {
         throw new NotImplementedException("구현 중");
     }
 
@@ -86,7 +86,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
     //
 
     @SuppressWarnings("unchecked")
-    protected QueryElement<?> prepareQuery(RequeryParameterAccessor accessor) {
+    protected QueryElement<? extends Result<?>> prepareQuery(RequeryParameterAccessor accessor) {
         QueryElement<? extends Result<?>> query = (QueryElement<? extends Result<?>>) getOperations().select(getDomainClass());
 
         query = buildWhereClause(query, accessor);

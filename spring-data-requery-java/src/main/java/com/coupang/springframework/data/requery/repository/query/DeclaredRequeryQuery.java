@@ -25,13 +25,13 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
     }
 
     @Override
-    protected QueryElement<?> doCreateQuery(Object[] values) {
+    protected QueryElement<? extends Result<?>> doCreateQuery(Object[] values) {
         // Nothing to do.
         return null;
     }
 
     @Override
-    protected QueryElement<?> doCreateCountQuery(Object[] values) {
+    protected QueryElement<? extends Result<?>> doCreateCountQuery(Object[] values) {
         // Nothing to do.
         return null;
     }
@@ -58,6 +58,7 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
         }
     }
 
+    @NotNull
     private String getRawQuery() {
         String rawQuery = getQueryMethod().getAnnotatedQuery();
 
@@ -69,6 +70,7 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
         return rawQuery;
     }
 
+    @NotNull
     private ReturnedType getReturnedType(Object[] parameters) {
         RequeryParametersParameterAccessor accessor = new RequeryParametersParameterAccessor(method, parameters);
         ResultProcessor processor = getQueryMethod().getResultProcessor();

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * RequeryWhereExecutor
+ * Requery {@link WhereAndOr} 를 이용하여 조회를 수행하는 메소드를 제공하는 Executor 입니다.
  *
  * @author debop@coupang.com
  * @since 18. 6. 20
@@ -29,7 +29,19 @@ public interface RequeryWhereExecutor<T> {
 
     List<T> findAll(Iterable<Condition<T, ?>> conditions);
 
+    /**
+     * 해당 Where 조건에 해당하는 엔티티의 수
+     *
+     * @param whereClause Where 조건절
+     * @return 조건절에 해당하는 엔티티 수
+     */
     int count(WhereAndOr<? extends Result<T>> whereClause);
 
+    /**
+     * 해당 where 조건에 해당하는 엔티티가 존재하는지 여부
+     *
+     * @param whereClause Where 조건절
+     * @return 조건절에 해당하는 엔티티 존재 여부
+     */
     boolean exists(WhereAndOr<? extends Result<T>> whereClause);
 }
