@@ -1,14 +1,15 @@
 package com.coupang.springframework.data.requery.repository.query;
 
+import com.coupang.springframework.data.requery.NotSupportedException;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.repository.query.ParameterMetadataProvider.ParameterMetadata;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.*;
 import io.requery.query.element.QueryElement;
+import io.requery.query.function.Count;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyPath;
@@ -33,7 +34,7 @@ import static org.springframework.data.repository.query.parser.Part.Type.NOT_CON
  */
 @Slf4j
 @Getter
-public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? extends Result<?>>, QueryElement<? extends Result<?>>> {
+public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, QueryElement<?>> {
 
     private final RequeryOperations operations;
     private final RequeryMappingContext context;
@@ -42,23 +43,20 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
     private final String domainClassName;
     private final ParameterMetadataProvider provider;
     private final PartTree tree;
-    private final RequeryParameterAccessor accessor;
-    private final Object[] parameters;
+//    private final RequeryParameterAccessor accessor;
+//    private final Object[] parameters;
 
     private final QueryElement<? extends Result<?>> root;
 
     public RequeryQueryCreator(@NotNull RequeryOperations operations,
                                @NotNull ParameterMetadataProvider provider,
                                @NotNull ReturnedType returnedType,
-                               @NotNull PartTree tree,
-                               @NotNull RequeryParameterAccessor accessor,
-                               Object[] parameters) {
-        super(tree, accessor);
+                               @NotNull PartTree tree) {
+        super(tree);
 
         Assert.notNull(operations, "operation must not be null!");
         Assert.notNull(provider, "provider must not be null!");
         Assert.notNull(tree, "tree must not be null!");
-        Assert.notNull(accessor, "accessor must not be null!");
 
         this.operations = operations;
         this.context = operations.getMappingContext();
@@ -69,12 +67,12 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
         this.domainClassName = returnedType.getDomainType().getSimpleName();
 
         this.tree = tree;
-        this.accessor = accessor;
-        this.parameters = parameters;
+//        this.accessor = accessor;
+//        this.parameters = parameters;
 
         this.root = createQueryElement(returnedType);
 
-        log.debug("Create RequeryQueryCreator for {}", domainClassName);
+        log.debug("Create RequeryQueryCreator for [{}]", domainClassName);
     }
 
     @SuppressWarnings("unchecked")
@@ -83,8 +81,8 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
         log.debug("Create QueryElement instance. ReturnedType={}", type);
 
         Class<?> typeToRead = type.getTypeToRead();
-        return typeToRead == null || tree.isExistsProjection()
-               ? (QueryElement<? extends Result<?>>) operations.select().from(type.getDomainType())
+        return typeToRead == null || tree.isExistsProjection() || tree.isCountProjection()
+               ? (QueryElement<? extends Result<?>>) operations.select(Count.count(type.getDomainType()))
                : (QueryElement<? extends Result<?>>) operations.select(typeToRead);
     }
 
@@ -94,34 +92,34 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
 
     @SuppressWarnings("unchecked")
     @Override
-    protected QueryElement<? extends Result<?>> create(Part part, Iterator<Object> iterator) {
+    protected QueryElement<?> create(Part part, Iterator<Object> iterator) {
         return toQueryElement(part, root);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected QueryElement<? extends Result<?>> and(Part part,
-                                                    QueryElement<? extends Result<?>> base,
+                                                    QueryElement<?> base,
                                                     Iterator<Object> iterator) {
         return (QueryElement<? extends Result<?>>) (((WhereAndOr<?>) base).and((Condition<?, ?>) toQueryElement(part, root)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected QueryElement<? extends Result<?>> or(QueryElement<? extends Result<?>> base,
-                                                   QueryElement<? extends Result<?>> criteria) {
+    protected QueryElement<?> or(QueryElement<?> base,
+                                 QueryElement<?> criteria) {
         return (QueryElement<? extends Result<?>>) (((WhereAndOr<?>) base).or((Condition<?, ?>) criteria));
     }
 
     @Override
-    protected QueryElement<? extends Result<?>> complete(QueryElement<? extends Result<?>> criteria, Sort sort) {
+    protected QueryElement<?> complete(QueryElement<?> criteria, Sort sort) {
         return complete(criteria, sort, root);
     }
 
     @SuppressWarnings("unchecked")
-    protected QueryElement<? extends Result<?>> complete(QueryElement<? extends Result<?>> criteria,
-                                                         Sort sort,
-                                                         QueryElement<? extends Result<?>> root) {
+    protected QueryElement<?> complete(QueryElement<?> criteria,
+                                       Sort sort,
+                                       QueryElement<?> root) {
         QueryElement<?> queryElement = criteria != null ? criteria : root;
 
         return RequeryUtils.applySort(returnedType.getDomainType(),
@@ -129,16 +127,16 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
                                       sort);
     }
 
-    private QueryElement<? extends Result<?>> toQueryElement(Part part, QueryElement<? extends Result<?>> root) {
+    private QueryElement<?> toQueryElement(Part part, QueryElement<?> root) {
         return new QueryElementBuilder(part, root).build();
     }
 
     private class QueryElementBuilder {
 
         private final Part part;
-        private final QueryElement<? extends Result<?>> root;
+        private final QueryElement<?> root;
 
-        public QueryElementBuilder(Part part, QueryElement<? extends Result<?>> root) {
+        public QueryElementBuilder(Part part, QueryElement<?> root) {
             Assert.notNull(part, "Part must not be null!");
             Assert.notNull(root, "Root must not be null!");
             this.part = part;
@@ -149,7 +147,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
          * Build Requery {@link QueryElement} from the underlying {@link Part}
          */
         @SuppressWarnings("unchecked")
-        public QueryElement<? extends Result<?>> build() {
+        public QueryElement<?> build() {
 
             PropertyPath property = part.getProperty();
             Part.Type type = part.getType();
@@ -207,16 +205,16 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
                 case CONTAINING:
                 case NOT_CONTAINING:
 
-                    if (property.getLeafProperty().isCollection()) {
-                        throw new NotImplementedException("구현 중");
-                    }
+                    throw new NotSupportedException("Not supported keyword " + type);
 
                 case LIKE:
                 case NOT_LIKE:
-                    String parameter = (String) provider.next(part, String.class).getValue();
+                    FieldExpression<String> fieldExpr = upperIfIgnoreCase(expr);
+                    String value = (String) provider.next(part, String.class).getValue();
+
                     whereClause = (type.equals(LIKE) || type.equals(NOT_CONTAINING))
-                                  ? root.where(expr.like(parameter))
-                                  : root.where(expr.notLike(parameter));
+                                  ? root.where(fieldExpr.like(value))
+                                  : root.where(fieldExpr.notLike(value));
                     break;
 
                 case TRUE:
@@ -227,31 +225,52 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
                     whereClause = root.where(expr.eq(false));
                     break;
 
+                // IS, Equals 
                 case SIMPLE_PROPERTY:
-                    ParameterMetadata<Object> expression = provider.next(part);
-                    whereClause = expression.isIsNullParameter()
+                    ParameterMetadata<Object> simpleExpr = provider.next(part);
+                    upperIfIgnoreCase(simpleExpr.getExpression());
+
+                    whereClause = simpleExpr.isIsNullParameter()
                                   ? root.where(expr.isNull())
-                                  : root.where(expr.eq(expression));
+                                  : root.where(upperIfIgnoreCase(expr).eq(simpleExpr.getValue()));
                     break;
 
                 case NEGATING_SIMPLE_PROPERTY:
-                    whereClause = root.where(expr.notEqual(provider.next(part).getExpression()));
+                    ParameterMetadata<Object> simpleNotExpr = provider.next(part);
+                    upperIfIgnoreCase(simpleNotExpr.getExpression());
+                    whereClause = root.where(upperIfIgnoreCase(expr).notEqual(simpleNotExpr.getValue()));
                     break;
 
                 case IS_EMPTY:
-
-                    if (!property.getLeafProperty().isCollection()) {
-                        throw new IllegalArgumentException("IsEmpty / IsNotEmpty can only be used on collection properties!");
-                    }
-                    // NOTE: association 관련이므로, 명시적인 JOIN 구문을 사용해야 합니다.
-                    whereClause = root;
-                    break;
-
+                case IS_NOT_EMPTY:
                 default:
-                    throw new IllegalArgumentException("Unsupported keyword " + type);
+                    throw new NotSupportedException("Not supported keyword " + type);
             }
 
-            return (QueryElement<? extends Result<?>>) RequeryUtils.unwrap(whereClause);
+            return RequeryUtils.unwrap(whereClause);
+        }
+
+        private <T> FieldExpression<T> upperIfIgnoreCase(FieldExpression<T> expression) {
+
+            switch (part.shouldIgnoreCase()) {
+                case ALWAYS:
+                    Assert.state(canUpperCase(expression), "Unable to ignore case of " + expression.getClassType().getName()
+                                                           + " types, the property '" + part.getProperty().getSegment() + "' must reference a String");
+                    return expression.function("Upper");
+
+                case WHEN_POSSIBLE:
+                    if (canUpperCase(expression)) {
+                        return expression.function("Upper");
+                    }
+
+                case NEVER:
+                default:
+                    return expression;
+            }
+        }
+
+        private boolean canUpperCase(FieldExpression<?> expression) {
+            return String.class.equals(expression.getClassType());
         }
     }
 }

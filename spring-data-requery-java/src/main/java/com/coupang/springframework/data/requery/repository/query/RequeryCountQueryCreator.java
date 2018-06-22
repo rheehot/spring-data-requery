@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.Result;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
@@ -22,10 +23,8 @@ public class RequeryCountQueryCreator extends RequeryQueryCreator {
     public RequeryCountQueryCreator(@NotNull RequeryOperations operations,
                                     @NotNull ParameterMetadataProvider provider,
                                     @NotNull ReturnedType returnedType,
-                                    @NotNull PartTree tree,
-                                    @NotNull RequeryParameterAccessor accessor,
-                                    Object[] values) {
-        super(operations, provider, returnedType, tree, accessor, values);
+                                    @NotNull PartTree tree) {
+        super(operations, provider, returnedType, tree);
     }
 
     @SuppressWarnings("unchecked")
@@ -36,9 +35,9 @@ public class RequeryCountQueryCreator extends RequeryQueryCreator {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected QueryElement<? extends Result<?>> complete(QueryElement<? extends Result<?>> criteria,
-                                                         Sort sort,
-                                                         QueryElement<? extends Result<?>> root) {
+    protected QueryElement<?> complete(QueryElement<?> criteria,
+                                       Sort sort,
+                                       QueryElement<?> root) {
 
         QueryElement<? extends Result<?>> query = (QueryElement<? extends Result<?>>) getOperations().select(Count.count(getDomainClass()));
 
@@ -46,8 +45,6 @@ public class RequeryCountQueryCreator extends RequeryQueryCreator {
             query = (QueryElement<? extends Result<?>>) query.distinct();
         }
 
-        return (QueryElement<? extends Result<?>>) query.where().exists(criteria);
+        return RequeryUtils.unwrap(query.where().exists(criteria));
     }
-
-
 }

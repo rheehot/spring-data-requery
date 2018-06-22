@@ -2,6 +2,7 @@ package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
 import io.requery.query.Expression;
+import io.requery.query.FieldExpression;
 import io.requery.query.NamedExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.repository.query.Parameter;
@@ -101,7 +102,7 @@ public class ParameterMetadataProvider {
 
         static final Object PLACEHOLDER = new Object();
 
-        private final NamedExpression<T> expression;
+        private final FieldExpression<T> expression;
         private final RequeryPersistenceProvider persistenceProvider;
         private final Part.Type type;
         private final Object value;
@@ -109,7 +110,7 @@ public class ParameterMetadataProvider {
         /**
          * Creates a new {@link ParameterMetadata}.
          */
-        public ParameterMetadata(NamedExpression<T> expression,
+        public ParameterMetadata(FieldExpression<T> expression,
                                  Part.Type type,
                                  @Nullable Object value,
                                  RequeryPersistenceProvider provider) {
@@ -125,7 +126,7 @@ public class ParameterMetadataProvider {
          *
          * @return the expression
          */
-        public NamedExpression<T> getExpression() {
+        public FieldExpression<T> getExpression() {
             return expression;
         }
 

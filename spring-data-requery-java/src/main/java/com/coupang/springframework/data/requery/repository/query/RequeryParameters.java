@@ -50,7 +50,7 @@ public class RequeryParameters extends Parameters<RequeryParameters, RequeryPara
             builder.append(param.toString()).append(",");
         });
 
-        return "(" + builder.substring(0, builder.length() - 1) + ")";
+        return "(" + (builder.length() > 0 ? builder.substring(0, builder.length() - 1) : "") + ")";
     }
 
     @Slf4j

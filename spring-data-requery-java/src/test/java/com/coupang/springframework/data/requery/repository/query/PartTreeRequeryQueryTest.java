@@ -1,8 +1,12 @@
 package com.coupang.springframework.data.requery.repository.query;
 
+import com.coupang.springframework.data.requery.NotSupportedException;
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest;
 import com.coupang.springframework.data.requery.domain.sample.User;
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
+import io.requery.query.Operator;
+import io.requery.query.Result;
+import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -25,6 +29,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@SuppressWarnings({ "unchecked", "ResultOfMethodCallIgnored" })
 @Slf4j
 public class PartTreeRequeryQueryTest extends AbstractDomainTest {
 
@@ -45,8 +53,127 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
                                                                      requeryTemplate,
                                                                      provider);
 
-        requeryQuery.createQueryElement(new Object[] { "Debop", PageRequest.of(0, 1) });
-        requeryQuery.createQueryElement(new Object[] { "Debop", PageRequest.of(0, 1) });
+        QueryElement<?> query = requeryQuery.createQueryElement(new Object[] { "Debop", PageRequest.of(0, 1) });
+        assertThat(query).isNotNull();
+
+        ((QueryElement<? extends Result<?>>) query).get().toList();
+
+        query = requeryQuery.createQueryElement(new Object[] { "Diego", PageRequest.of(1, 3) });
+        assertThat(query).isNotNull();
+
+        ((QueryElement<? extends Result<?>>) query).get().toList();
+    }
+
+    @Test
+    public void cannotIgnoreCaseIfNotString() throws Exception {
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("Unable to ignore case of java.lang.Integer types, the property 'id' must reference a String");
+        testIgnoreCase("findByIdIgnoringCase", 3);
+    }
+
+    @Test
+    public void cannotIgnoreCaseIfNotStringUnlessIgnoringAll() throws Exception {
+        testIgnoreCase("findByIdAllIgnoringCase", 3);
+    }
+
+    @Test
+    public void recreatesQueryIfNullValueIsGiven() throws Exception {
+
+        RequeryQueryMethod queryMethod = getQueryMethod("findByFirstname", String.class, Pageable.class);
+        PartTreeRequeryQuery requeryQuery = new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
+
+        // eq 
+        QueryElement<?> query = requeryQuery.createQueryElement(new Object[] { "Debop", PageRequest.of(0, 1) });
+        assertThat(query).isNotNull();
+        Operator operator = query.getWhereElements().iterator().next().getCondition().getOperator();
+        assertThat(operator).isEqualTo(Operator.EQUAL);
+
+        ((QueryElement<? extends Result<?>>) query).get().toList();
+
+        // isNull
+        query = requeryQuery.createQueryElement(new Object[] { null, PageRequest.of(0, 1) });
+        assertThat(query).isNotNull();
+        operator = query.getWhereElements().iterator().next().getCondition().getOperator();
+        assertThat(operator).isEqualTo(Operator.IS_NULL);
+
+        ((QueryElement<? extends Result<?>>) query).get().toList();
+    }
+
+    @Test
+    public void shouldLimitExistsProjectionQueries() throws Exception {
+
+        RequeryQueryMethod queryMethod = getQueryMethod("existsByFirstname", String.class);
+        PartTreeRequeryQuery requeryQuery = new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
+
+        QueryElement<?> query = requeryQuery.createQueryElement(new Object[] { "Debop" });
+
+        assertThat(query.getLimit()).isEqualTo(1);
+
+        ((QueryElement<? extends Result<?>>) query).get().firstOrNull();
+    }
+
+    @Test
+    public void shouldSelectForExistsProjectionQueries() throws Exception {
+
+        RequeryQueryMethod queryMethod = getQueryMethod("existsByFirstname", String.class);
+        PartTreeRequeryQuery requeryQuery = new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
+
+        QueryElement<?> query = requeryQuery.createQueryElement(new Object[] { "Debop" });
+
+        ((QueryElement<? extends Result<?>>) query).get().firstOrNull();
+    }
+
+    @Test(expected = NotSupportedException.class)
+    public void isEmptyCollection() throws Exception {
+
+        RequeryQueryMethod queryMethod = getQueryMethod("findByRolesIsEmpty");
+        PartTreeRequeryQuery requeryQuery = new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
+
+        QueryElement<?> query = requeryQuery.createQueryElement(new Object[] {});
+    }
+
+    @Test(expected = NotSupportedException.class)
+    public void isNotEmptyCollection() throws Exception {
+
+        RequeryQueryMethod queryMethod = getQueryMethod("findByRolesIsNotEmpty");
+        PartTreeRequeryQuery requeryQuery = new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
+
+        QueryElement<?> query = requeryQuery.createQueryElement(new Object[] {});
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void rejectsIsEmptyOnNonCollectionProperty() throws Exception {
+
+        RequeryQueryMethod queryMethod = getQueryMethod("findByFirstnameIsEmpty");
+        PartTreeRequeryQuery requeryQuery = new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
+
+        QueryElement<?> query = requeryQuery.createQueryElement(new Object[] { "Debop" });
+    }
+
+    @Test
+    public void errorDueToMismatchOfParametersContainNameOfMethodAndInterface() throws Exception {
+
+        // BUG: 왜 Parameters 수 검사를 못하지???
+
+        assertThatThrownBy(() -> {
+            RequeryQueryMethod queryMethod = getQueryMethod("findByFirstname");
+            new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
+        })
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private void testIgnoreCase(String methodName, Object... values) throws Exception {
+
+        Class<?>[] parameterTypes = new Class[values.length];
+        for (int i = 0; i < values.length; i++) {
+            parameterTypes[i] = values[i].getClass();
+        }
+
+        RequeryQueryMethod queryMethod = getQueryMethod(methodName, parameterTypes);
+        PartTreeRequeryQuery requeryQuery = new PartTreeRequeryQuery(queryMethod,
+                                                                     requeryTemplate,
+                                                                     provider);
+        requeryQuery.createQueryElement(values);
     }
 
 

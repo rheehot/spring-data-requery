@@ -122,14 +122,18 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
 
         QueryPreparer(RequeryPersistenceProvider persistenceProvider) {
             this.persistenceProvider = persistenceProvider;
+
+            // check wrong parameter numbers
+            RequeryQueryCreator creator = createCreator(persistenceProvider, null);
         }
 
         public QueryElement<?> createQuery(Object[] values) {
 
             RequeryParametersParameterAccessor accessor = new RequeryParametersParameterAccessor(parameters, values);
-            RequeryQueryCreator creator = createCreator(persistenceProvider, accessor, values);
+            RequeryQueryCreator creator = createCreator(persistenceProvider, accessor);
 
             QueryElement<?> query = creator.createQuery(getDynamicSort(values));
+
             return restrictMaxResultsIfNecessary(query);
         }
 
@@ -159,8 +163,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
         }
 
         protected RequeryQueryCreator createCreator(final RequeryPersistenceProvider persistenceProvider,
-                                                    final RequeryParametersParameterAccessor accessor,
-                                                    Object[] values) {
+                                                    final RequeryParametersParameterAccessor accessor) {
 
             ParameterMetadataProvider provider = (accessor != null)
                                                  ? new ParameterMetadataProvider(accessor, persistenceProvider)
@@ -171,7 +174,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
                                         ? processor.withDynamicProjection(accessor).getReturnedType()
                                         : processor.getReturnedType();
 
-            return new RequeryQueryCreator(operations, provider, returnedType, tree, accessor, values);
+            return new RequeryQueryCreator(operations, provider, returnedType, tree);
         }
 
         private Sort getDynamicSort(Object[] values) {
@@ -193,8 +196,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
 
         @Override
         protected RequeryCountQueryCreator createCreator(RequeryPersistenceProvider persistenceProvider,
-                                                         RequeryParametersParameterAccessor accessor,
-                                                         Object[] values) {
+                                                         RequeryParametersParameterAccessor accessor) {
             ParameterMetadataProvider provider = (accessor != null)
                                                  ? new ParameterMetadataProvider(accessor, persistenceProvider)
                                                  : new ParameterMetadataProvider(parameters, persistenceProvider);
@@ -202,9 +204,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
             return new RequeryCountQueryCreator(operations,
                                                 provider,
                                                 getQueryMethod().getResultProcessor().getReturnedType(),
-                                                tree,
-                                                accessor,
-                                                values);
+                                                tree);
         }
     }
 }

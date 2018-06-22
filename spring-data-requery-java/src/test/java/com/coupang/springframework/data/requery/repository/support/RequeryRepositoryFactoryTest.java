@@ -29,12 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 
-/**
- * com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactoryTest
- *
- * @author debop
- * @since 18. 6. 9
- */
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class RequeryRepositoryFactoryTest {
