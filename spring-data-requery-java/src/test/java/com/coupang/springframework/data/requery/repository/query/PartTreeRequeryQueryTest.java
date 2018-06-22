@@ -1,6 +1,5 @@
 package com.coupang.springframework.data.requery.repository.query;
 
-import com.coupang.springframework.data.requery.NotSupportedException;
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest;
 import com.coupang.springframework.data.requery.domain.sample.User;
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
@@ -66,7 +65,7 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
 
     @Test
     public void cannotIgnoreCaseIfNotString() throws Exception {
-        thrown.expect(IllegalStateException.class);
+        thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Unable to ignore case of java.lang.Integer types, the property 'id' must reference a String");
         testIgnoreCase("findByIdIgnoringCase", 3);
     }
@@ -123,7 +122,7 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
         ((QueryElement<? extends Result<?>>) query).get().firstOrNull();
     }
 
-    @Test(expected = NotSupportedException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void isEmptyCollection() throws Exception {
 
         RequeryQueryMethod queryMethod = getQueryMethod("findByRolesIsEmpty");
@@ -132,7 +131,7 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
         QueryElement<?> query = requeryQuery.createQueryElement(new Object[] {});
     }
 
-    @Test(expected = NotSupportedException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void isNotEmptyCollection() throws Exception {
 
         RequeryQueryMethod queryMethod = getQueryMethod("findByRolesIsNotEmpty");
@@ -153,13 +152,22 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
     @Test
     public void errorDueToMismatchOfParametersContainNameOfMethodAndInterface() throws Exception {
 
-        // BUG: 왜 Parameters 수 검사를 못하지???
+        RequeryQueryMethod queryMethod = getQueryMethod("findByFirstnameAndLastname", String.class);
 
         assertThatThrownBy(() -> {
-            RequeryQueryMethod queryMethod = getQueryMethod("findByFirstname");
             new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
-        })
-            .isInstanceOf(IllegalArgumentException.class);
+        }).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void errorDueToMissingPropertyContainNameOfMethodAndInterface() throws Exception {
+
+        RequeryQueryMethod queryMethod = getQueryMethod("findByNoSuchPropery", String.class);
+
+        assertThatThrownBy(() -> {
+            // HINT: PartTree 생성 시, 엔티티에 존재하지 않는 속성명을 사용하는 경우에 예외를 발생시킨다. 
+            new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
+        }).isInstanceOf(IllegalArgumentException.class);
     }
 
     private void testIgnoreCase(String methodName, Object... values) throws Exception {
@@ -201,6 +209,7 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
         return (T) result;
     }
 
+    @SuppressWarnings({ "SpringDataRepositoryMethodParametersInspection", "SpringDataMethodInconsistencyInspection" })
     interface UserRepository extends Repository<User, Integer> {
 
         Page<User> findByFirstname(String firstname, Pageable pageable);
@@ -220,7 +229,7 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
         List<User> findByFirstnameIsEmpty();
 
         // Wrong number of parameters
-        User findByFirstname();
+        User findByFirstnameAndLastname(String firstname);
 
         // Wrong property name
         User findByNoSuchPropery(String x);

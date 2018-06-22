@@ -54,7 +54,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
             this.countQueryPreparer = new CountQueryPreparer(persistenceProvider);
             this.queryPreparer = tree.isCountProjection() ? countQueryPreparer : new QueryPreparer(persistenceProvider);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Fail to create PartTreeRequeryQuery for queryMethod " + method, e);
+            throw new IllegalArgumentException("Fail to create query for method " + method + "! " + e.getMessage(), e);
         }
     }
 
@@ -123,8 +123,10 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
         QueryPreparer(RequeryPersistenceProvider persistenceProvider) {
             this.persistenceProvider = persistenceProvider;
 
-            // check wrong parameter numbers
+            // HINT: check wrong method (parameter number matching, not exists property name ...)
             RequeryQueryCreator creator = createCreator(persistenceProvider, null);
+            creator.createQuery();
+            creator.getParameterExpressions();
         }
 
         public QueryElement<?> createQuery(Object[] values) {

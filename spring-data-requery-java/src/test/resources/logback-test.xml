@@ -16,9 +16,9 @@
     <logger name="io.requery.sql" level="WARN"/>
     <logger name="requery" level="WARN"/>
 
-    <logger name="org.springframework.data" level="INFO"/>
+    <logger name="org.springframework.data" level="DEBUG"/>
 
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="console"/>
     </root>
 
