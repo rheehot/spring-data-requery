@@ -4,10 +4,7 @@ import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.repository.query.ParameterMetadataProvider.ParameterMetadata;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
-import io.requery.query.Condition;
-import io.requery.query.NamedExpression;
-import io.requery.query.Result;
-import io.requery.query.WhereAndOr;
+import io.requery.query.*;
 import io.requery.query.element.QueryElement;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -161,38 +158,49 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
 
             log.debug("Build QueryElement ... property={}, type={}", property, type);
 
+            Return<?> whereClause;
+
             switch (type) {
                 case BETWEEN:
                     ParameterMetadata<Comparable> first = provider.next(part);
                     ParameterMetadata<Comparable> second = provider.next(part);
 
-                    return (QueryElement<? extends Result<?>>) root.where(expr.between(first.getExpression(), second.getExpression()));
+                    whereClause = root.where(expr.between(first.getExpression(), second.getExpression()));
+                    break;
 
                 case AFTER:
                 case GREATER_THAN:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.greaterThan(provider.next(part, Comparable.class).getExpression()));
+                    whereClause = root.where(expr.greaterThan(provider.next(part, Comparable.class).getExpression()));
+                    break;
 
                 case GREATER_THAN_EQUAL:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.greaterThanOrEqual(provider.next(part, Comparable.class).getExpression()));
+                    whereClause = root.where(expr.greaterThanOrEqual(provider.next(part, Comparable.class).getExpression()));
+                    break;
 
                 case BEFORE:
                 case LESS_THAN:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.lt(provider.next(part, Comparable.class).getExpression()));
+                    whereClause = root.where(expr.lt(provider.next(part, Comparable.class).getExpression()));
+                    break;
 
                 case LESS_THAN_EQUAL:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.lte(provider.next(part, Comparable.class).getExpression()));
+                    whereClause = root.where(expr.lte(provider.next(part, Comparable.class).getExpression()));
+                    break;
 
                 case IS_NULL:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.isNull());
+                    whereClause = root.where(expr.isNull());
+                    break;
 
                 case IS_NOT_NULL:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.notNull());
+                    whereClause = root.where(expr.notNull());
+                    break;
 
                 case NOT_IN:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.notIn(provider.next(part, Collection.class).getExpression()));
+                    whereClause = root.where(expr.notIn(provider.next(part, Collection.class).getExpression()));
+                    break;
 
                 case IN:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.in(provider.next(part, Collection.class).getExpression()));
+                    whereClause = root.where(expr.in(provider.next(part, Collection.class).getExpression()));
+                    break;
 
                 case STARTING_WITH:
                 case ENDING_WITH:
@@ -206,26 +214,29 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
                 case LIKE:
                 case NOT_LIKE:
                     String parameter = (String) provider.next(part, String.class).getValue();
-                    return (type.equals(LIKE) || type.equals(NOT_CONTAINING))
-                           ? (QueryElement<? extends Result<?>>) root.where(expr.like(parameter))
-                           : (QueryElement<? extends Result<?>>) root.where(expr.notLike(parameter));
+                    whereClause = (type.equals(LIKE) || type.equals(NOT_CONTAINING))
+                                  ? root.where(expr.like(parameter))
+                                  : root.where(expr.notLike(parameter));
+                    break;
 
                 case TRUE:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.eq(true));
+                    whereClause = root.where(expr.eq(true));
+                    break;
 
                 case FALSE:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.eq(false));
+                    whereClause = root.where(expr.eq(false));
+                    break;
 
                 case SIMPLE_PROPERTY:
                     ParameterMetadata<Object> expression = provider.next(part);
-                    return (QueryElement<? extends Result<?>>) (
-                        expression.isIsNullParameter()
-                        ? root.where(expr.isNull())
-                        : root.where(expr.eq(expression))
-                    );
+                    whereClause = expression.isIsNullParameter()
+                                  ? root.where(expr.isNull())
+                                  : root.where(expr.eq(expression));
+                    break;
 
                 case NEGATING_SIMPLE_PROPERTY:
-                    return (QueryElement<? extends Result<?>>) root.where(expr.notEqual(provider.next(part).getExpression()));
+                    whereClause = root.where(expr.notEqual(provider.next(part).getExpression()));
+                    break;
 
                 case IS_EMPTY:
 
@@ -233,11 +244,14 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<? ext
                         throw new IllegalArgumentException("IsEmpty / IsNotEmpty can only be used on collection properties!");
                     }
                     // NOTE: association 관련이므로, 명시적인 JOIN 구문을 사용해야 합니다.
-                    return root;
+                    whereClause = root;
+                    break;
 
                 default:
                     throw new IllegalArgumentException("Unsupported keyword " + type);
             }
+
+            return (QueryElement<? extends Result<?>>) RequeryUtils.unwrap(whereClause);
         }
     }
 }

@@ -6,6 +6,7 @@ import io.requery.meta.EntityModel;
 import io.requery.meta.Type;
 import io.requery.query.*;
 import io.requery.query.element.QueryElement;
+import io.requery.query.element.QueryWrapper;
 import io.requery.sql.EntityContext;
 import io.requery.sql.EntityDataStore;
 import lombok.experimental.UtilityClass;
@@ -150,6 +151,21 @@ public class RequeryUtils {
         return (type != null) ? type.getSingleKeyAttribute() : null;
     }
 
+    /**
+     * 모든 Requery Query 구문은 {@link QueryWrapper} 를 구현하고 내부에 {@link QueryElement} 를 가지고 있습니다.
+     * 이를 unwrap 해서 실제 {@link QueryElement} 를 반환하도록 합니다.
+     *
+     * @param wrapper {@link QueryWrapper} instance
+     * @return {@link QueryElement} instance
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static QueryElement<?> unwrap(@NotNull Return<?> wrapper) {
+        if (wrapper instanceof QueryWrapper) {
+            return ((QueryWrapper<?>) wrapper).unwrapQuery();
+        } else {
+            return (QueryElement<?>) wrapper;
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public static QueryElement<? extends Result<?>> applyPageable(@NotNull Class<?> domainClass,

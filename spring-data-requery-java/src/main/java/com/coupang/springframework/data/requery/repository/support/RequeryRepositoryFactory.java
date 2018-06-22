@@ -16,7 +16,7 @@ import org.springframework.util.Assert;
 import java.util.Optional;
 
 /**
- * RequeryRepositoryFactory
+ * Requery specific generic repository factory.
  *
  * @author debop@coupang.com
  * @since 18. 6. 4
