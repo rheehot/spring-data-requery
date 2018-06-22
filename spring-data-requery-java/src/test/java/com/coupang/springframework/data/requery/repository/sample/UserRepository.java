@@ -29,7 +29,7 @@ public interface UserRepository extends RequeryRepository<User, Integer> {
     List<User> findByLastname(String lastname);
 
 
-    @Query("select * from SD_User u where u.emailAddress = ?1")
+    @Query("select * from SD_User u where u.emailAddress = ?")
     @Transactional(readOnly = true)
     User findByAnnotatedQuery(String emailAddress);
 
@@ -40,10 +40,10 @@ public interface UserRepository extends RequeryRepository<User, Integer> {
      * @param lastname
      */
     @Modifying
-    @Query("update SD_User u set u.lastname = ?1")
+    @Query("update SD_User u set u.lastname = ?")
     void renameAllUsersTo(String lastname);
 
-    @Query("select count(u) from SD_User u where u.firstname = ?1")
+    @Query("select count(u) from SD_User u where u.firstname = ?")
     Long countWithFirstname(String firstname);
 
 
