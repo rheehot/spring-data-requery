@@ -152,7 +152,7 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
     @Test
     public void errorDueToMismatchOfParametersContainNameOfMethodAndInterface() throws Exception {
 
-        RequeryQueryMethod queryMethod = getQueryMethod("findByFirstnameAndLastname", String.class);
+        RequeryQueryMethod queryMethod = getQueryMethod("findByFirstname");
 
         assertThatThrownBy(() -> {
             new PartTreeRequeryQuery(queryMethod, requeryTemplate, provider);
@@ -229,7 +229,7 @@ public class PartTreeRequeryQueryTest extends AbstractDomainTest {
         List<User> findByFirstnameIsEmpty();
 
         // Wrong number of parameters
-        User findByFirstnameAndLastname(String firstname);
+        User findByFirstname();
 
         // Wrong property name
         User findByNoSuchPropery(String x);
