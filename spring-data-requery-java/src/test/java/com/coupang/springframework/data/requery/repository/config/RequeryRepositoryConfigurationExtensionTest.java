@@ -1,6 +1,5 @@
 package com.coupang.springframework.data.requery.repository.config;
 
-import com.coupang.springframework.data.requery.repository.config.RequeryRepositoryConfigurationExtension;
 import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Rule;

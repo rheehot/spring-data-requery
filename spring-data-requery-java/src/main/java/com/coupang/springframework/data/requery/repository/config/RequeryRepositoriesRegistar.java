@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.repository.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.data.repository.config.RepositoryBeanDefinitionRegistrarSupport;
@@ -13,6 +14,7 @@ import java.lang.annotation.Annotation;
  * @author debop
  * @since 18. 6. 6
  */
+@Slf4j
 public class RequeryRepositoriesRegistar extends RepositoryBeanDefinitionRegistrarSupport {
 
     @NotNull

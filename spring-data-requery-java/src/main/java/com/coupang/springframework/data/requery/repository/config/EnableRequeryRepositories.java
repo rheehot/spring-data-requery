@@ -4,6 +4,7 @@ import com.coupang.springframework.data.requery.repository.support.RequeryReposi
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.repository.config.DefaultRepositoryBaseClass;
+import org.springframework.data.repository.query.QueryLookupStrategy;
 
 import java.lang.annotation.*;
 
@@ -33,6 +34,8 @@ public @interface EnableRequeryRepositories {
     String repositoryImplementationPostfix() default "Impl";
 
     String namedQueriesLocation() default "";
+
+    QueryLookupStrategy.Key queryLookupStrategy() default QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND;
 
     Class<?> repositoryFactoryBeanClass() default RequeryRepositoryFactoryBean.class;
 

@@ -1,13 +1,12 @@
 package com.coupang.springframework.data.requery.repository.config;
 
+import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.repository.sample.basic.BasicGroupRepository;
 import com.coupang.springframework.data.requery.repository.sample.basic.BasicLocationRepository;
 import com.coupang.springframework.data.requery.repository.sample.basic.BasicUserRepository;
-import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
