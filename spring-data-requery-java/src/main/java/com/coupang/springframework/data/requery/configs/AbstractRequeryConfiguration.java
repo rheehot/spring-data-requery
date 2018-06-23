@@ -5,8 +5,6 @@ import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.core.RequeryTemplate;
 import com.coupang.springframework.data.requery.core.RequeryTransactionManager;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
-import com.coupang.springframework.data.requery.repository.RequeryContext;
-import com.coupang.springframework.data.requery.repository.support.DefaultRequeryContext;
 import io.requery.cache.EmptyEntityCache;
 import io.requery.meta.EntityModel;
 import io.requery.sql.ConfigurationBuilder;
@@ -17,13 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.sql.DataSource;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Spring 용 Requery 환경설정 파일입니다.
@@ -67,7 +64,8 @@ public abstract class AbstractRequeryConfiguration {
             .build();
     }
 
-    @Bean
+    @Bean(destroyMethod = "close")
+    @Scope(value = "prototype")
     public EntityDataStore<Object> entityDataStore() {
         log.info("Create EntityDataStore instance.");
         return new EntityDataStore<>(requeryConfiguration());
@@ -79,19 +77,12 @@ public abstract class AbstractRequeryConfiguration {
         return new RequeryTemplate(entityDataStore(), requeryMappingContext());
     }
 
+    // TODO: 꼭 필요한 Class 인지 다시 판단해보자.
     @Bean
     public RequeryMappingContext requeryMappingContext() {
         RequeryMappingContext context = new RequeryMappingContext();
         context.setApplicationContext(applicationContext);
         return context;
-    }
-
-
-    @Bean
-    public RequeryContext requeryContext() {
-        Set<EntityDataStore> entityDatastores = new HashSet<>();
-        entityDatastores.add(entityDataStore());
-        return new DefaultRequeryContext(entityDatastores);
     }
 
     @Bean

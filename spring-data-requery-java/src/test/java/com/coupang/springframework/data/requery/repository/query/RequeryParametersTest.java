@@ -69,6 +69,7 @@ public class RequeryParametersTest {
         assertThat(method.isDefault()).isTrue();
 
         // HINT: 이렇게 default method 에 대해서도 직접 실행이 가능하도록 할 수 있다.
+        // HINT: 단 Implementation class 를 필요로 한다. 
         //
         SampleRepository repository = new SampleRepositoryImpl();
         Optional<String> result = (Optional<String>) method.invoke(repository, "value1");

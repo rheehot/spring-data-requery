@@ -2,7 +2,7 @@ package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.configs.RequeryTestConfiguration;
-import com.coupang.springframework.data.requery.core.RequeryTemplate;
+import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.domain.RandomData;
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
@@ -33,14 +33,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = { RequeryTestConfiguration.class })
 public class DeclaredRequeryQueryTest {
 
-    @Inject RequeryTemplate operations;
+    @Inject RequeryOperations operations;
 
-    DeclaredQueryRepository repository;
+    SampleQueryRepository repository;
 
     @Before
     public void setup() {
         assertThat(operations).isNotNull();
-        repository = new RequeryRepositoryFactory(operations).getRepository(DeclaredQueryRepository.class);
+        repository = new RequeryRepositoryFactory(operations).getRepository(SampleQueryRepository.class);
 
         assertThat(repository).isNotNull();
         repository.deleteAll();
@@ -89,7 +89,7 @@ public class DeclaredRequeryQueryTest {
         user.setName("배성혁");
         repository.save(user);
 
-        BasicUser loaded = repository.findAllBy(user.getName(), user.getEmail());
+        BasicUser loaded = repository.findAllBy(user.getName(), user.getEmail(), 1);
 
         assertThat(loaded).isEqualTo(user);
     }
@@ -124,7 +124,7 @@ public class DeclaredRequeryQueryTest {
         assertThat(notexists).isEmpty();
     }
 
-    interface DeclaredQueryRepository extends RequeryRepository<BasicUser, Long> {
+    interface SampleQueryRepository extends RequeryRepository<BasicUser, Long> {
 
         @Query("select * from basic_user u where u.email = ?")
         BasicUser findByAnnotatedQuery(String email);
@@ -135,8 +135,8 @@ public class DeclaredRequeryQueryTest {
         @Query("select * from basic_user u limit ?")
         List<BasicUser> findWithLimits(int limit);
 
-        @Query("select * from basic_user u where u.name=? and u.email=? limit 1")
-        BasicUser findAllBy(String name, String email);
+        @Query("select * from basic_user u where u.name=? and u.email=? limit ?")
+        BasicUser findAllBy(String name, String email, int limit);
 
         @Query("select u.id, u.name from basic_user u where u.email=?")
         List<Tuple> findAllIds(String email);

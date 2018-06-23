@@ -9,6 +9,7 @@ import io.requery.sql.EntityDataStore;
  * @author debop@coupang.com
  * @since 18. 6. 7
  */
+@Deprecated
 public interface RequeryContext {
 
     /**

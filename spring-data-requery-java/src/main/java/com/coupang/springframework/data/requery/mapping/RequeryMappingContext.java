@@ -18,6 +18,7 @@ import java.util.Optional;
  * @author debop@coupang.com
  * @since 18. 6. 8
  */
+// TODO: 꼭 필요한 클래스인지 다시 판단해보자.
 @Slf4j
 public class RequeryMappingContext
     extends AbstractMappingContext<DefaultRequeryPersistentEntity<?>, RequeryPersistentProperty>

@@ -1,10 +1,7 @@
 package com.coupang.springframework.data.requery.repository.sample.basic;
 
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
-import com.coupang.springframework.data.requery.repository.RequeryContext;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 
 /**
  * BasicUserRepositoryImpl
@@ -15,10 +12,7 @@ import org.springframework.util.Assert;
 @Slf4j
 public class BasicUserRepositoryImpl implements BasicUserRepositoryCustom {
 
-    @Autowired
-    public BasicUserRepositoryImpl(RequeryContext context) {
-        Assert.notNull(context, "RequeryContext must not be null");
-    }
+    public BasicUserRepositoryImpl() {}
 
 
     @Override
