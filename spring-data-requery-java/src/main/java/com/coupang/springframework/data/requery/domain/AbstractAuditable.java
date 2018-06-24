@@ -6,7 +6,7 @@ import io.requery.converter.LocalDateTimeConverter;
 import java.time.LocalDateTime;
 
 /**
- * AbstractAuditable
+ * Abstract Auditable Entity
  *
  * @author debop@coupang.com
  * @since 18. 6. 4

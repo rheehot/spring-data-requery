@@ -1,8 +1,8 @@
 package com.coupang.springframework.data.requery.domain.model;
 
 import com.coupang.kotlinx.objectx.ToStringBuilder;
-import com.coupang.springframework.data.requery.core.EntityState;
 import com.coupang.springframework.data.requery.domain.AbstractPersistable;
+import com.coupang.springframework.data.requery.domain.EntityState;
 import io.requery.*;
 import io.requery.converter.LocalDateConverter;
 import io.requery.query.MutableResult;

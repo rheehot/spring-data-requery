@@ -21,5 +21,4 @@ class KotlinRequeryTemplate(override val dataStore: KotlinEntityDataStore<Any>):
             dataStore.withTransaction(it) { block.invoke(this@KotlinRequeryTemplate) }
         } ?: dataStore.withTransaction { block.invoke(this@KotlinRequeryTemplate) }
     }
-
 }

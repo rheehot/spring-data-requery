@@ -4,20 +4,20 @@ import com.coupang.kotlinx.objectx.AbstractValueObject;
 import com.coupang.kotlinx.objectx.ToStringBuilder;
 import io.requery.Persistable;
 import io.requery.Superclass;
-import io.requery.Transient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * AbstractPersistable
+ * Abstract Entity class
  *
  * @author debop@coupang.com
  * @since 18. 6. 4
  */
 @Superclass
-public abstract class AbstractPersistable<ID> extends AbstractValueObject implements Persistable {
+public abstract class AbstractPersistable<ID> extends AbstractValueObject implements Persistable, Serializable {
 
     @Nullable
     abstract public ID getId();
@@ -50,7 +50,7 @@ public abstract class AbstractPersistable<ID> extends AbstractValueObject implem
 
     @NotNull
     @Override
-    @Transient
+    @io.requery.Transient
     protected ToStringBuilder buildStringHelper() {
         return super.buildStringHelper()
             .add("id", getId());

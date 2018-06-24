@@ -1,4 +1,4 @@
-package com.coupang.springframework.data.requery.core;
+package com.coupang.springframework.data.requery.domain;
 
 /**
  * EntityState

@@ -6,7 +6,7 @@ import io.requery.converter.LocalDateTimeConverter;
 import java.time.LocalDateTime;
 
 /**
- * com.coupang.springframework.data.requery.domain.AuditableLongEntity
+ * Auditable 이면서 Identifier 수형이 Long인 Entity
  *
  * @author debop
  * @since 18. 6. 4
@@ -33,4 +33,5 @@ public abstract class AuditableLongEntity extends AbstractPersistable<Long> {
     }
 
     private static final long serialVersionUID = -6288516556005303756L;
+
 }

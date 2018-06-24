@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.utils;
 
-import com.coupang.springframework.data.requery.core.EntityState;
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest;
+import com.coupang.springframework.data.requery.domain.EntityState;
 import com.coupang.springframework.data.requery.domain.basic.BasicGroup;
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
 import io.requery.meta.Attribute;

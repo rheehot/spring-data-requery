@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
  * @author debop@coupang.com
  * @since 18. 6. 7
  */
+@Deprecated
 public class RequerySort extends Sort {
 
     private static final long serialVersionUID = 1L;

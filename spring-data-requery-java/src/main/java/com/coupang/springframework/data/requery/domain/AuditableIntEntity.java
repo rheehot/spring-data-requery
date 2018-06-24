@@ -6,7 +6,7 @@ import io.requery.converter.LocalDateTimeConverter;
 import java.time.LocalDateTime;
 
 /**
- * com.coupang.springframework.data.requery.domain.AuditableIntEntity
+ * Auditable 이면서 Identifier 수형이 Integer인 Entity
  *
  * @author debop
  * @since 18. 6. 4

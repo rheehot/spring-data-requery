@@ -2,10 +2,10 @@ package com.coupang.springframework.data.requery.domain.functional
 
 import com.coupang.kotlinx.core.ForkJoinExecutor
 import com.coupang.kotlinx.logging.KLogging
-import com.coupang.springframework.data.requery.core.EntityState
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest
-import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPerson
+import com.coupang.springframework.data.requery.domain.EntityState
 import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPeople
+import com.coupang.springframework.data.requery.domain.functional.RandomData.randomPerson
 import io.requery.proxy.CompositeKey
 import io.requery.proxy.PropertyState
 import kotlinx.coroutines.experimental.Unconfined

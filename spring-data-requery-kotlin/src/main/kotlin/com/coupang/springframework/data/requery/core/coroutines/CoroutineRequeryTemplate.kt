@@ -22,5 +22,4 @@ class CoroutineRequeryTemplate(override val dataStore: KotlinEntityDataStore<Any
         } ?: dataStore.withTransaction { block.invoke(this@CoroutineRequeryTemplate) }
 
     }
-
 }

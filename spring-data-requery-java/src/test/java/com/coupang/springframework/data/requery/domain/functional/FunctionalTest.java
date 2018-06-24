@@ -1,8 +1,8 @@
 package com.coupang.springframework.data.requery.domain.functional;
 
 import com.coupang.kotlinx.core.ForkJoinExecutor;
-import com.coupang.springframework.data.requery.core.EntityState;
 import com.coupang.springframework.data.requery.domain.AbstractDomainTest;
+import com.coupang.springframework.data.requery.domain.EntityState;
 import com.coupang.springframework.data.requery.domain.model.*;
 import io.requery.meta.NumericAttributeDelegate;
 import io.requery.proxy.CompositeKey;
