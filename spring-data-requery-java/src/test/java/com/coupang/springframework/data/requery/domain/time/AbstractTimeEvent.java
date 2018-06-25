@@ -1,11 +1,14 @@
 package com.coupang.springframework.data.requery.domain.time;
 
+import com.coupang.kotlinx.objectx.ToStringBuilder;
 import com.coupang.springframework.data.requery.domain.AbstractPersistable;
 import io.requery.*;
 import io.requery.converter.*;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.*;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -14,6 +17,14 @@ import java.util.UUID;
 @Getter
 @Entity
 public abstract class AbstractTimeEvent extends AbstractPersistable<UUID> {
+
+    private static final long serialVersionUID = 8767142386985468901L;
+
+    public AbstractTimeEvent() {}
+
+    public AbstractTimeEvent(@NotNull UUID id) {
+        this.id = id;
+    }
 
     @Key
     protected UUID id;
@@ -45,5 +56,22 @@ public abstract class AbstractTimeEvent extends AbstractPersistable<UUID> {
 
         offsetDateTime = OffsetDateTime.now();
         zonedDateTime = ZonedDateTime.now();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name);
+    }
+
+    @Transient
+    @Override
+    protected @NotNull ToStringBuilder buildStringHelper() {
+        return super.buildStringHelper()
+            .add("name", name)
+            .add("localDate", localDate)
+            .add("localTime", localTime)
+            .add("localDateTime", localDateTime)
+            .add("offsetDateTime", offsetDateTime)
+            .add("zonedDateTime", zonedDateTime);
     }
 }
