@@ -322,7 +322,7 @@ class FunctionalTest: AbstractDomainTest() {
                 mutableMapOf(Func_Group_Members.FUNC_GROUP_ID to group.id,
                              Func_Group_Members.FUNC_PERSON_ID to person.id)
 
-            val compositeKey = CompositeKey(map)
+            val compositeKey: CompositeKey<Func_Group_Members> = CompositeKey(map)
 
             val joined = findById(Func_Group_Members::class, compositeKey)!!
             assertThat(joined.funcPersonId).isEqualTo(person.id)

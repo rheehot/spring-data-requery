@@ -233,7 +233,7 @@ public class RequeryQueryMethodTest {
         @Query(value = "query")
         List<User> findByLastname(String lastname);
 
-        @Query("select * from SD_Users u where u.id= ?1")
+        @Query("select * from SD_User u where u.id= ?1")
         List<User> findOne(Integer primaryKey);
 
         List<Integer> findsProjections();
@@ -244,7 +244,7 @@ public class RequeryQueryMethodTest {
 //        void withMetaAnnotation();
 
 
-        @Query("select * from SD_Users u where u.firstname = ?1")
+        @Query("select * from SD_User u where u.firstname = ?1")
         User queryWithPositionalBinding(@Param("firstname") String firstname);
 
     }

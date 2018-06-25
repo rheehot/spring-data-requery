@@ -12,7 +12,7 @@ import java.util.*
  * @since 18. 5. 31
  */
 @Entity
-@Table(name = "SD_Users")
+@Table(name = "SD_User")
 abstract class AbstractUser: AbstractPersistable<Int>() {
 
     @get:Key

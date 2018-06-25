@@ -1,4 +1,4 @@
-package com.coupang.springframework.data.requery.repository.sample.config;
+package com.coupang.springframework.data.requery.repository.sample;
 
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;

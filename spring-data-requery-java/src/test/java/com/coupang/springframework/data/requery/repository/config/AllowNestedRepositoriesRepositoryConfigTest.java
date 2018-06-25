@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.repository.config;
 
 import com.coupang.springframework.data.requery.repository.sample.basic.BasicUserRepository;
-import com.coupang.springframework.data.requery.repository.sample.config.ClassWithNestedRepository;
+import com.coupang.springframework.data.requery.repository.sample.ClassWithNestedRepository;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
