@@ -1,33 +1,35 @@
 package com.coupang.springframework.data.requery.domain.sample;
 
 import com.coupang.kotlinx.objectx.ToStringBuilder;
-import com.coupang.springframework.data.requery.domain.AbstractPersistable;
+import com.coupang.springframework.data.requery.domain.AbstractAuditable;
 import io.requery.Entity;
+import io.requery.Generated;
 import io.requery.Key;
 import io.requery.Transient;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 /**
- * AbstractCustomer
+ * AbstractAuditableRole
  *
  * @author debop@coupang.com
- * @since 18. 6. 14
+ * @since 18. 6. 25
  */
-@Getter
-@Setter
 @Entity
-public abstract class AbstractCustomer extends AbstractPersistable<Long> {
-
-    private static final long serialVersionUID = 5109744158340238800L;
+@NoArgsConstructor
+public abstract class AbstractAuditableRole extends AbstractAuditable<Long> {
 
     @Key
+    @Generated
     protected Long id;
 
     protected String name;
+
+    public AbstractAuditableRole(String name) {
+        this.name = name;
+    }
 
 
     @Override
@@ -41,4 +43,6 @@ public abstract class AbstractCustomer extends AbstractPersistable<Long> {
         return super.buildStringHelper()
             .add("name", name);
     }
+
+    private static final long serialVersionUID = -7804943655622745713L;
 }

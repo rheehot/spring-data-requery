@@ -23,4 +23,13 @@ public class AbstractAddress extends AbstractComponent {
     protected String streetName;
     protected String streetNo;
 
+    public AbstractAddress() {}
+
+//    public AbstractAddress(String country, String city, String streetName, String streetNo) {
+//        this.country = country;
+//        this.city = city;
+//        this.streetName = streetName;
+//        this.streetNo = streetNo;
+//    }
+
 }

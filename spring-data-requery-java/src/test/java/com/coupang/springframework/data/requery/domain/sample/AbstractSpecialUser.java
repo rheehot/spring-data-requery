@@ -10,4 +10,7 @@ import io.requery.Entity;
  */
 @Entity
 public class AbstractSpecialUser extends User {
+
+
+    private static final long serialVersionUID = -7890331277430318674L;
 }
