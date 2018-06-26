@@ -5,14 +5,11 @@ import com.coupang.springframework.data.requery.domain.RandomData;
 import com.coupang.springframework.data.requery.domain.basic.BasicUser;
 import io.requery.query.Result;
 import io.requery.query.Return;
-import io.requery.query.WhereAndOr;
 import io.requery.query.element.QueryElement;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
-import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.startsWith;
@@ -87,7 +84,7 @@ public class QueryByExampleBuilderTest extends AbstractDomainTest {
     }
 
     @SuppressWarnings("unchecked")
-    private WhereAndOr<? extends Result<BasicUser>> buildQueryByExample(Example<BasicUser> example) {
+    private Return<? extends Result<BasicUser>> buildQueryByExample(Example<BasicUser> example) {
         QueryElement<? extends Result<BasicUser>> root = (QueryElement<? extends Result<BasicUser>>) requeryTemplate.select(BasicUser.class);
         return QueryByExampleBuilder.getWhereAndOr(root, example);
     }

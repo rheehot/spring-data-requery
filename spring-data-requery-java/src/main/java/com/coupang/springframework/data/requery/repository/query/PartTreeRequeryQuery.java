@@ -54,7 +54,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
             this.countQueryPreparer = new CountQueryPreparer(persistenceProvider);
             this.queryPreparer = tree.isCountProjection() ? countQueryPreparer : new QueryPreparer(persistenceProvider);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Fail to create query for method " + method + "! " + e.getMessage(), e);
+            throw new IllegalArgumentException("Fail to create query for method " + method + "! message=" + e.getMessage(), e);
         }
     }
 
@@ -78,12 +78,12 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
 
         if (accessor.getParameters().hasPageableParameter()) {
             query = RequeryUtils.applyPageable(getDomainClass(),
-                                               (QueryElement<? extends Result<?>>) query,
+                                               query,
                                                accessor.getPageable());
         }
         if (accessor.getParameters().hasSortParameter()) {
             query = RequeryUtils.applySort(getDomainClass(),
-                                           (QueryElement<? extends Result<?>>) query,
+                                           query,
                                            accessor.getSort());
         }
 
@@ -120,13 +120,16 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
 
         private final RequeryPersistenceProvider persistenceProvider;
 
-        QueryPreparer(RequeryPersistenceProvider persistenceProvider) {
+        QueryPreparer(@NotNull RequeryPersistenceProvider persistenceProvider) {
+            Assert.notNull(persistenceProvider, "persistenceProvider must not be null!");
             this.persistenceProvider = persistenceProvider;
 
             // HINT: check wrong method (parameter number matching, not exists property name ...)
             RequeryQueryCreator creator = createCreator(persistenceProvider, null);
-            creator.createQuery();
-            creator.getParameterExpressions();
+            if (creator != null) {
+                creator.createQuery();
+                creator.getParameterExpressions();
+            }
         }
 
         public QueryElement<?> createQuery(Object[] values) {
@@ -192,7 +195,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
      */
     private class CountQueryPreparer extends QueryPreparer {
 
-        CountQueryPreparer(RequeryPersistenceProvider persistenceProvider) {
+        CountQueryPreparer(@NotNull RequeryPersistenceProvider persistenceProvider) {
             super(persistenceProvider);
         }
 

@@ -4,6 +4,7 @@ import io.requery.query.Condition;
 import io.requery.query.Result;
 import io.requery.query.Return;
 import io.requery.query.WhereAndOr;
+import io.requery.query.element.QueryElement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,7 +24,7 @@ public interface RequeryWhereExecutor<T> {
 
     List<T> findAll(Return<? extends Result<T>> whereClause);
 
-    Page<T> findAll(WhereAndOr<? extends Result<T>> whereClause, Pageable pageable);
+    Page<T> findAll(QueryElement<? extends Result<T>> whereClause, Pageable pageable);
 
     List<T> findAll(Iterable<Condition<T, ?>> conditions, Sort sort);
 
@@ -35,7 +36,7 @@ public interface RequeryWhereExecutor<T> {
      * @param whereClause Where 조건절
      * @return 조건절에 해당하는 엔티티 수
      */
-    int count(WhereAndOr<? extends Result<T>> whereClause);
+    int count(QueryElement<? extends Result<T>> whereClause);
 
     /**
      * 해당 where 조건에 해당하는 엔티티가 존재하는지 여부
@@ -43,5 +44,5 @@ public interface RequeryWhereExecutor<T> {
      * @param whereClause Where 조건절
      * @return 조건절에 해당하는 엔티티 존재 여부
      */
-    boolean exists(WhereAndOr<? extends Result<T>> whereClause);
+    boolean exists(QueryElement<? extends Result<T>> whereClause);
 }

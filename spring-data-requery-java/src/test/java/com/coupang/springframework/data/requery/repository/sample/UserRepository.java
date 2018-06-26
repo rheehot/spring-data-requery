@@ -113,7 +113,7 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 
     List<SpecialUser> findSpecialUsersByLastname(String lastname);
 
-    List<User> findBySpringDataNamedQuery(String lastname);
+//    List<User> findBySpringDataNamedQuery(String lastname);
 
     List<User> findByLastnameIgnoringCase(String lastname);
 
@@ -171,7 +171,7 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     boolean existsByLastname(String lastname);
 
     // DATAJPA-391
-    @Query("select u.firstname from User u where u.lastname = ?1")
+    @Query("select u.firstname from User u where u.lastname = ?")
     List<String> findFirstnamesByLastname(String lastname);
 
     // DATAJPA-415
@@ -199,45 +199,45 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     // DATAJPA-486
     Slice<User> findSliceByLastname(String lastname, Pageable pageable);
 
-    // DATAJPA-496
-    List<User> findByAttributesIn(Set<String> attributes);
+//    // DATAJPA-496
+//    List<User> findByAttributesIn(Set<String> attributes);
 
-    // DATAJPA-460
-    Long removeByLastname(String lastname);
+//    // DATAJPA-460
+//    Long removeByLastname(String lastname);
 
-    // DATAJPA-460
-    List<User> deleteByLastname(String lastname);
+//    // DATAJPA-460
+//    List<User> deleteByLastname(String lastname);
 
 
     @Query(value = "select * from SD_User where u u.firstname like ?%", countProjection = "u.firstname")
     Page<User> findAllByFirstnameLike(String firstname, Pageable page);
 
 
-    User findFirstByOrderByAgeDesc();
-
-    User findFirst1ByOrderByAgeDesc();
-
-    User findTopByOrderByAgeDesc();
-
-    User findTopByOrderByAgeAsc();
-
-    User findTop1ByOrderByAgeAsc();
-
-    List<User> findTop2ByOrderByAgeDesc();
-
-    List<User> findFirst2ByOrderByAgeDesc();
-
-    List<User> findFirst2UsersBy(Sort sort);
-
-    List<User> findTop2UsersBy(Sort sort);
-
-    Page<User> findFirst3UsersBy(Pageable page);
-
-    Page<User> findFirst2UsersBy(Pageable page);
-
-    Slice<User> findTop3UsersBy(Pageable page);
-
-    Slice<User> findTop2UsersBy(Pageable page);
+//    User findFirstByOrderByAgeDesc();
+//
+//    User findFirst1ByOrderByAgeDesc();
+//
+//    User findTopByOrderByAgeDesc();
+//
+//    User findTopByOrderByAgeAsc();
+//
+//    User findTop1ByOrderByAgeAsc();
+//
+//    List<User> findTop2ByOrderByAgeDesc();
+//
+//    List<User> findFirst2ByOrderByAgeDesc();
+//
+//    List<User> findFirst2UsersBy(Sort sort);
+//
+//    List<User> findTop2UsersBy(Sort sort);
+//
+//    Page<User> findFirst3UsersBy(Pageable page);
+//
+//    Page<User> findFirst2UsersBy(Pageable page);
+//
+//    Slice<User> findTop3UsersBy(Pageable page);
+//
+//    Slice<User> findTop2UsersBy(Pageable page);
 
 
     @Query("select u.binaryData from SD_User u where u.id = ?")
@@ -368,11 +368,11 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 //    // DATAJPA-1185
 //    <T> List<T> findAsListByFirstnameLike(String name, Class<T> projectionType);
 
-    @Query("SELECT u.firstname, u.lastname from SD_User u WHERE u.id=?")
-    NameOnly findByNativeQuery(Integer id);
-
-    @Query("SELECT u.emailaddress from SD_User u WHERE u.id=?")
-    EmailOnly findEmailOnlyByNativeQuery(Integer id);
+//    @Query("SELECT u.firstname, u.lastname from SD_User u WHERE u.id=?")
+//    NameOnly findByNativeQuery(Integer id);
+//
+//    @Query("SELECT u.emailaddress from SD_User u WHERE u.id=?")
+//    EmailOnly findEmailOnlyByNativeQuery(Integer id);
 
     // NOTE: Not Supported
 
@@ -392,15 +392,15 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 //    @Query(value = "SELECT u FROM User u WHERE ?2 = 'x' ORDER BY CASE WHEN (u.firstname  >= ?1) THEN 0 ELSE 1 END, u.firstname")
 //    Page<User> findAllOrderedBySpecialNameMultipleParamsIndexed(String name, String other, Pageable page);
 
-    // DATAJPA-928
-    Page<User> findByNativeNamedQueryWithPageable(Pageable pageable);
+//    // DATAJPA-928
+//    Page<User> findByNativeNamedQueryWithPageable(Pageable pageable);
 
     // DATAJPA-928
     @Query(value = "SELECT firstname FROM SD_User ORDER BY UCASE(firstname)", countQuery = "SELECT count(*) FROM SD_User")
-    Page<String> findByNativeQueryWithPageable(@Param("pageable") Pageable pageable);
+    Page<String> findByNativeQueryWithPageable(Pageable pageable);
 
-    // DATAJPA-1273
-    List<NameOnly> findByNamedQueryWithAliasInInvertedOrder();
+//    // DATAJPA-1273
+//    List<NameOnly> findByNamedQueryWithAliasInInvertedOrder();
 
     // DATAJPA-1301
     @Query("select firstname as firstname, lastname as lastname from SD_User u where u.firstname = 'Oliver'")

@@ -26,6 +26,12 @@ public abstract class AbstractRole extends AbstractPersistable<Integer> {
 
     private static final long serialVersionUID = -1819301866144058748L;
 
+    public AbstractRole() {}
+
+    public AbstractRole(String name) {
+        this.name = name;
+    }
+
     @Key
     @Generated
     protected Integer id;

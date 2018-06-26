@@ -20,6 +20,7 @@ import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -78,12 +79,17 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
     @SuppressWarnings("unchecked")
     protected QueryElement<? extends Result<?>> createQueryElement(ReturnedType type) {
 
-        log.debug("Create QueryElement instance. ReturnedType={}", type);
+        Assert.notNull(type, "type must not be null!");
 
         Class<?> typeToRead = type.getTypeToRead();
+
+        log.debug("Create QueryElement instance. ReturnedType={}, typeToRead={}", type, typeToRead);
+
+        // TODO: READ 뿐 아니라 insert/update/upsert/delete 시에는 QueryElement가 달라야 한다.
+        // TODO: 근데 이를 어떻게 알지?
         return typeToRead == null || tree.isExistsProjection() || tree.isCountProjection()
-               ? (QueryElement<? extends Result<?>>) operations.select(Count.count(type.getDomainType()))
-               : (QueryElement<? extends Result<?>>) operations.select(typeToRead);
+               ? (QueryElement<? extends Result<?>>) RequeryUtils.unwrap(operations.select(Count.count(type.getDomainType())))
+               : (QueryElement<? extends Result<?>>) RequeryUtils.unwrap(operations.select(type.getDomainType()));
     }
 
     public List<ParameterMetadata<?>> getParameterExpressions() {
@@ -98,17 +104,23 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
 
     @SuppressWarnings("unchecked")
     @Override
-    protected QueryElement<? extends Result<?>> and(Part part,
-                                                    QueryElement<?> base,
-                                                    Iterator<Object> iterator) {
-        return (QueryElement<? extends Result<?>>) (((WhereAndOr<?>) base).and((Condition<?, ?>) toQueryElement(part, root)));
+    protected QueryElement<?> and(Part part,
+                                  QueryElement<?> base,
+                                  Iterator<Object> iterator) {
+
+        return RequeryUtils.buildWhereClause(base,
+                                             Collections.singletonList((Condition<?, ?>) toQueryElement(part, root).getWhereElements().iterator().next().getCondition()),
+                                             true);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected QueryElement<?> or(QueryElement<?> base,
                                  QueryElement<?> criteria) {
-        return (QueryElement<? extends Result<?>>) (((WhereAndOr<?>) base).or((Condition<?, ?>) criteria));
+
+        Iterable<Condition<?, ?>> conditions = RequeryUtils.getConditions(criteria);
+        return RequeryUtils.unwrap(RequeryUtils.buildWhereClause(base, conditions, false));
+        // return RequeryUtils.unwrap(base.where().or((Condition<?, ?>) criteria));
     }
 
     @Override
@@ -123,7 +135,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
         QueryElement<?> queryElement = criteria != null ? criteria : root;
 
         return RequeryUtils.applySort(returnedType.getDomainType(),
-                                      (QueryElement<? extends Result<?>>) queryElement,
+                                      queryElement,
                                       sort);
     }
 
@@ -201,16 +213,41 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     break;
 
                 case STARTING_WITH:
-                case ENDING_WITH:
-                case CONTAINING:
-                case NOT_CONTAINING:
+                    if (property.getLeafProperty().isCollection()) {
+                        throw new NotSupportedException("Not supported keyword " + type);
+                    }
 
-                    throw new NotSupportedException("Not supported keyword " + type);
+                    whereClause = root.where(expr.like(provider.next(part, String.class).getValue() + "%"));
+                    break;
+                case ENDING_WITH:
+                    if (property.getLeafProperty().isCollection()) {
+                        throw new NotSupportedException("Not supported keyword " + type);
+                    }
+
+                    whereClause = root.where(expr.like("%" + provider.next(part, String.class).getValue()));
+                    break;
+
+                case CONTAINING:
+                    if (property.getLeafProperty().isCollection()) {
+                        throw new NotSupportedException("Not supported keyword " + type);
+                    }
+
+                    whereClause = root.where(expr.like("%" + provider.next(part, String.class).getValue() + "%"));
+                    break;
+
+                case NOT_CONTAINING:
+                    if (property.getLeafProperty().isCollection()) {
+                        throw new NotSupportedException("Not supported keyword " + type);
+                    }
+
+                    whereClause = root.where(expr.notLike("%" + provider.next(part, String.class).getValue() + "%"));
+                    break;
 
                 case LIKE:
                 case NOT_LIKE:
                     FieldExpression<String> fieldExpr = upperIfIgnoreCase(expr);
-                    String value = (String) provider.next(part, String.class).getValue();
+                    Object paramValue = provider.next(part, String.class).getValue();
+                    String value = (paramValue != null) ? paramValue.toString() : null;
 
                     whereClause = (type.equals(LIKE) || type.equals(NOT_CONTAINING))
                                   ? root.where(fieldExpr.like(value))

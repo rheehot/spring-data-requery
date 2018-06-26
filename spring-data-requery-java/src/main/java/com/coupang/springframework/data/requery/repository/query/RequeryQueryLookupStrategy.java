@@ -94,7 +94,7 @@ public final class RequeryQueryLookupStrategy {
         protected RepositoryQuery resolveQuery(RequeryQueryMethod method,
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
-            log.debug("Create PartTreeRequeryQuery, queryMethod={}, namedQueries={}", method, namedQueries);
+            log.debug("Create PartTreeRequeryQuery, queryMethod={}", method);
             return new PartTreeRequeryQuery(method, operations, persistenceProvider);
         }
     }
@@ -118,9 +118,21 @@ public final class RequeryQueryLookupStrategy {
         protected RepositoryQuery resolveQuery(RequeryQueryMethod method,
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
+            // @Query annotation이 있다면 그 값으로 한다.
+            if (method.isAnnotatedQuery()) {
+                log.debug("Create RawStringRequeryQuery. queryMethod={}, namedQueries={}", method.getName(), namedQueries);
+                return new DeclaredRequeryQuery(method, operations);
+            }
 
-            log.debug("Create RawStringRequeryQueryt. queryMethod={}, namedQueries={}", method.getName(), namedQueries);
-            return new DeclaredRequeryQuery(method, operations);
+            // Custom Implementation이라면 그 함수를 그대로 사용한다.
+            if (method.isCustomMethod()) {
+                log.debug("Create RawStringRequeryQuery. queryMethod={}, namedQueries={}", method.getName(), namedQueries);
+                return new DeclaredRequeryQuery(method, operations);
+            }
+
+            throw new IllegalStateException(
+                String.format("Cannot find a annotated query for method %s!", method)
+            );
         }
     }
 
@@ -151,8 +163,10 @@ public final class RequeryQueryLookupStrategy {
             log.debug("Resolve query ... queryMethod={}, namedQueries={}", method, namedQueries);
 
             try {
+                log.debug("Resolve query by DeclaredQueryLookupStrategy...");
                 return lookupStrategy.resolveQuery(method, operations, namedQueries);
             } catch (IllegalStateException e) {
+                log.debug("Resolve query by CreateQueryLookupStrategy...");
                 return createStrategy.resolveQuery(method, operations, namedQueries);
             }
         }

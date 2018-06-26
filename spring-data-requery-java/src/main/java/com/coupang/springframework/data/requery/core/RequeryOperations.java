@@ -8,6 +8,7 @@ import io.requery.meta.Attribute;
 import io.requery.meta.EntityModel;
 import io.requery.meta.QueryAttribute;
 import io.requery.query.*;
+import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import io.requery.sql.EntityContext;
 import io.requery.sql.EntityDataStore;
@@ -155,12 +156,12 @@ public interface RequeryOperations {
         return getDataStore().count(attributes);
     }
 
-    default <E> int count(Class<E> entityType, WhereAndOr<? extends Result<E>> whereClause) {
+    default <E> int count(Class<E> entityType, QueryElement<? extends Result<E>> whereClause) {
         Tuple tuple = select(Count.count(entityType)).where().exists(whereClause).get().first();
         return tuple.<Integer>get(0);
     }
 
-    default <E> boolean exists(Class<E> entityType, WhereAndOr<? extends Result<E>> whereClause) {
+    default <E> boolean exists(Class<E> entityType, QueryElement<? extends Result<E>> whereClause) {
         return whereClause.limit(1).get().firstOrNull() != null;
     }
 

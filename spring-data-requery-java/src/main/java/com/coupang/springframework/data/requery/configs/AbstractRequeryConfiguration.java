@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PostConstruct;
@@ -65,7 +64,6 @@ public abstract class AbstractRequeryConfiguration {
     }
 
     @Bean(destroyMethod = "close")
-    @Scope(value = "prototype")
     public EntityDataStore<Object> entityDataStore() {
         log.info("Create EntityDataStore instance.");
         return new EntityDataStore<>(requeryConfiguration());

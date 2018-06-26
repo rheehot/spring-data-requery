@@ -194,7 +194,7 @@ subprojects {
         useJUnitPlatform()
         // systemProperty 'java.util.logging.manager', 'ch.qos.logback.classic.Logger'
         
-        ignoreFailures true
+        ignoreFailures false
         // maxParallelForks 4
         // set heap size for the test JVM(s)
         minHeapSize = "1G"

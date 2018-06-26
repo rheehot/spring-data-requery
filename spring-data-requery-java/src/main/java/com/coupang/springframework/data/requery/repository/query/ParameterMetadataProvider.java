@@ -57,6 +57,7 @@ public class ParameterMetadataProvider {
 
     public List<ParameterMetadata<?>> getExpressions() { return Collections.unmodifiableList(expressions); }
 
+    @SuppressWarnings("unchecked")
     public <T> ParameterMetadata<T> next(Part part) {
 
         Assert.isTrue(parameters.hasNext(), "No parameter available for part. part=" + part);
@@ -65,6 +66,7 @@ public class ParameterMetadataProvider {
         return (ParameterMetadata<T>) next(part, parameter.getType(), parameter);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> ParameterMetadata<T> next(Part part, Class<T> type) {
         Parameter parameter = parameters.next();
         Class<?> typeToUse = ClassUtils.isAssignable(type, parameter.getType()) ? parameter.getType() : type;

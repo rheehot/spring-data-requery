@@ -108,6 +108,14 @@ public class RequeryQueryMethod extends QueryMethod {
         return null != AnnotationUtils.findAnnotation(method, Modifying.class);
     }
 
+    public boolean isAnnotatedQuery() {
+        return null != AnnotationUtils.findAnnotation(method, Query.class);
+    }
+
+    public boolean isCustomMethod() {
+        return !method.getDeclaringClass().equals(method.getClass());
+    }
+
 
     QueryExtractor getQueryExtractor() {
         return extractor;

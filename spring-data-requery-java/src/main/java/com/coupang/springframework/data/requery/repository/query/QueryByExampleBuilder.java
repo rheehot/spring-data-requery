@@ -41,7 +41,7 @@ public class QueryByExampleBuilder {
      * {@link Example} 를 표현하는 {@link WhereAndOr} 조건절로 빌드합니다.
      */
     @SuppressWarnings("unchecked")
-    public static <E> WhereAndOr<? extends Result<E>> getWhereAndOr(QueryElement<? extends Result<E>> root, Example<E> example) {
+    public static <E> QueryElement<? extends Result<E>> getWhereAndOr(QueryElement<? extends Result<E>> root, Example<E> example) {
 
         Assert.notNull(root, "Root must not be null!");
         Assert.notNull(example, "Example must not be null!");
@@ -53,7 +53,9 @@ public class QueryByExampleBuilder {
                                                          example.getProbeType(),
                                                          new ExampleMatcherAccessor(matcher));
 
-        return RequeryUtils.buildWhereClause(root, conditions, matcher.isAllMatching());
+        List<Condition<?, ?>> conds = RequeryUtils.getGenericConditions(conditions);
+
+        return (QueryElement<? extends Result<E>>) RequeryUtils.buildWhereClause(root, conds, matcher.isAllMatching());
     }
 
     @SuppressWarnings("unchecked")

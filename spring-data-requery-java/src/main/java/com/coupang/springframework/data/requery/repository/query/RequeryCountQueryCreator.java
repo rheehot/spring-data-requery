@@ -41,10 +41,13 @@ public class RequeryCountQueryCreator extends RequeryQueryCreator {
 
         QueryElement<? extends Result<?>> query = (QueryElement<? extends Result<?>>) getOperations().select(Count.count(getDomainClass()));
 
-        if (criteria.isDistinct()) {
-            query = (QueryElement<? extends Result<?>>) query.distinct();
-        }
+        if (criteria != null) {
+            if (criteria.isDistinct()) {
+                query = (QueryElement<? extends Result<?>>) query.distinct();
+            }
 
-        return RequeryUtils.unwrap(query.where().exists(criteria));
+            return RequeryUtils.unwrap(query.where().exists(criteria));
+        }
+        return query;
     }
 }

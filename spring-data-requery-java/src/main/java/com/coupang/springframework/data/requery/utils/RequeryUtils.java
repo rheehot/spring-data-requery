@@ -168,9 +168,9 @@ public class RequeryUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static QueryElement<? extends Result<?>> applyPageable(@NotNull Class<?> domainClass,
-                                                                  @NotNull QueryElement<? extends Result<?>> baseQuery,
-                                                                  @NotNull Pageable pageable) {
+    public static <E> QueryElement<?> applyPageable(@NotNull Class<E> domainClass,
+                                                    @NotNull QueryElement<?> baseQuery,
+                                                    @NotNull Pageable pageable) {
         Assert.notNull(domainClass, "domainClass must not be null!");
         Assert.notNull(baseQuery, "baseQuery must not be null!");
         Assert.notNull(pageable, "pageable must not be null!");
@@ -181,22 +181,24 @@ public class RequeryUtils {
             return baseQuery;
         }
 
-        QueryElement<? extends Result<?>> query = applySort(domainClass, baseQuery, pageable.getSort());
+        QueryElement<?> query = applySort(domainClass, baseQuery, pageable.getSort());
 
-        return (QueryElement<? extends Result<?>>) query
-            .limit(pageable.getPageSize())
-            .offset((int) pageable.getOffset());
+        return unwrap(query
+                          .limit(pageable.getPageSize())
+                          .offset((int) pageable.getOffset()));
     }
 
     @SuppressWarnings("unchecked")
-    public static QueryElement<? extends Result<?>> applySort(@NotNull Class<?> domainClass,
-                                                              @NotNull QueryElement<? extends Result<?>> baseQuery,
-                                                              @NotNull Sort sort) {
+    public static <E> QueryElement<?> applySort(@NotNull Class<E> domainClass,
+                                                @NotNull QueryElement<?> baseQuery,
+                                                @NotNull Sort sort) {
         log.trace("Apply sort, domainClass={}, sort={}", domainClass.getSimpleName(), sort);
 
         if (sort.isUnsorted()) {
             return baseQuery;
         }
+
+        QueryElement<?> query = baseQuery;
 
         for (Sort.Order order : sort) {
             String propertyName = order.getProperty();
@@ -206,11 +208,11 @@ public class RequeryUtils {
             if (field != null) {
                 NamedExpression<?> expr = NamedExpression.of(propertyName, field.getType());
 
-                baseQuery = (QueryElement<? extends Result<?>>) baseQuery.orderBy(direction.isAscending() ? expr.asc() : expr.desc());
+                query = unwrap(baseQuery.orderBy(direction.isAscending() ? expr.asc() : expr.desc()));
             }
         }
 
-        return baseQuery;
+        return query;
     }
 
     @NotNull
@@ -237,19 +239,19 @@ public class RequeryUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E> WhereAndOr<? extends Result<E>> buildWhereClause(QueryElement<? extends Result<E>> baseQuery,
-                                                                       Iterable<Condition<E, ?>> conditions,
-                                                                       boolean isAnd) {
+    public static QueryElement<?> buildWhereClause(QueryElement<?> baseQuery,
+                                                   Iterable<Condition<?, ?>> conditions,
+                                                   boolean isAnd) {
 
-        List<Condition<E, ?>> conds = Iterables.toList(conditions);
+        List<Condition<?, ?>> conds = Iterables.toList(conditions);
 
         if (conds.isEmpty()) {
-            return (WhereAndOr<? extends Result<E>>) baseQuery;
+            return baseQuery;
         } else if (conds.size() == 1) {
-            return baseQuery.where(conds.get(0));
+            return unwrap(baseQuery.where(conds.get(0)));
         } else {
 
-            final List<WhereAndOr<? extends Result<E>>> whereClauses = new ArrayList<>();
+            final List<WhereAndOr<?>> whereClauses = new ArrayList<>();
             whereClauses.add(baseQuery.where(conds.get(0)));
 
             conds.stream()
@@ -262,8 +264,22 @@ public class RequeryUtils {
                     }
                 });
 
-            return whereClauses.get(0);
+            return unwrap(whereClauses.get(0));
         }
+    }
+
+    public static List<Condition<?, ?>> getConditions(QueryElement<?> query) {
+        return query.getWhereElements().stream()
+            .map(it -> it.getCondition())
+            .collect(Collectors.toList());
+    }
+
+    public static <T> List<Condition<?, ?>> getGenericConditions(Iterable<Condition<T, ?>> conditions) {
+        List<Condition<?, ?>> conds = new ArrayList<>();
+        for (Condition<T, ?> condition : conditions) {
+            conds.add(condition);
+        }
+        return conds;
     }
 
     /**

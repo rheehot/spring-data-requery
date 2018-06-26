@@ -277,31 +277,55 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         return whereClause.get().toList();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Page<T> findAll(WhereAndOr<? extends Result<T>> whereClause, Pageable pageable) {
-        // HINT: RequeryUtils#applyPaging 를 참고해서 구현 필요
-        return null;
+    public Page<T> findAll(QueryElement<? extends Result<T>> whereClause, Pageable pageable) {
+
+        int total = count(whereClause);
+
+        Return<?> query = RequeryUtils.applyPageable(domainClass, whereClause, pageable);
+        List<T> contents = ((Return<? extends Result<T>>) query).get().toList();
+
+        return new PageImpl<>(contents, pageable, total);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll(Iterable<Condition<T, ?>> conditions, Sort sort) {
-        // HINT: RequeryUtils#getOrderingExpressions 를 참고해서 구현 필요
-        return null;
+
+        QueryElement<? extends Result<T>> baseQuery = (QueryElement<? extends Result<T>>) getOperations().select(domainClass);
+        baseQuery = (QueryElement<? extends Result<T>>) RequeryUtils
+            .buildWhereClause(baseQuery,
+                              RequeryUtils.getGenericConditions(conditions),
+                              true);
+
+        Return<? extends Result<T>> query = (Return<? extends Result<T>>) RequeryUtils.applySort(domainClass, baseQuery, sort);
+
+        return query.get().toList();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll(Iterable<Condition<T, ?>> conditions) {
-        // HINT: QueryByExampleUtils 에서 List<Condition<T, ?>> 를 WhereOrAnd<? extends Result<T>> 로 빌드하는 코드 사용
-        return null;
+        QueryElement<?> baseQuery = (QueryElement<?>) getOperations().select(domainClass);
+
+
+        Return<? extends Result<T>> query = (Return<? extends Result<T>>)
+            RequeryUtils.buildWhereClause(baseQuery, RequeryUtils.getGenericConditions(conditions), true);
+
+        return query.get().toList();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public int count(WhereAndOr<? extends Result<T>> whereClause) {
+    public int count(QueryElement<? extends Result<T>> whereClause) {
         return getOperations().count(domainClass, whereClause);
     }
 
     @Override
-    public boolean exists(WhereAndOr<? extends Result<T>> whereClause) {
+    public boolean exists(QueryElement<? extends Result<T>> whereClause) {
         return getOperations().exists(domainClass, whereClause);
     }
+
+
 }
