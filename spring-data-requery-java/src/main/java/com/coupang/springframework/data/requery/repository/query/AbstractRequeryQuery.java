@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import com.coupang.springframework.data.requery.repository.query.RequeryQueryExecution.*;
 import com.coupang.springframework.data.requery.utils.RequeryMetamodel;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.Scalar;
@@ -60,22 +61,24 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
 
     protected RequeryQueryExecution getExecution() {
         if (queryMethod.isStreamQuery()) {
-            return new RequeryQueryExecution.StreamExecution();
+            log.debug("Create StreamExecution. queryMethod={}", queryMethod);
+            return new StreamExecution();
         } else if (queryMethod.isCollectionQuery()) {
-            return new RequeryQueryExecution.CollectionExecution();
+            log.debug("Create CollectionExecution. queryMethod={}", queryMethod);
+            return new CollectionExecution();
         } else if (queryMethod.isSliceQuery()) {
-            return new RequeryQueryExecution.SlicedExecution(queryMethod.getParameters());
+            log.debug("Create SliceExecution. queryMethod={}", queryMethod);
+            return new SlicedExecution(queryMethod.getParameters());
         } else if (queryMethod.isPageQuery()) {
-            return new RequeryQueryExecution.PagedExecution(queryMethod.getParameters());
-
-            // TODO: UPSERT/INSERT/UPDATE 관련은 구현해야된다
-//        } else if (queryMethod.isModifyingQuery()) {
-//            return new RequeryQueryExecution.ModifyingExecution();
+            log.debug("Create PagedExecution. queryMethod={}", queryMethod);
+            return new PagedExecution(queryMethod.getParameters());
+        } else if (queryMethod.isModifyingQuery()) {
+            return new ModifyingExecution(queryMethod, operations);
         } else {
-            return new RequeryQueryExecution.SingleEntityExecution();
+            log.debug("Create SingleEntityExecution. queryMethod={}", queryMethod);
+            return new SingleEntityExecution();
         }
     }
-
 
     protected QueryElement<?> createQueryElement(Object[] values) {
         log.debug("Create QueryElement with domainClass={}, values={}", domainClass.getName(), values);

@@ -5,7 +5,10 @@ import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.repository.query.ParameterMetadataProvider.ParameterMetadata;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
-import io.requery.query.*;
+import io.requery.query.Condition;
+import io.requery.query.FieldExpression;
+import io.requery.query.NamedExpression;
+import io.requery.query.Return;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import lombok.Getter;
@@ -24,6 +27,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static org.springframework.data.repository.query.parser.Part.Type.LIKE;
 import static org.springframework.data.repository.query.parser.Part.Type.NOT_CONTAINING;
 
@@ -47,7 +51,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
 //    private final RequeryParameterAccessor accessor;
 //    private final Object[] parameters;
 
-    private final QueryElement<? extends Result<?>> root;
+    private final QueryElement<?> root;
 
     public RequeryQueryCreator(@NotNull RequeryOperations operations,
                                @NotNull ParameterMetadataProvider provider,
@@ -77,7 +81,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
     }
 
     @SuppressWarnings("unchecked")
-    protected QueryElement<? extends Result<?>> createQueryElement(ReturnedType type) {
+    protected QueryElement<?> createQueryElement(ReturnedType type) {
 
         Assert.notNull(type, "type must not be null!");
 
@@ -87,9 +91,18 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
 
         // TODO: READ 뿐 아니라 insert/update/upsert/delete 시에는 QueryElement가 달라야 한다.
         // TODO: 근데 이를 어떻게 알지?
-        return typeToRead == null || tree.isExistsProjection() || tree.isCountProjection()
-               ? (QueryElement<? extends Result<?>>) RequeryUtils.unwrap(operations.select(Count.count(type.getDomainType())))
-               : (QueryElement<? extends Result<?>>) RequeryUtils.unwrap(operations.select(type.getDomainType()));
+
+        if (tree.isCountProjection()) {
+            return unwrap(operations.select(Count.count(type.getDomainType())));
+        }
+        if (tree.isExistsProjection()) {
+            return unwrap(operations.select(type.getDomainType()));
+        }
+        if (tree.isDelete()) {
+            return unwrap(operations.delete(type.getDomainType()));
+        }
+
+        return unwrap(operations.select(type.getDomainType()));
     }
 
     public List<ParameterMetadata<?>> getParameterExpressions() {
@@ -119,7 +132,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                                  QueryElement<?> criteria) {
 
         Iterable<Condition<?, ?>> conditions = RequeryUtils.getConditions(criteria);
-        return RequeryUtils.unwrap(RequeryUtils.buildWhereClause(base, conditions, false));
+        return unwrap(RequeryUtils.buildWhereClause(base, conditions, false));
         // return RequeryUtils.unwrap(base.where().or((Condition<?, ?>) criteria));
     }
 
@@ -284,7 +297,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     throw new NotSupportedException("Not supported keyword " + type);
             }
 
-            return RequeryUtils.unwrap(whereClause);
+            return unwrap(whereClause);
         }
 
         private <T> FieldExpression<T> upperIfIgnoreCase(FieldExpression<T> expression) {

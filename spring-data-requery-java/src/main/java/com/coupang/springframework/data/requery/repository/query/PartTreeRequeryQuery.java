@@ -3,6 +3,8 @@ package com.coupang.springframework.data.requery.repository.query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
+import com.coupang.springframework.data.requery.repository.query.RequeryQueryExecution.DeleteExecution;
+import com.coupang.springframework.data.requery.repository.query.RequeryQueryExecution.ExistsExecution;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.NamedExpression;
 import io.requery.query.Result;
@@ -68,6 +70,18 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
     @Override
     protected QueryElement<? extends Scalar<Integer>> doCreateCountQuery(Object[] values) {
         return (QueryElement<? extends Scalar<Integer>>) countQueryPreparer.createQuery(values);
+    }
+
+    @Override
+    protected RequeryQueryExecution getExecution() {
+        if (tree.isDelete()) {
+            log.debug("Create DeleteExecution. queryMethod={}", queryMethod);
+            return new DeleteExecution(operations);
+        } else if (tree.isExistsProjection()) {
+            log.debug("Create ExistsExecution. queryMethod={}", queryMethod);
+            return new ExistsExecution();
+        }
+        return super.getExecution();
     }
 
     @SuppressWarnings("unchecked")

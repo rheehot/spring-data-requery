@@ -1,5 +1,7 @@
 package com.coupang.springframework.data.requery.repository.query;
 
+import com.coupang.springframework.data.requery.NotSupportedException;
+import com.coupang.springframework.data.requery.core.RequeryOperations;
 import io.requery.query.Result;
 import io.requery.query.Scalar;
 import io.requery.query.Selection;
@@ -81,12 +83,11 @@ public abstract class RequeryQueryExecution {
 
         try {
             result = doExecute(query, values);
-        } catch (io.requery.PersistenceException e) {
-            log.error("Fail to doExecute", e);
+        } catch (io.requery.PersistenceException pe) {
+            log.error("Fail to doExecute. query={}", query, pe);
             return null;
-        }
-
-        if (result == null) {
+        } catch (Exception e) {
+            log.error("Fail to execute. query={}", query, e);
             return null;
         }
 
@@ -155,17 +156,6 @@ public abstract class RequeryQueryExecution {
         }
     }
 
-
-    static class SingleEntityExecution extends RequeryQueryExecution {
-
-        @Override
-        protected @Nullable Object doExecute(AbstractRequeryQuery query, Object[] values) {
-            Result<?> result = (Result<?>) query.createQueryElement(values).get();
-            return result.firstOrNull();
-        }
-    }
-
-
     static class PagedExecution extends RequeryQueryExecution {
 
         private final RequeryParameters parameters;
@@ -202,22 +192,77 @@ public abstract class RequeryQueryExecution {
         }
     }
 
-    static class DeleteExecution extends RequeryQueryExecution {
+
+    static class SingleEntityExecution extends RequeryQueryExecution {
 
         @Override
         protected @Nullable Object doExecute(AbstractRequeryQuery query, Object[] values) {
-            QueryElement<?> queryElement = query.createQueryElement(values);
+            log.debug("Get single entity. query={}, values={}", query, values);
+            Result<?> result = (Result<?>) query.createQueryElement(values).get();
+            return result.firstOrNull();
+        }
+    }
+
+
+    static class ModifyingExecution extends RequeryQueryExecution {
+        private final RequeryOperations operations;
+        private final boolean isLong;
+        private final boolean isInt;
+        private final boolean isVoid;
+        private final CommandType commandType;
+
+        public ModifyingExecution(@NotNull RequeryQueryMethod method, @NotNull RequeryOperations operations) {
+
+            Assert.notNull(method, "method must not be null!");
+            Assert.notNull(operations, "operation must not be null!");
+
+            Class<?> returnType = method.getReturnType();
+
+            isVoid = void.class.equals(returnType) || Void.class.equals(returnType);
+            isInt = int.class.equals(returnType) || Integer.class.equals(returnType);
+            isLong = long.class.equals(returnType) || Long.class.equals(returnType);
+
+            commandType = CommandType.parse(method.getName());
+
+            this.operations = operations;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected @Nullable Object doExecute(AbstractRequeryQuery query, Object[] values) {
+            throw new NotSupportedException("구현 중");
+        }
+    }
+
+    static class DeleteExecution extends RequeryQueryExecution {
+
+        private final RequeryOperations operations;
+
+        public DeleteExecution(@NotNull RequeryOperations operations) {
+            Assert.notNull(operations, "operations must not be null!");
+            this.operations = operations;
+        }
+
+        @Override
+        protected @Nullable Object doExecute(AbstractRequeryQuery query, Object[] values) {
+
+            QueryElement<?> deleteQuery = query.createQueryElement(values);
 
             //
             // TODO: 삭제관련 효율을 높히기 위한 방안을 찾아야한다.
             //
 
-            Result<?> result = (Result<?>) queryElement.get();
-            List<?> entities = result.toList();
+            Result<?> result = (Result<?>) deleteQuery.get();
+            return result.first();
+        }
+    }
 
-            query.getOperations().deleteAll(entities);
+    static class ExistsExecution extends RequeryQueryExecution {
+        @Override
+        protected @Nullable Object doExecute(AbstractRequeryQuery query, Object[] values) {
+            Result<?> result = (Result<?>) query.createQueryElement(values).limit(1).get();
 
-            return query.getQueryMethod().isCollectionQuery() ? entities : entities.size();
+            return result.firstOrNull() != null;
         }
     }
 }
