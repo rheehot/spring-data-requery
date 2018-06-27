@@ -120,13 +120,19 @@ public final class RequeryQueryLookupStrategy {
                                                NamedQueries namedQueries) {
             // @Query annotation이 있다면 그 값으로 한다.
             if (method.isAnnotatedQuery()) {
-                log.debug("Create RawStringRequeryQuery for @Query annotated method. queryMethod={}", method.getName());
+                log.debug("Create DeclaredRequeryQuery for @Query annotated method. queryMethod={}", method.getName());
                 return new DeclaredRequeryQuery(method, operations);
             }
 
-            // Custom Implementation이라면 그 함수를 그대로 사용한다.
+            // Interface default method라면 그 함수를 그대로 사용한다.
             if (method.isDefaultMethod()) {
-                log.debug("Create RawStringRequeryQuery for custom implmented method. queryMethod={}", method.getName());
+                log.debug("Create RawStringRequeryQuery for inteface default method. queryMethod={}", method.getName());
+                return new DeclaredRequeryQuery(method, operations);
+            }
+
+            // Custom implemented method 라면 그 함수를 그대로 사용한다.
+            if (method.isOverridedMethod()) {
+                log.debug("Create DeclaredRequeryQuery for custom implmented method. queryMethod={}", method.getName());
                 return new DeclaredRequeryQuery(method, operations);
             }
 

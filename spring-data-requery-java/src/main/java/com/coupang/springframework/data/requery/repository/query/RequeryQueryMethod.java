@@ -4,6 +4,7 @@ import com.coupang.springframework.data.requery.annotation.Modifying;
 import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.annotation.QueryOptions;
 import com.coupang.springframework.data.requery.provider.QueryExtractor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +30,7 @@ import java.util.Set;
  * @author debop
  * @since 18. 6. 7
  */
+@Getter
 @Slf4j
 public class RequeryQueryMethod extends QueryMethod {
 
@@ -45,6 +47,7 @@ public class RequeryQueryMethod extends QueryMethod {
     }
 
     private final Method method;
+    private final RepositoryMetadata metadata;
     private final QueryExtractor extractor;
     private final RequeryEntityMetadata<?> entityInformation;
 
@@ -66,6 +69,7 @@ public class RequeryQueryMethod extends QueryMethod {
                   metadata.getRepositoryInterface(), method.getName(), method);
 
         this.method = method;
+        this.metadata = metadata;
         this.extractor = extractor;
         this.entityInformation = DefaultRequeryEntityMetadata.of(getDomainClass());
 
@@ -116,6 +120,9 @@ public class RequeryQueryMethod extends QueryMethod {
         return method.isDefault();
     }
 
+    public boolean isOverridedMethod() {
+        return !method.getDeclaringClass().equals(metadata.getRepositoryInterface());
+    }
 
     QueryExtractor getQueryExtractor() {
         return extractor;

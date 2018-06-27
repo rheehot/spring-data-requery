@@ -4,16 +4,19 @@ import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import io.requery.query.Result;
 import io.requery.query.Scalar;
+import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.data.repository.query.ResultProcessor;
 import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link Query} annotation에 정의된 문자열에 대한 쿼리 문장
+ * {@link Query} annotation이 정의된 메소드, interface default method, custom defined method를 실행하는 {@link RepositoryQuery}
  *
  * @author debop@coupang.com
  * @since 18. 6. 15
@@ -28,7 +31,7 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
 
     @Override
     protected QueryElement<? extends Result<?>> doCreateQuery(Object[] values) {
-        throw new UnsupportedOperationException("Unsupported operation in @Query is defined");
+        throw new UnsupportedOperationException("Unsupported operation in DeclaredRequeryQuery is defined");
     }
 
     @Override
@@ -38,19 +41,29 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
 
     @Override
     public Object execute(Object[] parameters) {
-        String query = getRawQuery();
+        if (getQueryMethod().isAnnotatedQuery()) {
+            String query = getRawQuery();
 
-        log.debug("Execute queryMethod={}, query={}, return type={}", getQueryMethod().getName(), getQueryMethod().getReturnType(), query);
+            log.debug("Execute queryMethod={}, query={}, return type={}", getQueryMethod().getName(), getQueryMethod().getReturnType(), query);
 
-        Result<?> result;
-        if (getQueryMethod().isQueryForEntity()) {
-            log.debug("Query for entity. entity={}", getQueryMethod().getEntityInformation().getJavaType());
-            result = operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, parameters);
-            return castResult(result);
-        } else {
-            result = operations.raw(query, parameters);
-            return castResult(result);
+            Result<?> result;
+            if (getQueryMethod().isQueryForEntity()) {
+                log.debug("Query for entity. entity={}", getQueryMethod().getEntityInformation().getJavaType());
+                result = operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, parameters);
+                return castResult(result);
+            } else {
+                result = operations.raw(query, parameters);
+                return castResult(result);
+            }
+        } else if (getQueryMethod().isDefaultMethod()) {
+            // TODO: interface default method 일 경우 처리
+            throw new NotImplementedException("Interface default method 실행 구현 중");
+        } else if (getQueryMethod().isOverridedMethod()) {
+            // TODO: custom implemented method 일 경우 처리
+            throw new NotImplementedException("Custom implmented method 실행 구현 중");
         }
+
+        return null;
     }
 
     @Nullable
@@ -60,7 +73,17 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
         } else if (getQueryMethod().isStreamQuery()) {
             return result.stream();
         } else {
-            return result.firstOrNull();
+            Object value = result.firstOrNull();
+
+            // TODO: 중복 제거 필요 
+            if (value instanceof Tuple) {
+                Tuple tuple = (Tuple) value;
+                if (tuple.count() == 1) {
+                    return tuple.get(0);
+                }
+                return tuple;
+            }
+            return value;
         }
     }
 
@@ -71,7 +94,7 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
         log.trace("Get raw query = {}", rawQuery);
 
         if (StringUtils.isEmpty(rawQuery)) {
-            throw new IllegalStateException("No query specified on " + queryMethod.getName());
+            throw new IllegalStateException("No @Query query specified on " + queryMethod.getName());
         }
 
         return rawQuery;
@@ -84,6 +107,4 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
 
         return processor.withDynamicProjection(accessor).getReturnedType();
     }
-
-
 }

@@ -25,5 +25,5 @@ public interface RoleRepository extends RequeryRepository<Role, Integer> {
     Optional<Role> findOne(Return<? extends Result<Role>> whereClause);
 
 
-    long countByName(String name);
+    Long countByName(String name);
 }
