@@ -109,6 +109,15 @@ public class RequeryRepositoryFactoryTest {
         assertThat(user.getEmail()).isEqualTo("debop@coupang.com");
     }
 
+    @Test
+    public void runDefaultMethodWithCustomName() {
+        RepositoryFragments fragments = RepositoryFragments.just(new SampleCustomRepositoryImpl());
+        SampleRepository repository = factory.getRepository(SampleRepository.class, fragments);
+
+        BasicUser user = repository.customMethod(1L);
+        assertThat(user).isNotNull();
+    }
+
     @Test(expected = UnsupportedOperationException.class)
     public void createsProxyWithCustomBaseClass() {
 
@@ -175,6 +184,10 @@ public class RequeryRepositoryFactoryTest {
             BasicUser user = new BasicUser();
             user.setEmail(email);
             return user;
+        }
+
+        default BasicUser customMethod(Long id) {
+            return new BasicUser();
         }
     }
 
