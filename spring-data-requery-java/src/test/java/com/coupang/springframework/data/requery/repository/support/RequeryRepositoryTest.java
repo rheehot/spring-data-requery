@@ -11,29 +11,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * RequeryRepositoryTest
- *
- * @author debop@coupang.com
- * @since 18. 6. 12
- */
 @Slf4j
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = { RequeryTestConfiguration.class })
 public class RequeryRepositoryTest {
 
-    @Inject RequeryTemplate operations;
+    @Autowired RequeryTemplate operations;
 
     SampleEntityRepository repository;
     GroupEntityRepository groupRepository;
@@ -53,21 +48,24 @@ public class RequeryRepositoryTest {
     }
 
     @Test
-    public void testCrudOperationsForSimpleEntity() throws Exception {
+    public void testCrudOperationsForSimpleEntity() {
+
         BasicUser user = RandomData.randomUser();
         repository.save(user);
+
+        assertThat(user.getId()).isNotNull();
         assertThat(repository.existsById(user.getId())).isTrue();
         assertThat(repository.count()).isEqualTo(1L);
         assertThat(repository.findById(user.getId())).isEqualTo(Optional.of(user));
 
-        repository.deleteAll(Arrays.asList(user));
+        repository.deleteAll(Collections.singletonList(user));
         assertThat(repository.count()).isEqualTo(0L);
     }
 
     @Test
     public void executesCrudOperationsForEntity() {
-        BasicGroup group = RandomData.randomBasicGroup();
 
+        BasicGroup group = RandomData.randomBasicGroup();
         groupRepository.save(group);
 
         assertThat(group.getId()).isNotNull();
@@ -79,6 +77,7 @@ public class RequeryRepositoryTest {
 
     @Test
     public void executeMultipleEntities() {
+
         int userCount = 10;
         Set<BasicUser> users = RandomData.randomUsers(userCount);
 
@@ -91,7 +90,24 @@ public class RequeryRepositoryTest {
         assertThat(deleted).isEqualTo(userCount);
     }
 
-    private static interface SampleEntityRepository extends RequeryRepository<BasicUser, Long> {
+    @Test
+    public void executeInterfaceDefaultMethod() {
+
+        BasicGroup group = RandomData.randomBasicGroup();
+        groupRepository.save(group);
+
+        assertThat(group.getId()).isNotNull();
+        assertThat(groupRepository.findById(group.getId())).isEqualTo(Optional.of(group));
+
+        List<BasicGroup> groups = groupRepository.findAllByName(group.getName());
+        assertThat(groups).hasSize(1);
+        assertThat(groups.get(0)).isEqualTo(group);
+
+        groupRepository.deleteAll(groups);
+        assertThat(repository.count()).isEqualTo(0L);
+    }
+
+    private interface SampleEntityRepository extends RequeryRepository<BasicUser, Long> {
 
         @Query("select * from basic_user u where u.email = ?")
         @Transactional(readOnly = true)
@@ -99,8 +115,14 @@ public class RequeryRepositoryTest {
 
     }
 
-    private static interface GroupEntityRepository extends RequeryRepository<BasicGroup, Integer> {
+    private interface GroupEntityRepository extends RequeryRepository<BasicGroup, Integer> {
 
+        default List<BasicGroup> findAllByName(String name) {
+            return getOperations().select(BasicGroup.class)
+                .where(BasicGroup.NAME.eq(name))
+                .get()
+                .toList();
+        }
     }
 
 }

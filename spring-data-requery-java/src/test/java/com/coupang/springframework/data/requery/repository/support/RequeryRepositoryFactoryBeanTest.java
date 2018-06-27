@@ -3,7 +3,6 @@ package com.coupang.springframework.data.requery.repository.support;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.domain.basic.AbstractBasicUser;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
-import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean;
 import io.requery.meta.EntityModel;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -64,7 +63,7 @@ public class RequeryRepositoryFactoryBeanTest {
     }
 
     @Test
-    public void setsBasicInstanceCorrectly() throws Exception {
+    public void setsBasicInstanceCorrectly() {
 
         factoryBean.setBeanFactory(beanFactory);
         factoryBean.afterPropertiesSet();
@@ -73,7 +72,7 @@ public class RequeryRepositoryFactoryBeanTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void requiresListableBeanFactory() throws Exception {
+    public void requiresListableBeanFactory() {
 
         factoryBean.setBeanFactory(mock(BeanFactory.class));
 
@@ -110,6 +109,7 @@ public class RequeryRepositoryFactoryBeanTest {
             this.repository = repository;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <T> T getRepository(Class<T> repositoryInterface, RepositoryComposition.RepositoryFragments fragments) {
             return (T) repository;

@@ -7,7 +7,6 @@ import com.coupang.springframework.data.requery.repository.sample.RoleRepository
 import com.coupang.springframework.data.requery.repository.sample.UserRepository;
 import com.coupang.springframework.data.requery.repository.support.SimpleRequeryRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.aop.support.AopUtils;
@@ -77,9 +76,7 @@ public class RoleRepositoryTest {
         assertThat(repository.existsById(reference.getId())).isTrue();
     }
 
-    // TODO: PartTreeRequeryQuery 에서 문제가 발생한다.
     @Test
-    @Ignore
     public void shouldUseExplicitlyConfiguredEntityNameInDerivedCountQueries() {
         Role reference = new Role("ADMIN");
         repository.save(reference);

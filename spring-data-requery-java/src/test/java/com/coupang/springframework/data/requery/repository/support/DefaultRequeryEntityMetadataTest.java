@@ -2,6 +2,7 @@ package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.domain.basic.AbstractBasicGroup;
 import com.coupang.springframework.data.requery.domain.basic.AbstractBasicUser;
+import com.coupang.springframework.data.requery.domain.model.AbstractGroup;
 import com.coupang.springframework.data.requery.repository.query.DefaultRequeryEntityMetadata;
 import org.junit.Test;
 
@@ -17,8 +18,8 @@ public class DefaultRequeryEntityMetadataTest {
 
     @Test
     public void returnsConfiguredType() {
-        DefaultRequeryEntityMetadata<AbstractBasicUser> metadata = new DefaultRequeryEntityMetadata<>(AbstractBasicUser.class);
-        assertThat(metadata.getJavaType()).isEqualTo(AbstractBasicUser.class);
+        DefaultRequeryEntityMetadata<AbstractGroup> metadata = new DefaultRequeryEntityMetadata<>(AbstractGroup.class);
+        assertThat(metadata.getJavaType()).isEqualTo(AbstractGroup.class);
     }
 
     @Test

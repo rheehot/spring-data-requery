@@ -8,7 +8,6 @@ import com.coupang.springframework.data.requery.repository.custom.UserCustomExte
 import io.requery.meta.EntityModel;
 import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,12 +16,15 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.aop.framework.Advised;
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.data.repository.core.support.RepositoryComposition.RepositoryFragments;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,25 +38,26 @@ public class RequeryRepositoryFactoryTest {
     RequeryRepositoryFactory factory;
 
     @Mock RequeryOperations requeryOperations;
-    @Mock EntityDataStore entityDataStore;
+    @Mock EntityDataStore<Object> entityDataStore;
     @Mock EntityModel entityModel;
-    @Mock @SuppressWarnings("rawtypes") RequeryEntityInformation entityInformation;
+    @Mock @SuppressWarnings("rawtypes") RequeryEntityInformation<?, ?> entityInformation;
 
     @Before
     public void setup() {
         when(requeryOperations.getDataStore()).thenReturn(entityDataStore);
 
         factory = new RequeryRepositoryFactory(requeryOperations) {
+            @SuppressWarnings("unchecked")
             @Override
             public <T, ID> RequeryEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
-                return entityInformation;
+                return (RequeryEntityInformation<T, ID>) entityInformation;
             }
         };
         factory.setQueryLookupStrategyKey(QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND);
     }
 
     @Test
-    public void setupBasicInstanceCorrectly() throws Exception {
+    public void setupBasicInstanceCorrectly() {
         assertThat(factory.getRepository(SimpleSampleRepository.class)).isNotNull();
     }
 
@@ -63,26 +66,25 @@ public class RequeryRepositoryFactoryTest {
 
         SimpleSampleRepository repository = factory.getRepository(SimpleSampleRepository.class);
 
-        repository.hashCode();
-        repository.toString();
-        repository.equals(repository);
+        assertThat(repository.hashCode()).isNotEqualTo(0);
+        assertThat(repository.toString()).isNotEmpty();
+        assertThat(Objects.equals(repository, repository)).isTrue();
     }
 
     @Test
-    public void capturesMissingCustomImplementationAndProvidesInterfacename() throws Exception {
+    public void capturesMissingCustomImplementationAndProvidesInterfacename() {
         try {
             factory.getRepository(SampleRepository.class);
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage()).contains(SampleRepository.class.getName());
-        } catch (NotImplementedException ne) {
-            log.error("구현 중", ne);
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void handlesRuntimeExceptionsCorrectly() {
 
-        SampleRepository repository = factory.getRepository(SampleRepository.class, new SampleCustomRepositoryImpl());
+        RepositoryFragments fragments = RepositoryFragments.just(new SampleCustomRepositoryImpl());
+        SampleRepository repository = factory.getRepository(SampleRepository.class, fragments);
         repository.throwingRuntimeException();
     }
 
@@ -90,14 +92,16 @@ public class RequeryRepositoryFactoryTest {
     @Test(expected = IOException.class)
     public void handlesCheckedExceptionsCorrectly() throws Exception {
 
-        SampleRepository repository = factory.getRepository(SampleRepository.class, new SampleCustomRepositoryImpl());
+        RepositoryFragments fragments = RepositoryFragments.just(new SampleCustomRepositoryImpl());
+        SampleRepository repository = factory.getRepository(SampleRepository.class, fragments);
         repository.throwingCheckedException();
     }
 
     @Test
     public void runDefaultMethods() {
 
-        SampleRepository repository = factory.getRepository(SampleRepository.class, new SampleCustomRepositoryImpl());
+        RepositoryFragments fragments = RepositoryFragments.just(new SampleCustomRepositoryImpl());
+        SampleRepository repository = factory.getRepository(SampleRepository.class, fragments);
         assertThat(repository.findByEmail("email")).isNotNull();
     }
 
@@ -128,6 +132,7 @@ public class RequeryRepositoryFactoryTest {
         factory.setBeanClassLoader(classLoader);
 
         Object processor = ReflectionTestUtils.getField(factory, "crudMethodMetadataPostProcessor");
+        Assert.notNull(processor, "processor must not be null");
         assertThat(ReflectionTestUtils.getField(processor, "classLoader")).isEqualTo(classLoader);
     }
 

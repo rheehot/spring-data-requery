@@ -2,8 +2,8 @@ package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.configs.RequeryTestConfiguration;
 import com.coupang.springframework.data.requery.domain.RandomData;
-import com.coupang.springframework.data.requery.repository.sample.basic.BasicUserRepository;
 import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
+import com.coupang.springframework.data.requery.repository.sample.basic.BasicUserRepository;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -21,16 +21,10 @@ import org.springframework.transaction.TransactionStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * TransactionalRepositoryTest
- *
- * @author debop@coupang.com
- * @since 18. 6. 14
- */
+@Slf4j
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class TransactionalRepositoryTest {
-
 
     @Configuration
     @EnableRequeryRepositories(basePackageClasses = { BasicUserRepository.class })
@@ -62,13 +56,13 @@ public class TransactionalRepositoryTest {
     }
 
     @Test
-    public void unannotatedFinder() throws Exception {
+    public void unannotatedFinder() {
         repository.findByEmail("foo@bar.kr");
         assertThat(transactionManager.getTransactionRequests()).isEqualTo(1);
     }
 
     @Test
-    public void rawQueryString() throws Exception {
+    public void rawQueryString() {
         repository.findByAnnotatedQuery("foo@bar.kr");
         assertThat(transactionManager.getTransactionRequests()).isEqualTo(1);
     }
@@ -97,16 +91,18 @@ public class TransactionalRepositoryTest {
 
         @Override
         public void commit(TransactionStatus status) throws TransactionException {
+            log.info("Commit transaction. status={}", status);
             txManager.commit(status);
         }
 
         @Override
         public void rollback(TransactionStatus status) throws TransactionException {
+            log.info("Rollback transaction. status={}", status);
             txManager.rollback(status);
         }
 
         public void resetCount() {
-            log.debug("Reset transaction request.");
+            log.info("Reset transaction request.");
             this.transactionRequests = 0;
             this.definition = null;
         }

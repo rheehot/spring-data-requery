@@ -5,6 +5,7 @@ import com.coupang.springframework.data.requery.core.RequeryOperations;
 import io.requery.query.Result;
 import io.requery.query.Scalar;
 import io.requery.query.Selection;
+import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import lombok.extern.slf4j.Slf4j;
@@ -199,7 +200,16 @@ public abstract class RequeryQueryExecution {
         protected @Nullable Object doExecute(AbstractRequeryQuery query, Object[] values) {
             log.debug("Get single entity. query={}, values={}", query, values);
             Result<?> result = (Result<?>) query.createQueryElement(values).get();
-            return result.firstOrNull();
+            Object value = result.firstOrNull();
+
+            if (value instanceof Tuple) {
+                Tuple tuple = (Tuple) value;
+                if (tuple.count() == 1) {
+                    return tuple.get(0);
+                }
+                return tuple;
+            }
+            return value;
         }
     }
 

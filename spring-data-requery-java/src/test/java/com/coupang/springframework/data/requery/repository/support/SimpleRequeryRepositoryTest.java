@@ -10,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +27,7 @@ public class SimpleRequeryRepositoryTest {
     SimpleRequeryRepository<BasicUser, Long> repo;
 
     @Mock RequeryOperations operations;
-    @Mock EntityDataStore entityDataStore;
+    @Mock EntityDataStore<Object> entityDataStore;
     @Mock EntityModel entityModel;
 
     @Mock RequeryEntityInformation<BasicUser, Long> information;

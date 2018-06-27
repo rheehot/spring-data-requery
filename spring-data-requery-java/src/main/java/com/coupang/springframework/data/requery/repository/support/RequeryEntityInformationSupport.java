@@ -23,7 +23,7 @@ public abstract class RequeryEntityInformationSupport<T, ID>
 
     public RequeryEntityInformationSupport(Class<T> domainClass) {
         super(domainClass);
-        this.metadata = new DefaultRequeryEntityMetadata(domainClass);
+        this.metadata = DefaultRequeryEntityMetadata.of(domainClass);
     }
 
     public String getEntityName() {
@@ -37,8 +37,8 @@ public abstract class RequeryEntityInformationSupport<T, ID>
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> RequeryEntityInformation<T, ?> getEntityInformation(@NotNull Class<T> domainClass,
                                                                           @NotNull RequeryOperations operations) {
-        Assert.notNull(domainClass, "Domain class must not be null.");
-        Assert.notNull(operations, "RequeryOperations must not be null.");
+        Assert.notNull(domainClass, "domainClass must not be null.");
+        Assert.notNull(operations, "operations must not be null.");
 
         EntityModel entityModel = operations.getEntityModel();
         Assert.notNull(entityModel, "EntityModel must not be null!");

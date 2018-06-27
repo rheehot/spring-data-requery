@@ -33,7 +33,7 @@ public class DefaultRequeryEntityMetadata<T> implements RequeryEntityMetadata<T>
     public String getEntityName() {
         Entity entity = AnnotatedElementUtils.findMergedAnnotation(domainClass, Entity.class);
 
-        log.debug("Get entity name... domainClass={}, entity={}", domainClass.getName(), entity);
+        log.trace("Get entity name... domainClass={}, entity={}", domainClass.getName(), entity);
 
         return (entity != null) && StringUtils.hasText(entity.name())
                ? entity.name()
@@ -44,11 +44,12 @@ public class DefaultRequeryEntityMetadata<T> implements RequeryEntityMetadata<T>
     public String getModelName() {
         Entity entity = AnnotatedElementUtils.findMergedAnnotation(domainClass, Entity.class);
 
-        log.debug("Get model name... domainClass={}, entity={}", domainClass.getName(), entity);
+        log.trace("Get model name... domainClass={}, entity={}", domainClass.getName(), entity);
 
-        return (entity != null) && StringUtils.hasText(entity.model())
-               ? entity.model()
-               : "default";
+        if (entity != null) {
+            return StringUtils.hasText(entity.model()) ? entity.model() : "default";
+        }
+        return "";
     }
 
     @Override

@@ -36,7 +36,7 @@ public class RequeryEntityModelEntityInformation<T, ID> extends RequeryEntityInf
     public RequeryEntityModelEntityInformation(@NotNull Class<T> domainClass, @NotNull EntityModel entityModel) {
         super(domainClass);
 
-        log.debug("Construct RequeryEntityModelEntityInformation, domainClass={}, entityModel={}", domainClass.getName(), entityModel.getName());
+        log.debug("Create RequeryEntityModelEntityInformation, domainClass={}, entityModel={}", domainClass, entityModel.getName());
 
         this.entityModel = entityModel;
 

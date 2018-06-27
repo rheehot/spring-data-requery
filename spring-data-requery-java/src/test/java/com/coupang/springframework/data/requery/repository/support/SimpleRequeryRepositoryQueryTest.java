@@ -21,12 +21,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * SimpleRequeryRepositoryQueryTest
- *
- * @author debop@coupang.com
- * @since 18. 6. 19
- */
 @Slf4j
 public class SimpleRequeryRepositoryQueryTest extends AbstractDomainTest {
 
@@ -44,7 +38,11 @@ public class SimpleRequeryRepositoryQueryTest extends AbstractDomainTest {
     @SuppressWarnings("unchecked")
     @Test
     public void findAllByIds() {
-        Set<Long> ids = users.stream().map(BasicUser::getId).collect(Collectors.toSet());
+
+        Set<Long> ids = users
+            .stream()
+            .map(BasicUser::getId)
+            .collect(Collectors.toSet());
 
         NamedExpression<Long> keyExpr = (NamedExpression<Long>) RequeryUtils.getKeyExpression(BasicUser.class);
 

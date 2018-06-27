@@ -2,12 +2,8 @@ package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.domain.basic.AbstractBasicUser;
-import com.coupang.springframework.data.requery.repository.support.RequeryEntityInformation;
-import com.coupang.springframework.data.requery.repository.support.RequeryEntityInformationSupport;
-import com.coupang.springframework.data.requery.utils.RequeryMetamodel;
 import io.requery.meta.Attribute;
 import io.requery.meta.EntityModel;
-import io.requery.sql.EntityDataStore;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,9 +32,11 @@ public class RequeryEntityInformationSupportTest {
 
         RequeryEntityInformation<User, Long> information = new DummyRequeryEntityInformation<>(User.class);
         assertThat(information.getEntityName()).isEqualTo("User");
+        assertThat(information.getModelName()).isNullOrEmpty();
 
         RequeryEntityInformation<AbstractBasicUser, Long> second = new DummyRequeryEntityInformation<>(AbstractBasicUser.class);
         assertThat(second.getEntityName()).isEqualTo("BasicUser");
+        assertThat(second.getModelName()).isEqualTo("default");
     }
 
     @Test(expected = IllegalArgumentException.class)

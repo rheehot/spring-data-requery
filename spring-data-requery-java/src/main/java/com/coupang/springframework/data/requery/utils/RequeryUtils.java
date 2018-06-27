@@ -24,12 +24,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * com.coupang.springframework.data.requery.utils.RequeryUtils
+ * Requery 사용을 위한 Utility class
  *
  * @author debop
  * @since 18. 6. 20
@@ -39,30 +38,18 @@ import java.util.stream.Collectors;
 public class RequeryUtils {
 
     private static Map<Class<?>, NamedExpression<?>> classKeys = new ConcurrentHashMap<>();
-    private static NamedExpression<?> UNKNOWN_KEY_EXPRESSION = NamedExpression.of("Unknown", Object.class);
+    public static NamedExpression<?> UNKNOWN_KEY_EXPRESSION = NamedExpression.of("Unknown", Object.class);
 
     public NamedExpression<?> getKeyExpression(@NotNull Class<?> domainClass) {
         Assert.notNull(domainClass, "domainClass must not be null!");
         log.trace("Retrieve Key property. domainClass={}", domainClass.getSimpleName());
 
         return classKeys
-            .computeIfAbsent(domainClass, (domainType) -> {
-
-                final AtomicReference<NamedExpression<?>> keyExprRef = new AtomicReference<>();
-
-                ReflectionUtils.doWithFields(domainType, field -> {
-                    if (keyExprRef.get() == null) {
-                        if (field.getAnnotation(Key.class) != null) {
-                            String keyName = field.getName();
-                            Class<?> keyType = field.getType();
-
-                            log.trace("Key field name={}, type={}", keyName, keyType);
-                            keyExprRef.set(NamedExpression.of(keyName, keyType));
-                        }
-                    }
-                });
-
-                return keyExprRef.get() != null ? keyExprRef.get() : UNKNOWN_KEY_EXPRESSION;
+            .computeIfAbsent(domainClass, (clazz) -> {
+                Field field = RequeryUtils.findFirstField(clazz, it -> it.getAnnotation(Key.class) != null);
+                return (field != null)
+                       ? NamedExpression.of(field.getName(), field.getType())
+                       : UNKNOWN_KEY_EXPRESSION;
             });
     }
 
@@ -183,9 +170,14 @@ public class RequeryUtils {
 
         QueryElement<?> query = applySort(domainClass, baseQuery, pageable.getSort());
 
-        return unwrap(query
-                          .limit(pageable.getPageSize())
-                          .offset((int) pageable.getOffset()));
+        if (pageable.getPageSize() > 0) {
+            query = unwrap(query.limit(pageable.getPageSize()));
+        }
+        if (pageable.getOffset() > 0) {
+            query = unwrap(query.offset((int) pageable.getOffset()));
+        }
+
+        return query;
     }
 
     @SuppressWarnings("unchecked")
@@ -349,6 +341,29 @@ public class RequeryUtils {
         } while (targetClass != null && targetClass != Object.class);
 
         return foundFields;
+    }
+
+    @Nullable
+    public static Field findFirstField(@NotNull final Class<?> domainClass,
+                                       @NotNull final Predicate<Field> fieldPredicate) {
+        Assert.notNull(domainClass, "domainClass must not be null!");
+        Assert.notNull(fieldPredicate, "predicate must not be null!");
+
+        Class<?> targetClass = domainClass;
+
+        do {
+            Field[] fields = targetClass.getDeclaredFields();
+            if (fields != null) {
+                for (Field field : fields) {
+                    if (fieldPredicate.test(field)) {
+                        return field;
+                    }
+                }
+            }
+            targetClass = targetClass.getSuperclass();
+        } while (targetClass != null && targetClass != Object.class);
+
+        return null;
     }
 
     /**

@@ -8,7 +8,6 @@ import com.coupang.springframework.data.requery.domain.sample.Parent_Child;
 import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
 import com.coupang.springframework.data.requery.repository.sample.ParentRepository;
 import com.coupang.springframework.data.requery.repository.sample.UserRepository;
-import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.Result;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -48,14 +48,13 @@ public class ParentRepositoryTest {
 
         RequeryOperations ops = repository.getOperations();
 
-        QueryElement<? extends Result<Parent>> query =
-            (QueryElement<? extends Result<Parent>>) RequeryUtils
-                .unwrap(ops
-                            .select(Parent.class)
-                            .distinct()
-                            .join(Parent_Child.class).on(Parent.ID.eq(Parent_Child.PARENT_ID)));
+        QueryElement<?> query = unwrap(ops
+                                           .select(Parent.class)
+                                           .distinct()
+                                           .join(Parent_Child.class).on(Parent.ID.eq(Parent_Child.PARENT_ID)));
 
-        Page<Parent> page = repository.findAll(query, PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "id")));
+        Page<Parent> page = repository.findAll((QueryElement<? extends Result<Parent>>) query,
+                                               PageRequest.of(0, 5, Sort.by(Sort.Direction.ASC, "id")));
 
         assertThat(page).isNotNull();
         for (Parent parent : page.getContent()) {

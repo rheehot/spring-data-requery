@@ -202,18 +202,18 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 //    // DATAJPA-496
 //    List<User> findByAttributesIn(Set<String> attributes);
 
-//    // DATAJPA-460
-//    Long removeByLastname(String lastname);
+    // DATAJPA-460
+    Integer removeByLastname(String lastname);
 
-//    // DATAJPA-460
-//    List<User> deleteByLastname(String lastname);
+    // DATAJPA-460
+    Integer deleteByLastname(String lastname);
 
 
     @Query(value = "select * from SD_User where u u.firstname like ?%", countProjection = "u.firstname")
     Page<User> findAllByFirstnameLike(String firstname, Pageable page);
 
 
-//    User findFirstByOrderByAgeDesc();
+    User findFirstByOrderByAgeDesc();
 //
 //    User findFirst1ByOrderByAgeDesc();
 //

@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
+import static org.springframework.data.repository.query.parser.Part.Type.CONTAINING;
 import static org.springframework.data.repository.query.parser.Part.Type.LIKE;
-import static org.springframework.data.repository.query.parser.Part.Type.NOT_CONTAINING;
 
 /**
  * Query creator to create a {@link io.requery.sql.QueryBuilder} from a {@link PartTree}.
@@ -48,8 +48,6 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
     private final String domainClassName;
     private final ParameterMetadataProvider provider;
     private final PartTree tree;
-//    private final RequeryParameterAccessor accessor;
-//    private final Object[] parameters;
 
     private final QueryElement<?> root;
 
@@ -72,9 +70,6 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
         this.domainClassName = returnedType.getDomainType().getSimpleName();
 
         this.tree = tree;
-//        this.accessor = accessor;
-//        this.parameters = parameters;
-
         this.root = createQueryElement(returnedType);
 
         log.debug("Create RequeryQueryCreator for [{}]", domainClassName);
@@ -88,9 +83,6 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
         Class<?> typeToRead = type.getTypeToRead();
 
         log.debug("Create QueryElement instance. ReturnedType={}, typeToRead={}", type, typeToRead);
-
-        // TODO: READ 뿐 아니라 insert/update/upsert/delete 시에는 QueryElement가 달라야 한다.
-        // TODO: 근데 이를 어떻게 알지?
 
         if (tree.isCountProjection()) {
             return unwrap(operations.select(Count.count(type.getDomainType())));
@@ -122,7 +114,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                                   Iterator<Object> iterator) {
 
         return RequeryUtils.buildWhereClause(base,
-                                             Collections.singletonList((Condition<?, ?>) toQueryElement(part, root).getWhereElements().iterator().next().getCondition()),
+                                             Collections.singletonList(toQueryElement(part, root).getWhereElements().iterator().next().getCondition()),
                                              true);
     }
 
@@ -133,7 +125,6 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
 
         Iterable<Condition<?, ?>> conditions = RequeryUtils.getConditions(criteria);
         return unwrap(RequeryUtils.buildWhereClause(base, conditions, false));
-        // return RequeryUtils.unwrap(base.where().or((Condition<?, ?>) criteria));
     }
 
     @Override
@@ -156,12 +147,15 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
         return new QueryElementBuilder(part, root).build();
     }
 
+
     private class QueryElementBuilder {
 
         private final Part part;
         private final QueryElement<?> root;
 
         public QueryElementBuilder(Part part, QueryElement<?> root) {
+            log.debug("Create QueryElementBuilder. part={}, root={}", part, root);
+
             Assert.notNull(part, "Part must not be null!");
             Assert.notNull(root, "Root must not be null!");
             this.part = part;
@@ -260,9 +254,13 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                 case NOT_LIKE:
                     FieldExpression<String> fieldExpr = upperIfIgnoreCase(expr);
                     Object paramValue = provider.next(part, String.class).getValue();
-                    String value = (paramValue != null) ? paramValue.toString() : null;
+                    String value = (paramValue != null) ? paramValue.toString() : "";
 
-                    whereClause = (type.equals(LIKE) || type.equals(NOT_CONTAINING))
+                    if (!value.startsWith("%") && !value.endsWith("%")) {
+                        value = "%" + value + "%";
+                    }
+
+                    whereClause = (type.equals(LIKE) || type.equals(CONTAINING))
                                   ? root.where(fieldExpr.like(value))
                                   : root.where(fieldExpr.notLike(value));
                     break;

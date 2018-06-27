@@ -43,7 +43,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
         this.entityInformation = entityInformation;
         this.domainClass = entityInformation.getJavaType();
-        this.domainClassName = (domainClass != null) ? domainClass.getSimpleName() : "Unknown";
+        this.domainClassName = domainClass.getSimpleName();
 
         this.operations = operations;
     }
