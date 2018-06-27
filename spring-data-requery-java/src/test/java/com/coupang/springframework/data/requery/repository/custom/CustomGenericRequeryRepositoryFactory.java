@@ -3,7 +3,7 @@ package com.coupang.springframework.data.requery.repository.custom;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.repository.support.RequeryEntityInformation;
 import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactory;
-import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryImplementation;
+import com.coupang.springframework.data.requery.repository.support.SimpleRequeryRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -25,12 +25,13 @@ public class CustomGenericRequeryRepositoryFactory extends RequeryRepositoryFact
         super(operations);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected RequeryRepositoryImplementation<?, ?> getTargetRepository(RepositoryInformation information, RequeryOperations operations) {
+    protected SimpleRequeryRepository<?, ?> getTargetRepository(RepositoryInformation information, RequeryOperations operations) {
 
         RequeryEntityInformation<Object, Serializable> entityMetadata = mock(RequeryEntityInformation.class);
         when(entityMetadata.getJavaType()).thenReturn((Class<Object>) information.getDomainType());
-        return new CustomGenericRequeryRepository<Object, Serializable>(entityMetadata, operations);
+        return new CustomGenericRequeryRepository<>(entityMetadata, operations);
 
     }
 

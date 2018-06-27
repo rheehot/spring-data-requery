@@ -44,33 +44,32 @@ public class RequeryRepositoryFactory extends RepositoryFactorySupport {
     }
 
     @Override
-    protected final RequeryRepositoryImplementation<?, ?> getTargetRepository(RepositoryInformation metadata) {
+    protected final SimpleRequeryRepository<?, ?> getTargetRepository(RepositoryInformation metadata) {
 
-        RequeryRepositoryImplementation<?, ?> repository = getTargetRepository(metadata, operations);
+        SimpleRequeryRepository<?, ?> repository = getTargetRepository(metadata, operations);
         repository.setRepositoryMethodMetadata(crudMethodMetadataPostProcessor.getCrudMethodMetadata());
 
-        Assert.isInstanceOf(RequeryRepositoryImplementation.class, repository);
+        Assert.isInstanceOf(SimpleRequeryRepository.class, repository);
 
         return repository;
     }
 
     @SuppressWarnings("unchecked")
-    protected RequeryRepositoryImplementation<?, ?> getTargetRepository(RepositoryInformation information,
-                                                                        RequeryOperations operations) {
+    protected SimpleRequeryRepository<?, ?> getTargetRepository(RepositoryInformation information,
+                                                                RequeryOperations operations) {
 
         log.debug("Get target repository. information={}", information);
 
         RequeryEntityInformation<?, ?> entityInformation = getEntityInformation(information.getDomainType());
-        Object repository = getTargetRepositoryViaReflection(information, entityInformation, operations);
+        return getTargetRepositoryViaReflection(information, entityInformation, operations);
 
-        Assert.isInstanceOf(RequeryRepositoryImplementation.class, repository);
-
-        log.debug("Get target repository. repository={}", repository);
-
-        return (RequeryRepositoryImplementation<?, ?>) repository;
+//        Assert.isInstanceOf(SimpleRequeryRepository.class, repository);
+//
+//        log.debug("Get target repository. repository={}", repository);
+//
+//        return (SimpleRequeryRepository<?, ?>) repository;
     }
 
-    @NotNull
     @Override
     protected Class<?> getRepositoryBaseClass(@NotNull RepositoryMetadata metadata) {
         return SimpleRequeryRepository.class;

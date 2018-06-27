@@ -17,7 +17,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.aop.framework.Advised;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.data.repository.core.support.RepositoryComposition.RepositoryFragments;
-import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -29,6 +28,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static org.springframework.data.repository.query.QueryLookupStrategy.Key;
 
 
 @Slf4j
@@ -40,7 +40,7 @@ public class RequeryRepositoryFactoryTest {
     @Mock RequeryOperations requeryOperations;
     @Mock EntityDataStore<Object> entityDataStore;
     @Mock EntityModel entityModel;
-    @Mock @SuppressWarnings("rawtypes") RequeryEntityInformation<?, ?> entityInformation;
+    @Mock @SuppressWarnings("rawtypes") RequeryEntityInformation entityInformation;
 
     @Before
     public void setup() {
@@ -53,7 +53,7 @@ public class RequeryRepositoryFactoryTest {
                 return (RequeryEntityInformation<T, ID>) entityInformation;
             }
         };
-        factory.setQueryLookupStrategyKey(QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND);
+        factory.setQueryLookupStrategyKey(Key.CREATE_IF_NOT_FOUND);
     }
 
     @Test
@@ -73,6 +73,7 @@ public class RequeryRepositoryFactoryTest {
 
     @Test
     public void capturesMissingCustomImplementationAndProvidesInterfacename() {
+        // NOTE: spring-data-jpa 에서는 NamedQuery 가 생성되는데... 왜 그런지 모르겠다.
         try {
             factory.getRepository(SampleRepository.class);
         } catch (IllegalArgumentException e) {
@@ -102,14 +103,17 @@ public class RequeryRepositoryFactoryTest {
 
         RepositoryFragments fragments = RepositoryFragments.just(new SampleCustomRepositoryImpl());
         SampleRepository repository = factory.getRepository(SampleRepository.class, fragments);
-        assertThat(repository.findByEmail("email")).isNotNull();
+
+        BasicUser user = repository.findByEmail("debop@coupang.com");
+        assertThat(user).isNotNull();
+        assertThat(user.getEmail()).isEqualTo("debop@coupang.com");
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void createsProxyWithCustomBaseClass() {
 
         RequeryRepositoryFactory factory = new CustomGenericRequeryRepositoryFactory(requeryOperations);
-        factory.setQueryLookupStrategyKey(QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND);
+        factory.setQueryLookupStrategyKey(Key.CREATE_IF_NOT_FOUND);
         UserCustomExtendedRepository repository = factory.getRepository(UserCustomExtendedRepository.class);
 
         repository.customMethod(1L);
@@ -117,6 +121,8 @@ public class RequeryRepositoryFactoryTest {
 
     @Test
     public void usesConfiguredRepositoryBaseClass() {
+
+        // NOTE: spring-data-jpa 에서는 NamedQuery 가 생성되는데... 왜 그런지 모르겠다.
 
         factory.setRepositoryBaseClass(CustomRequeryRepository.class);
 

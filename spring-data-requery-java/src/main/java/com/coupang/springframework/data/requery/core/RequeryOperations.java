@@ -13,6 +13,7 @@ import io.requery.query.function.Count;
 import io.requery.sql.EntityContext;
 import io.requery.sql.EntityDataStore;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.context.ApplicationContext;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -26,6 +27,8 @@ import java.util.function.Function;
  * @since 18. 6. 4
  */
 public interface RequeryOperations {
+
+    ApplicationContext getApplicationContext();
 
     EntityDataStore<Object> getDataStore();
 

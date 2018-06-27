@@ -11,9 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * @author debop
  * @since 18. 6. 9
  */
-public class CustomGenericRequeryRepository<T, ID>
-    extends SimpleRequeryRepository<T, ID>
-    implements CustomGenericRepository<T, ID> {
+public class CustomGenericRequeryRepository<T, ID> extends SimpleRequeryRepository<T, ID> implements CustomGenericRepository<T, ID> {
 
     public CustomGenericRequeryRepository(@NotNull RequeryEntityInformation<T, ID> entityInformation,
                                           @NotNull RequeryOperations operations) {

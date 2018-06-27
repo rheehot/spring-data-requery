@@ -7,7 +7,6 @@ import io.requery.query.Scalar;
 import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.repository.query.RepositoryQuery;
@@ -41,29 +40,20 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
 
     @Override
     public Object execute(Object[] parameters) {
-        if (getQueryMethod().isAnnotatedQuery()) {
-            String query = getRawQuery();
 
-            log.debug("Execute queryMethod={}, query={}, return type={}", getQueryMethod().getName(), getQueryMethod().getReturnType(), query);
+        String query = getRawQuery();
 
-            Result<?> result;
-            if (getQueryMethod().isQueryForEntity()) {
-                log.debug("Query for entity. entity={}", getQueryMethod().getEntityInformation().getJavaType());
-                result = operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, parameters);
-                return castResult(result);
-            } else {
-                result = operations.raw(query, parameters);
-                return castResult(result);
-            }
-        } else if (getQueryMethod().isDefaultMethod()) {
-            // TODO: interface default method 일 경우 처리
-            throw new NotImplementedException("Interface default method 실행 구현 중");
-        } else if (getQueryMethod().isOverridedMethod()) {
-            // TODO: custom implemented method 일 경우 처리
-            throw new NotImplementedException("Custom implmented method 실행 구현 중");
+        log.debug("Execute queryMethod={}, query={}, return type={}", getQueryMethod().getName(), getQueryMethod().getReturnType(), query);
+
+        Result<?> result;
+        if (getQueryMethod().isQueryForEntity()) {
+            log.debug("Query for entity. entity={}", getQueryMethod().getEntityInformation().getJavaType());
+            result = operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, parameters);
+            return castResult(result);
+        } else {
+            result = operations.raw(query, parameters);
+            return castResult(result);
         }
-
-        return null;
     }
 
     @Nullable

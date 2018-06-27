@@ -64,6 +64,7 @@ public class CrudMethodMetadataPostProcessor implements RepositoryProxyPostProce
 
         @Override
         public Object invoke(MethodInvocation invocation) throws Throwable {
+
             Method method = invocation.getMethod();
             CrudMethodMetadata metadata = (CrudMethodMetadata) TransactionSynchronizationManager.getResource(method);
 
@@ -71,17 +72,7 @@ public class CrudMethodMetadataPostProcessor implements RepositoryProxyPostProce
                 return invocation.proceed();
             }
 
-            CrudMethodMetadata methodMetadata = metadataCache.get(method);
-
-            if (methodMetadata == null) {
-                methodMetadata = new DefaultCrudMethodMetadata(method);
-                CrudMethodMetadata tmp = metadataCache.putIfAbsent(method, methodMetadata);
-
-                if (tmp != null) {
-                    methodMetadata = tmp;
-                }
-            }
-
+            CrudMethodMetadata methodMetadata = metadataCache.computeIfAbsent(method, DefaultCrudMethodMetadata::new);
             TransactionSynchronizationManager.bindResource(method, methodMetadata);
 
             try {

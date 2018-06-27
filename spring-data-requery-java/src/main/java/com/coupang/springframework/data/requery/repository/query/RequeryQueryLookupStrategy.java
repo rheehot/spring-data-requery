@@ -16,6 +16,8 @@ import org.springframework.data.repository.query.RepositoryQuery;
 
 import java.lang.reflect.Method;
 
+import static org.springframework.data.repository.query.QueryLookupStrategy.Key;
+
 /**
  * Query lookup strategy to execute finders.
  *
@@ -27,12 +29,12 @@ import java.lang.reflect.Method;
 public final class RequeryQueryLookupStrategy {
 
     public static QueryLookupStrategy create(RequeryOperations operations,
-                                             QueryLookupStrategy.Key key,
+                                             Key key,
                                              QueryExtractor extractor,
                                              EvaluationContextProvider evaluationContextProvider) {
         log.debug("Create Query Lookup Strategy with key={}", key);
 
-        switch (key != null ? key : QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND) {
+        switch (key != null ? key : Key.CREATE_IF_NOT_FOUND) {
             case CREATE:
                 log.trace("Create CreateQueryLookupStrategy instance.");
                 return new CreateQueryLookupStrategy(operations, extractor);
@@ -124,17 +126,8 @@ public final class RequeryQueryLookupStrategy {
                 return new DeclaredRequeryQuery(method, operations);
             }
 
-            // Interface default method라면 그 함수를 그대로 사용한다.
-            if (method.isDefaultMethod()) {
-                log.debug("Create RawStringRequeryQuery for inteface default method. queryMethod={}", method.getName());
-                return new DeclaredRequeryQuery(method, operations);
-            }
-
-            // Custom implemented method 라면 그 함수를 그대로 사용한다.
-            if (method.isOverridedMethod()) {
-                log.debug("Create DeclaredRequeryQuery for custom implmented method. queryMethod={}", method.getName());
-                return new DeclaredRequeryQuery(method, operations);
-            }
+            // TODO: spring-data-jpa 처럼 NamedQuery 를 만들어서 제공해야 한다.
+            // NOTE: NamedQuery 가 하는 일이 Custom implemented method 에 대한 수행을 담당한다. ㅠ.ㅠ
 
             throw new IllegalStateException(
                 String.format("Cannot find a annotated query for method %s!", method)
@@ -165,13 +158,10 @@ public final class RequeryQueryLookupStrategy {
         protected RepositoryQuery resolveQuery(RequeryQueryMethod method,
                                                RequeryOperations operations,
                                                NamedQueries namedQueries) {
-
-            log.debug("Resolve query ... queryMethod={}, namedQueries={}", method, namedQueries);
-
             try {
                 log.debug("Resolve query by DeclaredQueryLookupStrategy...");
                 return lookupStrategy.resolveQuery(method, operations, namedQueries);
-            } catch (IllegalStateException e) {
+            } catch (IllegalStateException se) {
                 log.debug("Resolve query by CreateQueryLookupStrategy...");
                 return createStrategy.resolveQuery(method, operations, namedQueries);
             }

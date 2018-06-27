@@ -56,7 +56,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
             this.countQueryPreparer = new CountQueryPreparer(persistenceProvider);
             this.queryPreparer = tree.isCountProjection() ? countQueryPreparer : new QueryPreparer(persistenceProvider);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Fail to create query for method " + method + "! message=" + e.getMessage(), e);
+            throw new IllegalArgumentException("Fail to create query for method [" + method + "] message=" + e.getMessage(), e);
         }
     }
 

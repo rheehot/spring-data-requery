@@ -3,8 +3,11 @@ package com.coupang.springframework.data.requery.core;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import io.requery.TransactionIsolation;
 import io.requery.sql.EntityDataStore;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import java.util.concurrent.Callable;
@@ -17,22 +20,25 @@ import java.util.function.Function;
  * @since 18. 6. 4
  */
 @Slf4j
+@Getter
 public class RequeryTemplate implements RequeryOperations {
 
+    private final ApplicationContext applicationContext;
     private final EntityDataStore<Object> dataStore;
     private final RequeryMappingContext mappingContext;
 
-    public RequeryTemplate(EntityDataStore<Object> dataStore,
-                           RequeryMappingContext mappingContext) {
+    public RequeryTemplate(@NotNull ApplicationContext applicationContext,
+                           @NotNull EntityDataStore<Object> dataStore,
+                           @NotNull RequeryMappingContext mappingContext) {
+
+        Assert.notNull(applicationContext, "applicationContext must not be null");
+        Assert.notNull(dataStore, "dataStore must not be null");
+        Assert.notNull(mappingContext, "mappingContext must not be null");
+
+        this.applicationContext = applicationContext;
         this.dataStore = dataStore;
         this.mappingContext = mappingContext;
     }
-
-    public EntityDataStore<Object> getDataStore() {
-        return dataStore;
-    }
-
-    public RequeryMappingContext getMappingContext() { return mappingContext; }
 
     @SuppressWarnings("unchecked")
     @Override

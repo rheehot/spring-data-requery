@@ -1,8 +1,10 @@
 package com.coupang.springframework.data.requery.repository.config;
 
 import com.coupang.springframework.data.requery.configs.RequeryTestConfiguration;
+import com.coupang.springframework.data.requery.repository.custom.CustomGenericRequeryRepository;
+import com.coupang.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactoryBean;
 import com.coupang.springframework.data.requery.repository.custom.UserCustomExtendedRepository;
-import com.coupang.springframework.data.requery.repository.support.TransactionalRepositoryTest;
+import com.coupang.springframework.data.requery.repository.support.TransactionalRepositoryTest.DelegatingTransactionManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,25 +27,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CustomRepositoryFactoryConfigTest {
 
     @Configuration
-    @EnableRequeryRepositories(basePackageClasses = { UserCustomExtendedRepository.class })
+    @EnableRequeryRepositories(basePackages = { "com.coupang.springframework.data.requery.repository.custom" },
+                               basePackageClasses = { CustomGenericRequeryRepository.class },
+                               repositoryFactoryBeanClass = CustomGenericRequeryRepositoryFactoryBean.class)
     static class TestConfiguration extends RequeryTestConfiguration {
 
         @Override
         public PlatformTransactionManager transactionManager() {
-            return new TransactionalRepositoryTest.DelegatingTransactionManager(super.transactionManager());
+            return new DelegatingTransactionManager(super.transactionManager());
         }
+
+
     }
 
     @Autowired(required = false) UserCustomExtendedRepository userRepository;
 
-    @Autowired TransactionalRepositoryTest.DelegatingTransactionManager transactionManager;
+    @Autowired DelegatingTransactionManager transactionManager;
 
     @Before
     public void setup() {
         transactionManager.resetCount();
     }
 
-    @Test(expected = IllegalStateException.class)
+    // NOTE: repositoryFactoryBeanClass 를 지정해줘야 UserCustomExtendedRepository 가 제대로 injection이 된다. 
+    @Test(expected = UnsupportedOperationException.class)
     public void testCustomFactoryUsed() {
         userRepository.customMethod(1L);
     }

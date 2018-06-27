@@ -21,15 +21,15 @@ import org.springframework.util.Assert;
 public class RequeryRepositoryFactoryBean<T extends Repository<S, ID>, S, ID>
     extends TransactionalRepositoryFactoryBeanSupport<T, S, ID> {
 
-    private @Nullable RequeryOperations requeryOperations;
+    private @Nullable RequeryOperations operations;
 
     public RequeryRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
         super(repositoryInterface);
     }
 
-    @Autowired
-    public void setRequeryOperations(RequeryOperations requeryOperations) {
-        this.requeryOperations = requeryOperations;
+    @Autowired(required = false)
+    public void setOperations(RequeryOperations operations) {
+        this.operations = operations;
     }
 
     @Override
@@ -39,9 +39,10 @@ public class RequeryRepositoryFactoryBean<T extends Repository<S, ID>, S, ID>
 
     @Override
     protected RepositoryFactorySupport doCreateRepositoryFactory() {
-        Assert.state(requeryOperations != null, "RequeryOperations must not be null!");
 
-        return createRepositoryFactory(requeryOperations);
+        Assert.state(operations != null, "RequeryOperations must not be null!");
+
+        return createRepositoryFactory(operations);
     }
 
     protected RepositoryFactorySupport createRepositoryFactory(RequeryOperations requeryOperations) {
@@ -50,7 +51,14 @@ public class RequeryRepositoryFactoryBean<T extends Repository<S, ID>, S, ID>
 
     @Override
     public void afterPropertiesSet() {
-        Assert.state(requeryOperations != null, "RequeryOperations must not be null!");
-        super.afterPropertiesSet();
+        Assert.state(operations != null, "RequeryOperations must not be null!");
+
+        log.debug("Before afterPropertiesSet");
+        try {
+            super.afterPropertiesSet();
+        } catch (Exception e) {
+            log.debug("Fail to setup...", e);
+        }
+        log.debug("After afterPropertiesSet");
     }
 }

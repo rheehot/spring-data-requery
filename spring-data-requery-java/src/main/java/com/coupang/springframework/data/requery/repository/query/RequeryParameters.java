@@ -22,7 +22,7 @@ public class RequeryParameters extends Parameters<RequeryParameters, RequeryPara
 
     public RequeryParameters(Method method) {
         super(method);
-        log.debug("Ctor RequeryParameters. queryMethod={}", method);
+        log.debug("Ctor RequeryParameters. method={}", method);
     }
 
     public RequeryParameters(List<RequeryParameter> parameters) {

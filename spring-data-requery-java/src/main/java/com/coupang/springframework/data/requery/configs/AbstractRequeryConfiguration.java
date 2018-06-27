@@ -72,7 +72,7 @@ public abstract class AbstractRequeryConfiguration {
     @Bean
     public RequeryOperations requeryOperations() {
         log.info("Create RequeryTemplate instance.");
-        return new RequeryTemplate(entityDataStore(), requeryMappingContext());
+        return new RequeryTemplate(applicationContext, entityDataStore(), requeryMappingContext());
     }
 
     // TODO: 꼭 필요한 Class 인지 다시 판단해보자.
