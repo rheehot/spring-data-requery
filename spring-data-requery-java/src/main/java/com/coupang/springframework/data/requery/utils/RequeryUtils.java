@@ -5,8 +5,10 @@ import io.requery.meta.Attribute;
 import io.requery.meta.EntityModel;
 import io.requery.meta.Type;
 import io.requery.query.*;
+import io.requery.query.element.LogicalOperator;
 import io.requery.query.element.QueryElement;
 import io.requery.query.element.QueryWrapper;
+import io.requery.query.element.WhereConditionElement;
 import io.requery.sql.EntityContext;
 import io.requery.sql.EntityDataStore;
 import lombok.experimental.UtilityClass;
@@ -230,6 +232,39 @@ public class RequeryUtils {
         return orderingExprs.toArray(new OrderingExpression<?>[0]);
     }
 
+    public static QueryElement<?> applyWhereClause(QueryElement<?> baseQuery,
+                                                   Set<WhereConditionElement<?>> conditionElements) {
+        if (conditionElements.isEmpty()) {
+            return baseQuery;
+        } else if (conditionElements.size() == 1) {
+            return unwrap(baseQuery.where(conditionElements.iterator().next().getCondition()));
+        } else {
+
+            WhereAndOr<?>[] whereClause = new WhereAndOr[1];
+            whereClause[0] = baseQuery.where(conditionElements.iterator().next().getCondition());
+
+            conditionElements.stream()
+                .skip(1)
+                .forEach(conditionElement -> {
+                    Condition<?, ?> condition = conditionElement.getCondition();
+                    LogicalOperator op = conditionElement.getOperator();
+                    if (op == LogicalOperator.AND) {
+                        whereClause[0] = whereClause[0].and(condition);
+                    } else if (op == LogicalOperator.OR) {
+                        whereClause[0] = whereClause[0].or(condition);
+                    } else if (op == LogicalOperator.NOT) {
+                        whereClause[0] = whereClause[0].and(condition).not();
+                    }
+                });
+
+            return unwrap(whereClause[0]);
+        }
+    }
+
+    /**
+     * @deprecated use applyWhereClause
+     */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static QueryElement<?> buildWhereClause(QueryElement<?> baseQuery,
                                                    Iterable<Condition<?, ?>> conditions,

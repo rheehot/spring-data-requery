@@ -85,7 +85,7 @@ class CompletableFutureTest: AbstractDomainTest() {
 
         with(asyncEntityStore) {
             insert(user)
-                .thenCompose { savedUser ->
+                .thenCompose { _ ->
                     update<BasicUser>(BasicUser::class)
                         .set(BasicUser.ABOUT, "nothing")
                         .set(BasicUser.AGE, 50)

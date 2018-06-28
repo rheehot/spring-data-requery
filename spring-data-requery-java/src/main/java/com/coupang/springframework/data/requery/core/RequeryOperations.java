@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
+
 /**
  * Java용 RequeryOperations
  *
@@ -159,8 +161,10 @@ public interface RequeryOperations {
         return getDataStore().count(attributes);
     }
 
+    @SuppressWarnings("unchecked")
     default <E> int count(Class<E> entityType, QueryElement<? extends Result<E>> whereClause) {
-        Tuple tuple = select(Count.count(entityType)).where().exists(whereClause).get().first();
+        QueryElement<?> query = RequeryUtils.applyWhereClause(unwrap(select(Count.count(entityType))), whereClause.getWhereElements());
+        Tuple tuple = ((QueryElement<? extends Result<Tuple>>) query).get().first();
         return tuple.<Integer>get(0);
     }
 

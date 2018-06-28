@@ -77,7 +77,8 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
             insert(parent)
 
             // Assert that child has been associated to parent
-            val parentGot = findById(FuncParentNoCascade::class, 1L)!!
+            val parentGot = findById(FuncParentNoCascade::class, 1L)
+            assertThat(parentGot).isNotNull
         }
     }
 
@@ -92,7 +93,8 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
             insert(parent)
 
             // Assert that child has been associated to parent
-            val parentGot = findById(FuncParentNoCascade::class, 1L)!!
+            val parentGot = findById(FuncParentNoCascade::class, 1L)
+            assertThat(parentGot).isNotNull
         }
     }
 
@@ -107,7 +109,8 @@ class ParentChildNoCascadeTest: AbstractDomainTest() {
                 insert(parent)
 
                 // Assert that child has been associated to parent
-                val parentGot = findById(FuncParentNoCascade::class, 1L)!!
+                val parentGot = findById(FuncParentNoCascade::class, 1L)
+                assertThat(parentGot).isNotNull
             }
         }.isInstanceOf(RowCountException::class.java)
     }

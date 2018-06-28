@@ -32,8 +32,8 @@ abstract class AbstractFuncAddress: AbstractPersistable<Long>() {
     abstract var city: String?
 
     // NOTE: OneToOne 한 곳은 @ForeignKey 를 지정하고, 다른 한쪽은 mappedBy를 지정해줘야 합니다.
-    // NOTE: OneToOne 의 mappedBy 를 지정한 쪽은 abstract 가 아닌 var 만으로 지정해줘야 합니다. 
-    @get:OneToOne(mappedBy = "abstractAddress", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
+    // NOTE: OneToOne 의 mappedBy 를 지정한 쪽은 abstract 가 아닌 var 만으로 지정해줘야 합니다.
+    @get:OneToOne(mappedBy = "address", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     var person: AbstractFuncPerson? = null
 
     @get:Convert(AddressTypeStringConverter::class)

@@ -101,6 +101,8 @@ class HierarchyTest: AbstractDomainTest() {
 
 
             insert(root)
+            insert(grandChild21)
+            
             assertThat(root.id).isGreaterThan(0)
             assertThat(child1.id).isGreaterThan(0)
             assertThat(child2.id).isGreaterThan(0)

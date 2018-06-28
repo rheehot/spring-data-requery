@@ -44,6 +44,7 @@ public abstract class AbstractUser extends AbstractPersistable<Integer> {
     @ManyToMany
     protected Set<AbstractUser> colleagues;
 
+    @JunctionTable
     @ManyToMany
     protected Set<AbstractRole> roles;
 

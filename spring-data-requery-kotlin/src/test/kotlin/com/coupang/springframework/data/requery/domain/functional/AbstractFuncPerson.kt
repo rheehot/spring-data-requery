@@ -35,8 +35,10 @@ abstract class AbstractFuncPerson: AbstractPersistable<Long>() {
     @get:Nullable
     abstract var age: Int?
 
-    @get:OneToOne(mappedBy = "person", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
+    // NOTE: OneToOne 한 곳은 @ForeignKey 를 지정하고, 다른 한쪽은 mappedBy를 지정해줘야 합니다.
+    // NOTE: OneToOne 의 mappedBy 를 지정한 쪽은 abstract 가 아닌 var 만으로 지정해줘야 합니다.
     @get:ForeignKey
+    @get:OneToOne(cascade = [CascadeAction.DELETE, CascadeAction.SAVE])
     abstract var address: AbstractFuncAddress?
 
     @get:OneToMany(mappedBy = "owner", cascade = [CascadeAction.DELETE, CascadeAction.SAVE])

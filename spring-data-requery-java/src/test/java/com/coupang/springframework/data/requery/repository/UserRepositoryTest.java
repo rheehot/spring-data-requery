@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.repository;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import com.coupang.springframework.data.requery.domain.sample.AbstractUser;
 import com.coupang.springframework.data.requery.domain.sample.Role;
 import com.coupang.springframework.data.requery.domain.sample.User;
 import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
@@ -10,6 +11,8 @@ import com.coupang.springframework.data.requery.repository.sample.UserRepository
 import com.coupang.springframework.data.requery.repository.sample.UserRepositoryImpl;
 import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean;
 import com.coupang.springframework.data.requery.repository.support.SimpleRequeryRepository;
+import io.requery.query.Result;
+import io.requery.query.element.QueryElement;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,15 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Sort;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -255,7 +257,317 @@ public class UserRepositoryTest {
 
         flushTestUsers();
 
-        repository.findByLastname((String) null);
+        repository.findByLastname(null);
+    }
+
+    @Test
+    public void testFindByLastname() {
+        flushTestUsers();
+        assertThat(repository.findByLastname("Bae")).containsOnly(firstUser);
+    }
+
+    @Test
+    public void testFindByEmailAddress() {
+        flushTestUsers();
+        assertThat(repository.findByEmailAddress("debop@coupang.com")).isEqualTo(firstUser);
+    }
+
+    @Test
+    public void testReadAll() {
+        flushTestUsers();
+
+        assertThat(repository.count()).isEqualTo(4L);
+        assertThat(repository.findAll()).containsOnly(firstUser, secondUser, thirdUser, fourthUser);
+    }
+
+    @Test
+    public void deleteAll() {
+        flushTestUsers();
+
+        repository.deleteAll();
+        assertThat(repository.count()).isZero();
+    }
+
+    @Test
+    public void deleteAllInBatch() {
+        flushTestUsers();
+
+        repository.deleteAllInBatch();
+        assertThat(repository.count()).isZero();
+    }
+
+    @Test
+    public void testCascadesPersisting() {
+
+        // Create link prior to persisting
+        firstUser.getColleagues().add(secondUser);
+
+        flushTestUsers();
+
+        User firstReferenceUser = repository.findById(firstUser.getId()).get();
+        assertThat(firstReferenceUser).isEqualTo(firstUser);
+
+        Set<AbstractUser> colleagues = firstReferenceUser.getColleagues();
+        assertThat(colleagues).containsOnly(secondUser);
+    }
+
+    @Test
+    public void testPreventsCascadingRolePersisting() {
+
+        firstUser.getRoles().add(new Role("USER"));
+        flushTestUsers();
+    }
+
+    @Test
+    public void testUpsertCascadesCollegues() {
+
+        firstUser.getColleagues().add(secondUser);
+        flushTestUsers();
+
+        firstUser.getColleagues().add(createUser("Tao", "Kim", "tagkim@coupang.com"));
+        firstUser = repository.upsert(firstUser);
+
+        User reference = repository.findById(firstUser.getId()).get();
+        Set<AbstractUser> colleagues = reference.getColleagues();
+
+        assertThat(colleagues).hasSize(2).contains(secondUser);
+    }
+
+    @Test
+    public void testCountsCorrectly() {
+
+        long count = repository.count();
+
+        User user = createUser("Jane", "Doe", "janedoe@example.com");
+        repository.save(user);
+
+        assertThat(repository.count()).isEqualTo(count + 1);
+    }
+
+    @Test
+    public void testInvocationOfCustomImplementation() {
+
+        repository.someCustomMethod(new User());
+    }
+
+    @Test
+    public void testOverwritingFinder() {
+
+        repository.findByOverrridingMethod();
+    }
+
+    @Test
+    public void testUsesQueryAnnotation() {
+        assertThat(repository.findByAnnotatedQuery("debop@coupang.com")).isNull();
+
+        flushTestUsers();
+        assertThat(repository.findByAnnotatedQuery("debop@coupang.com")).isEqualTo(firstUser);
+    }
+
+    @Test
+    public void testExecutionOfProjectingMethod() {
+        flushTestUsers();
+
+        assertThat(repository.countWithFirstname("Debop")).isEqualTo(1L);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void executesSpecificationCorrectly() {
+        flushTestUsers();
+        QueryElement<? extends Result<User>> query = (QueryElement<? extends Result<User>>)
+            unwrap(repository.getOperations().select(User.class).where(User.FIRSTNAME.eq("Debop")));
+
+        assertThat(repository.findAll(query)).hasSize(1).containsOnly(firstUser);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void executesSingleEntitySpecificationCorrectly() {
+        flushTestUsers();
+        QueryElement<? extends Result<User>> query = (QueryElement<? extends Result<User>>)
+            unwrap(repository.getOperations().select(User.class).where(User.FIRSTNAME.eq("Debop")));
+
+        assertThat(repository.findOne(query)).isPresent();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(expected = IncorrectResultSizeDataAccessException.class)
+    public void throwsExceptionForUnderSpecifiedSingleEntitySpecification() {
+        flushTestUsers();
+        QueryElement<? extends Result<User>> query = (QueryElement<? extends Result<User>>)
+            unwrap(repository.getOperations().select(User.class).where(User.FIRSTNAME.like("%e%")));
+
+        // 2개 이상이 나온다
+        repository.findOne(query);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void executesCombinedSpecificationsCorrectly() {
+        flushTestUsers();
+
+        QueryElement<? extends Result<User>> query = (QueryElement<? extends Result<User>>)
+            unwrap(repository.getOperations().select(User.class)
+                       .where(User.FIRSTNAME.eq("Debop"))
+                       .or(User.LASTNAME.eq("Ahn")));
+
+        assertThat(repository.findAll(query)).hasSize(2).containsOnly(firstUser, secondUser);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void executesNegatingSpecificationCorrectly() {
+        flushTestUsers();
+
+        QueryElement<? extends Result<User>> query = (QueryElement<? extends Result<User>>)
+            unwrap(repository.getOperations()
+                       .select(User.class)
+                       .where(User.FIRSTNAME.ne("Debop"))
+                       .and(User.LASTNAME.eq("Ahn")));
+
+        assertThat(repository.findAll(query)).hasSize(1).containsOnly(secondUser);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void executesCombinedSpecificationsWithPageableCorrectly() {
+        flushTestUsers();
+
+        QueryElement<? extends Result<User>> query = (QueryElement<? extends Result<User>>)
+            unwrap(repository.getOperations()
+                       .select(User.class)
+                       .where(User.FIRSTNAME.eq("Debop"))
+                       .or(User.LASTNAME.eq("Ahn")));
+
+        Page<User> users = repository.findAll(query, PageRequest.of(0, 1));
+        assertThat(users.getSize()).isEqualTo(1);
+        assertThat(users.hasPrevious()).isFalse();
+        assertThat(users.getTotalElements()).isEqualTo(2L);
+    }
+
+    @Test
+    public void executesMethodWithAnnotatedNamedParametersCorrectly() {
+
+        firstUser = repository.save(firstUser);
+        secondUser = repository.save(secondUser);
+
+        assertThat(repository.findByLastnameOrFirstname("Ahn", "Debop"))
+            .hasSize(2)
+            .containsOnly(firstUser, secondUser);
+    }
+
+    // BUG: where 절에 반복해서 두 번 나온다.
+    @Test
+    public void executesMethodWithNamedParametersCorrectlyOnMethodsWithQueryCreation() {
+
+        firstUser = repository.save(firstUser);
+        secondUser = repository.save(secondUser);
+
+        assertThat(repository.findByFirstnameOrLastname("Debop", "Ahn"))
+            .hasSize(2)
+            .containsOnly(firstUser, secondUser);
+    }
+
+    @Test
+    public void executesLikeAndOrderByCorrectly() {
+        flushTestUsers();
+
+        assertThat(repository.findByLastnameLikeOrderByFirstnameDesc("%a%"))
+            .hasSize(2)
+            .containsExactly(thirdUser, firstUser);
+    }
+
+    @Test
+    public void executesNotLikeCorrectly() {
+        flushTestUsers();
+
+        assertThat(repository.findByLastnameNotLike("%ae%"))
+            .hasSize(3)
+            .containsOnly(secondUser, thirdUser, fourthUser);
+    }
+
+    @Test
+    public void executesSimpleNotCorrectly() {
+        flushTestUsers();
+
+        assertThat(repository.findByLastnameNot("Bae"))
+            .hasSize(3)
+            .containsOnly(secondUser, thirdUser, fourthUser);
+    }
+
+    @Test
+    public void returnsSameListIfNoSpecGiven() {
+
+        flushTestUsers();
+        assertSameElements(repository.findAll(), repository.findAll(operations.select(User.class)));
+    }
+
+    @Test
+    public void returnsSameListIfNoSortIsGiven() {
+
+        flushTestUsers();
+        assertSameElements(repository.findAll(Sort.unsorted()), repository.findAll());
+    }
+
+    @Test
+    public void returnsAllAsPageIfNoPageableIsGiven() {
+
+        flushTestUsers();
+        assertThat(repository.findAll(Pageable.unpaged())).isEqualTo(new PageImpl<>(repository.findAll()));
+    }
+
+    @Test
+    public void removeObject() {
+
+        flushTestUsers();
+        long count = repository.count();
+
+        repository.delete(firstUser);
+        assertThat(repository.count()).isEqualTo(count - 1);
+    }
+
+    @Test
+    public void executesPagedSpecificationsCorrectly() {
+
+        Page<User> result = executeSpecWithSort(Sort.unsorted());
+        assertThat(result.getContent()).isSubsetOf(firstUser, thirdUser);
+    }
+
+    @Test
+    public void executesPagedSpecificationsWithSortCorrectly() {
+
+        Page<User> result = executeSpecWithSort(Sort.by(Sort.Direction.ASC, "lastname"));
+        assertThat(result.getContent()).contains(firstUser).doesNotContain(secondUser, thirdUser);
+    }
+
+    // NOTE: Not Supported
+    @Test(expected = AssertionError.class)
+    public void executesQueryMethodWithDeepTraversalCorrectly() {
+
+        flushTestUsers();
+
+        firstUser.setManager(secondUser);
+        thirdUser.setManager(firstUser);
+        repository.saveAll(Arrays.asList(firstUser, thirdUser));
+
+        assertThat(repository.findByManagerLastname("Ahn")).containsOnly(firstUser);
+        assertThat(repository.findByManagerLastname("Bae")).containsOnly(thirdUser);
+    }
+
+    // NOTE: Not Supported
+    @Test(expected = AssertionError.class)
+    public void executesFindByColleaguesLastnameCorrectly() {
+
+        flushTestUsers();
+
+        firstUser.getColleagues().add(secondUser);
+        thirdUser.getColleagues().add(firstUser);
+        repository.saveAll(Arrays.asList(firstUser, thirdUser));
+
+        assertThat(repository.findByColleaguesLastname(secondUser.getLastname())).containsOnly(firstUser);
+        assertThat(repository.findByColleaguesLastname("Bae")).containsOnly(secondUser, thirdUser);
     }
 
     protected void flushTestUsers() {
@@ -294,6 +606,24 @@ public class UserRepositoryTest {
 
         repository.deleteAll(collection);
         assertThat(repository.count()).isEqualTo(count);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Page<User> executeSpecWithSort(Sort sort) {
+
+        flushTestUsers();
+
+        QueryElement<? extends Result<User>> whereClause = (QueryElement<? extends Result<User>>)
+            unwrap(operations
+                       .select(User.class)
+                       .where(User.FIRSTNAME.eq("Debop"))
+                       .or(User.LASTNAME.eq("Park")));
+
+        Page<User> result = repository.findAll(whereClause,
+                                               PageRequest.of(0, 1, sort));
+
+        assertThat(result.getTotalElements()).isEqualTo(2L);
+        return result;
     }
 
 }

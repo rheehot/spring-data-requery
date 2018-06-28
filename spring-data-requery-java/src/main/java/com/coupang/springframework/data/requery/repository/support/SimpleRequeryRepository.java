@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -149,14 +150,14 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @NotNull
     @Override
     public <S extends T> S save(@NotNull S entity) {
-        return operations.insert(entity);
+        return operations.upsert(entity);
     }
 
     @Transactional
     @NotNull
     @Override
     public <S extends T> List<S> saveAll(@NotNull Iterable<S> entities) {
-        return operations.insertAll(entities);
+        return operations.upsertAll(entities);
     }
 
     @NotNull
@@ -283,7 +284,14 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
     @Override
     public Optional<T> findOne(Return<? extends Result<T>> whereClause) {
-        return Optional.ofNullable(whereClause.get().firstOrNull());
+        List<T> list = whereClause.get().toList();
+        if (list.size() == 1) {
+            return Optional.ofNullable(list.get(0));
+        } else if (list.size() == 0) {
+            return Optional.empty();
+        } else {
+            throw new IncorrectResultSizeDataAccessException(1, list.size());
+        }
     }
 
     @Override

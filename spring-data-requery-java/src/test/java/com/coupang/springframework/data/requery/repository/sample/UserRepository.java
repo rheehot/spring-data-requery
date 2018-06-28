@@ -79,20 +79,16 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     @Query("update SD_User u set u.lastname = ?")
     void renameAllUsersTo(String lastname);
 
-    @Query("select count(u) from SD_User u where u.firstname = ?")
+    @Query("select count(*) from SD_User u where u.firstname = ?")
     Long countWithFirstname(String firstname);
 
     @Query("select * from SD_User u where u.lastname = ? or u.firstname = ?")
-    List<User> findByLastnameOrFirstname(/*@Param("firstname") */String foo, /*@Param("lastname") */String bar);
+    List<User> findByLastnameOrFirstname(/*@Param("firstname") */String lastname, /*@Param("lastname") */String firstname);
 
-    @Query("select * from SD_User u where u.lastname = ? or u.firstname = ?")
+    @Query("select * from SD_User u where u.firstname = ? or u.lastname = ?")
     List<User> findByLastnameOrFirstnameUnannotated(String firstname, String lastname);
 
-    /**
-     * Method to check query creation and named parameter usage go well hand in hand.
-     */
-    // BUG: @Param 이 있는 경우 @Query의 SQL문을 찾도록만 되어 있다. 이 부분을 수정해야 한다. 
-    // List<User> findByFirstnameOrLastname(@Param("lastname") String lastname, @Param("firstname") String firstname);
+    List<User> findByFirstnameOrLastname(String firstname, String lastname);
 
     List<User> findByLastnameLikeOrderByFirstnameDesc(String lastname);
 
@@ -100,10 +96,11 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 
     List<User> findByLastnameNot(String lastname);
 
+    // NOTE: Not supported associated query, use direct join query instead.
     List<User> findByManagerLastname(String name);
 
     // NOTE: Not supported associated query, use direct join query instead.
-    // List<User> findByColleaguesLastname(String lastname);
+    List<User> findByColleaguesLastname(String lastname);
 
     List<User> findByLastnameNotNull();
 

@@ -10,6 +10,7 @@ import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -71,9 +72,9 @@ public class RequeryRepositoryFactoryTest {
         assertThat(Objects.equals(repository, repository)).isTrue();
     }
 
+    @Ignore("spring-data-jpa 에서는 NamedQuery를 이용해서 수행하는데, 굳이 그럴 필요가 있을까 싶다.")
     @Test
     public void capturesMissingCustomImplementationAndProvidesInterfacename() {
-        // NOTE: spring-data-jpa 에서는 NamedQuery 가 생성되는데... 왜 그런지 모르겠다.
         try {
             factory.getRepository(SampleRepository.class);
         } catch (IllegalArgumentException e) {
@@ -128,10 +129,9 @@ public class RequeryRepositoryFactoryTest {
         repository.customMethod(1L);
     }
 
+    @Ignore("spring-data-jpa 에서는 NamedQuery를 이용해서 수행하는데, 굳이 그럴 필요가 있을까 싶다.")
     @Test
     public void usesConfiguredRepositoryBaseClass() {
-
-        // NOTE: spring-data-jpa 에서는 NamedQuery 가 생성되는데... 왜 그런지 모르겠다.
 
         factory.setRepositoryBaseClass(CustomRequeryRepository.class);
 
