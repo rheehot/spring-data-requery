@@ -4,7 +4,6 @@ import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import io.requery.query.Result;
 import io.requery.query.Scalar;
-import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -63,17 +62,7 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
         } else if (getQueryMethod().isStreamQuery()) {
             return result.stream();
         } else {
-            Object value = result.firstOrNull();
-
-            // TODO: 중복 제거 필요 
-            if (value instanceof Tuple) {
-                Tuple tuple = (Tuple) value;
-                if (tuple.count() == 1) {
-                    return tuple.get(0);
-                }
-                return tuple;
-            }
-            return value;
+            return RequeryResultConverter.convertResult(result.firstOrNull());
         }
     }
 

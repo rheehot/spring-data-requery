@@ -5,9 +5,7 @@ import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
 import com.coupang.springframework.data.requery.repository.query.RequeryQueryExecution.DeleteExecution;
 import com.coupang.springframework.data.requery.repository.query.RequeryQueryExecution.ExistsExecution;
-import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.NamedExpression;
-import io.requery.query.Result;
 import io.requery.query.Scalar;
 import io.requery.query.element.QueryElement;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +15,8 @@ import org.springframework.data.repository.query.ResultProcessor;
 import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
+
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.*;
 
 /**
  * {@link PartTree} 정보를 바탕으로 Requery {@link QueryElement} 를 빌드합니다.
@@ -86,19 +86,15 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
 
     @SuppressWarnings("unchecked")
     protected QueryElement<?> prepareQuery(RequeryParameterAccessor accessor) {
-        QueryElement<?> query = (QueryElement<?>) getOperations().select(getDomainClass());
+        QueryElement<?> query = unwrap(getOperations().select(getDomainClass()));
 
         query = buildWhereClause(query, accessor);
 
         if (accessor.getParameters().hasPageableParameter()) {
-            query = RequeryUtils.applyPageable(getDomainClass(),
-                                               query,
-                                               accessor.getPageable());
+            query = applyPageable(getDomainClass(), query, accessor.getPageable());
         }
         if (accessor.getParameters().hasSortParameter()) {
-            query = RequeryUtils.applySort(getDomainClass(),
-                                           query,
-                                           accessor.getSort());
+            query = applySort(getDomainClass(), query, accessor.getSort());
         }
 
         return query;
@@ -120,7 +116,7 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
 
             if (param.isNamedParameter() && param.getName().isPresent()) {
                 NamedExpression expr = NamedExpression.of(param.getName().get(), value.getClass());
-                queries[0] = (QueryElement<? extends Result<?>>) baseQuery.where(expr.eq(value));
+                queries[0] = unwrap(baseQuery.where(expr.eq(value)));
             }
         }
         return queries[0];
@@ -168,14 +164,14 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
                      * - AND the requested page size was bigger than the derived result limitation via the First/Top keyword.
                      */
                     if (query.getLimit() > tree.getMaxResults() && query.getOffset() > 0) {
-                        query = (QueryElement<?>) query.offset(query.getOffset() - (query.getLimit() - tree.getMaxResults()));
+                        query = unwrap(query.offset(query.getOffset() - (query.getLimit() - tree.getMaxResults())));
                     }
                 }
-                query = (QueryElement<?>) query.limit(tree.getMaxResults());
+                query = unwrap(query.limit(tree.getMaxResults()));
             }
 
             if (tree.isExistsProjection()) {
-                query = (QueryElement<?>) query.limit(1);
+                query = unwrap(query.limit(1));
             }
 
             return query;

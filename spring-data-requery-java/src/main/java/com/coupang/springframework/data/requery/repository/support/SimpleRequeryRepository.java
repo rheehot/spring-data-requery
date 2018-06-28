@@ -135,14 +135,14 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @NotNull
     @Override
     public <S extends T> S save(@NotNull S entity) {
-        return operations.upsert(entity);
+        return operations.insert(entity);
     }
 
     @Transactional
     @NotNull
     @Override
     public <S extends T> List<S> saveAll(@NotNull Iterable<S> entities) {
-        return operations.upsertAll(entities);
+        return operations.insertAll(entities);
     }
 
     @NotNull

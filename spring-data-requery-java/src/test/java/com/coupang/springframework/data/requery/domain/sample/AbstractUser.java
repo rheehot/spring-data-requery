@@ -8,10 +8,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
 
 /**
- * com.coupang.springframework.data.requery.domain.sample.AbstractUser
+ * // NOTE: @Embedded property 가 있는 Entity에 생성자를 만들지 말라. 기본생성자에서 Embedded component를 생성한다.
  *
  * @author debop
  * @since 18. 6. 14
@@ -48,6 +50,7 @@ public abstract class AbstractUser extends AbstractPersistable<Integer> {
     @ManyToOne
     protected AbstractUser manager;
 
+    @Getter
     @Embedded
     protected AbstractAddress address;
 
@@ -59,20 +62,6 @@ public abstract class AbstractUser extends AbstractPersistable<Integer> {
 //    protected Set<String> attributes;
 
     protected Date dateOfBirth;
-
-    public AbstractUser() {
-        this(null, null, null);
-    }
-
-    public AbstractUser(String firstname, String lastname, String emailAddress, AbstractRole... roles) {
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.emailAddress = emailAddress;
-        this.active = true;
-        this.roles = new HashSet<>(Arrays.asList(roles));
-
-        this.createdAt = new Date();
-    }
 
     @Override
     public int hashCode() {

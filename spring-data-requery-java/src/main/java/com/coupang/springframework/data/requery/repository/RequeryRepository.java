@@ -45,7 +45,6 @@ public interface RequeryRepository<T, ID>
 
     T getOne(ID id);
 
-
     @Override
     <S extends T> List<S> findAll(Example<S> example);
 

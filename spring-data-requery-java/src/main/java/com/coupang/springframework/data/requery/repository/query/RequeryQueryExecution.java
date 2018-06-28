@@ -2,10 +2,10 @@ package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.NotSupportedException;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.Result;
 import io.requery.query.Scalar;
 import io.requery.query.Selection;
-import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 
 /**
  * Set of classes to contain query execution strategies. Depending (mostly) on the return type of a
@@ -169,23 +171,17 @@ public abstract class RequeryQueryExecution {
         @SuppressWarnings("unchecked")
         protected @Nullable Page<?> doExecute(AbstractRequeryQuery query, Object[] values) {
             ParameterAccessor accessor = new ParametersParameterAccessor(parameters, values);
-            QueryElement<?> queryElement = query.createQueryElement(values);
+            QueryElement<?> queryElement = unwrap(query.createQueryElement(values));
 
-            //
-            // TODO: Sort 와 관련된 부분도 처리해야 한다.
-            //
-            Pageable pageable = accessor.getPageable();
-            int limit = pageable.getPageSize();
-            int offset = (int) pageable.getOffset();
+            queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, accessor.getPageable());
+            Result<?> result = (Result<?>) queryElement.get();
 
-            Result<?> result = (Result<?>) queryElement.limit(limit).offset(offset).get();
-
-            return new PageImpl(result.toList(), pageable, count(query, values));
+            return new PageImpl(result.toList(), accessor.getPageable(), count(query, values));
         }
 
         @SuppressWarnings("unchecked")
         private long count(AbstractRequeryQuery query, Object[] values) {
-            QueryElement<?> queryElement = query.createQueryElement(values);
+            QueryElement<?> queryElement = unwrap(query.createQueryElement(values));
             Selection<?> selection = query.getOperations().select(Count.count(query.getDomainClass()));
 
             Scalar<Integer> result = (Scalar<Integer>) queryElement.select(Count.count(query.getDomainClass())).get();
@@ -201,19 +197,16 @@ public abstract class RequeryQueryExecution {
             log.debug("Get single entity. query={}, values={}", query, values);
             Result<?> result = (Result<?>) query.createQueryElement(values).get();
             Object value = result.firstOrNull();
-
-            if (value instanceof Tuple) {
-                Tuple tuple = (Tuple) value;
-                if (tuple.count() == 1) {
-                    return tuple.get(0);
-                }
-                return tuple;
-            }
-            return value;
+            return RequeryResultConverter.convertResult(value);
         }
     }
 
-
+    /**
+     * Requery에서는 질의를 통한 Save/Insert/Update/Upsert는 {@link RequeryOperations} 를 사용해서 구현해야 한다.
+     *
+     * @deprecated
+     */
+    @Deprecated
     static class ModifyingExecution extends RequeryQueryExecution {
         private final RequeryOperations operations;
         private final boolean isLong;

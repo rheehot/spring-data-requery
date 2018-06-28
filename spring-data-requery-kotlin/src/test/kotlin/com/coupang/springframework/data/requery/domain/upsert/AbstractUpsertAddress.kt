@@ -33,6 +33,6 @@ abstract class AbstractUpsertAddress: AbstractComponent() {
         return super.buildStringHelper()
             .add("zipcode", zipcode)
             .add("city", city)
-            .add("address", address)
+            .add("abstractAddress", address)
     }
 }
