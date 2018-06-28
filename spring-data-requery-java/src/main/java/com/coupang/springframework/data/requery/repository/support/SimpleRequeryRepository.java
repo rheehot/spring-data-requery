@@ -2,6 +2,7 @@ package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
+import io.requery.meta.Attribute;
 import io.requery.query.*;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
@@ -63,6 +64,19 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Override
     public <S extends T> List<S> upsertAll(Iterable<S> entities) {
         return operations.upsertAll(entities);
+    }
+
+    public <S extends T> S refresh(S entity) {
+        return operations.refresh(entity);
+    }
+
+    @SafeVarargs
+    public final <S extends T> List<S> refresh(Iterable<S> entities, Attribute<S, ?>... attributes) {
+        return operations.refresh(entities, attributes);
+    }
+
+    public <S extends T> S refreshAll(S entity) {
+        return operations.refreshAll(entity);
     }
 
     @Transactional

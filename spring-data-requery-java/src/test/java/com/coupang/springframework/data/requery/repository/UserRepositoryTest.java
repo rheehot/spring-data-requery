@@ -17,8 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -104,6 +110,8 @@ public class UserRepositoryTest {
         fourthUser.setAge(30);
 
         adminRole = new Role("admin");
+
+        repository.deleteAll();
     }
 
     @Test
@@ -116,6 +124,139 @@ public class UserRepositoryTest {
         assertThat(operations.count(User.class).get().value()).isEqualTo(before + 4);
     }
 
+    @Test
+    public void testRead() {
+
+        flushTestUsers();
+
+        assertThat(repository.findById(id)).map(User::getFirstname).contains(firstUser.getFirstname());
+    }
+
+    @Test
+    public void findAllByGivenIds() {
+        flushTestUsers();
+        assertThat(repository.findAllById(Arrays.asList(firstUser.getId(), secondUser.getId()))).contains(firstUser, secondUser);
+    }
+
+    @Test
+    public void testReadByIdReturnsNullForNotFoundEntities() {
+
+        flushTestUsers();
+        assertThat(repository.findById(-27 * id)).isNotPresent();
+    }
+
+    @Test
+    public void savesCollectionCorrectly() {
+        List<User> savedUsers = repository.saveAll(Arrays.asList(firstUser, secondUser, thirdUser));
+
+        assertThat(savedUsers).hasSize(3).containsOnly(firstUser, secondUser, thirdUser);
+        savedUsers.forEach(user -> assertThat(user.getId()).isNotNull());
+    }
+
+    @Test
+    public void savingEmptyCollectionIsNoOp() {
+
+        assertThat(repository.saveAll(new ArrayList<>())).isEmpty();
+    }
+
+    @Test
+    public void testUpdate() {
+
+        flushTestUsers();
+
+        User foundPerson = repository.findById(id).get();
+        foundPerson.setLastname("Kwon");
+
+        repository.upsert(foundPerson);
+        repository.refresh(foundPerson);
+
+        assertThat(repository.findById(id)).map(User::getFirstname).contains(foundPerson.getFirstname());
+    }
+
+    @Test
+    public void existReturnsWhetherAnEntityCanBeLoaded() {
+        flushTestUsers();
+
+        assertThat(repository.existsById(id)).isTrue();
+        assertThat(repository.existsById(-27 * id)).isFalse();
+    }
+
+    @Test
+    public void deletesAUserById() {
+        flushTestUsers();
+
+        repository.deleteById(firstUser.getId());
+    }
+
+    @Test
+    public void testDelete() {
+        flushTestUsers();
+
+        repository.delete(firstUser);
+
+        assertThat(repository.existsById(id)).isFalse();
+        assertThat(repository.findById(id)).isNotPresent();
+    }
+
+    @Test
+    public void returnsAllSortedCorrectly() {
+        flushTestUsers();
+
+        assertThat(repository.findAll(Sort.by(Sort.Direction.ASC, "lastname")))
+            .hasSize(4)
+            .containsExactly(secondUser, firstUser, fourthUser, thirdUser);
+    }
+
+    @Test
+    public void deleteCollectionOfEntities() {
+        flushTestUsers();
+
+        long before = repository.count();
+
+        repository.deleteAll(Arrays.asList(firstUser, secondUser));
+
+        assertThat(repository.existsById(firstUser.getId())).isFalse();
+        assertThat(repository.existsById(secondUser.getId())).isFalse();
+
+        assertThat(repository.count()).isEqualTo(before - 2);
+    }
+
+    @Test
+    public void batchDeleteCollectionOfEntities() {
+        flushTestUsers();
+
+        long before = repository.count();
+
+        repository.deleteInBatch(Arrays.asList(firstUser, secondUser));
+
+        assertThat(repository.existsById(firstUser.getId())).isFalse();
+        assertThat(repository.existsById(secondUser.getId())).isFalse();
+
+        assertThat(repository.count()).isEqualTo(before - 2);
+    }
+
+    @Test
+    public void deleteEmptyCollectionDoesNotDeleteAnything() {
+        assertDeleteCallDoesNotDeleteAnything(new ArrayList<>());
+    }
+
+    @Test
+    public void executesManipulatingQuery() {
+        flushTestUsers();
+
+        repository.renameAllUsersTo("newLastname");
+
+        long expected = repository.count();
+        assertThat(repository.findByLastname("newLastname")).hasSize((int) expected);
+    }
+
+    @Test
+    public void testFinderInvocationWithNullParameter() {
+
+        flushTestUsers();
+
+        repository.findByLastname((String) null);
+    }
 
     protected void flushTestUsers() {
 
@@ -137,6 +278,22 @@ public class UserRepositoryTest {
         assertThat(repository.existsById(secondUser.getId())).isTrue();
         assertThat(repository.existsById(thirdUser.getId())).isTrue();
         assertThat(repository.existsById(fourthUser.getId())).isTrue();
+    }
+
+    private static <T> void assertSameElements(Collection<T> first, Collection<T> second) {
+        assertThat(first.size()).isEqualTo(second.size());
+
+        first.forEach(it -> assertThat(second).contains(it));
+        second.forEach(it -> assertThat(first).contains(it));
+    }
+
+    private void assertDeleteCallDoesNotDeleteAnything(List<User> collection) {
+
+        flushTestUsers();
+        long count = repository.count();
+
+        repository.deleteAll(collection);
+        assertThat(repository.count()).isEqualTo(count);
     }
 
 }

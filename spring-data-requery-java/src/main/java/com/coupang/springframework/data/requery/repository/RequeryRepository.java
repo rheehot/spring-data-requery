@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.repository;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import io.requery.meta.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
@@ -38,6 +39,13 @@ public interface RequeryRepository<T, ID>
     <S extends T> S upsert(S entity);
 
     <S extends T> List<S> upsertAll(Iterable<S> entities);
+
+    <S extends T> S refresh(S entity);
+
+    @SuppressWarnings("unchecked")
+    <S extends T> List<S> refresh(Iterable<S> entities, Attribute<S, ?>... attributes);
+
+    <S extends T> S refreshAll(S entity);
 
     void deleteInBatch(Iterable<T> entities);
 
