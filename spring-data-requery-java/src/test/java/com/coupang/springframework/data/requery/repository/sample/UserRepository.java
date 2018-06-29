@@ -176,20 +176,22 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     boolean existsByLastname(String lastname);
 
     // DATAJPA-391
-    @Query("select u.firstname from User u where u.lastname = ?")
+    @Query("select u.firstname from SD_User u where u.lastname = ?")
     List<String> findFirstnamesByLastname(String lastname);
 
     // DATAJPA-415
-    // Collection<User> findByIdIn(@Param("ids") Integer... ids);
+    Collection<User> findByIdIn(Integer... ids);
 
     // DATAJPA-461
-    @Query("select u from User u where u.id in ?1")
+    @Query("select u from SD_User u where u.id in ?1")
     Collection<User> findByIdsCustomWithPositionalVarArgs(Integer... ids);
 
     // DATAJPA-461
-    @Query("select u from User u where u.id in :ids")
+    @Query("select u from SD_User u where u.id in :ids")
     Collection<User> findByIdsCustomWithNamedVarArgs(@Param("ids") Integer... ids);
 
+
+    // NOTE: Not supported Spring expression
     // DATAJPA-415
     @Modifying
     @Query("update #{#entityName} u set u.active = :activeState where u.id in :ids")

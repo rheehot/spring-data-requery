@@ -16,6 +16,7 @@ import io.requery.query.Result;
 import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import io.requery.sql.StatementExecutionException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author debop@coupang.com
  * @since 18. 6. 28
  */
+@Slf4j
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class UserRepositoryTest {
@@ -851,6 +853,58 @@ public class UserRepositoryTest {
 
         flushTestUsers();
         assertThat(repository.countByLastname("Bae")).isEqualTo(1L);
+    }
+
+    @Test
+    public void executesDerivedCountQueryToInt() {
+
+        flushTestUsers();
+
+        assertThat(repository.countUsersByFirstname("Debop")).isEqualTo(1);
+    }
+
+    @Test
+    public void executesDerivedExistsQuery() {
+
+        flushTestUsers();
+
+        assertThat(repository.existsByLastname("Bae")).isTrue();
+        assertThat(repository.existsByLastname("Donald Trump")).isFalse();
+    }
+
+    @Test
+    public void findAllReturnsEmptyIterableIfNoIdsGiven() {
+
+        assertThat(repository.findAllById(Collections.emptySet())).isEmpty();
+    }
+
+    // TODO: 결과가 Tuple 인 경우 원하는 데이터로 casting 해야 하는데 ...
+    @Test
+    public void executesManuallyDefinedQueryWithFieldProjection() {
+
+        flushTestUsers();
+        List<String> firstnames = repository.findFirstnamesByLastname("Bae");
+
+        firstnames.forEach(firstname -> log.debug("firstname={}", firstname));
+        assertThat(firstnames).containsOnly("Debop");
+    }
+
+    @Test
+    public void looksUpEntityReference() {
+
+        flushTestUsers();
+
+        User result = repository.getOne(firstUser.getId());
+        assertThat(result).isEqualTo(firstUser);
+    }
+
+    @Test
+    public void invokesQueryWithVarargsParametersCorrectly() {
+
+        flushTestUsers();
+
+        Collection<User> result = repository.findByIdIn(firstUser.getId(), secondUser.getId());
+        assertThat(result).containsOnly(firstUser, secondUser);
     }
 
     @SuppressWarnings("unchecked")
