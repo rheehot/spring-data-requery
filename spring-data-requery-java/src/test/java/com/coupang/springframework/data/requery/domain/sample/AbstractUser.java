@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
@@ -35,7 +36,7 @@ public abstract class AbstractUser extends AbstractPersistable<Integer> {
     protected int age;
     protected boolean active;
 
-    protected Date createdAt;
+    protected Timestamp createdAt;
 
     @Column(nullable = false, unique = true)
     protected String emailAddress;

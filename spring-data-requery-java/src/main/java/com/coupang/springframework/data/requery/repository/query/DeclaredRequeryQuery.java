@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.repository.query;
 
+import com.coupang.springframework.data.requery.NotSupportedException;
 import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import io.requery.query.Result;
@@ -45,6 +46,12 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
         log.debug("Execute queryMethod={}, query={}, return type={}", getQueryMethod().getName(), getQueryMethod().getReturnType(), query);
 
         Result<?> result;
+
+        // TODO: @Query 에 대한 Paging 처리하는 기능이 필요하다.
+        if (getQueryMethod().isPageQuery()) {
+            throw new NotSupportedException("Not supporting for paging of @Query.");
+        }
+
         if (getQueryMethod().isQueryForEntity()) {
             log.debug("Query for entity. entity={}", getQueryMethod().getEntityInformation().getJavaType());
             result = operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, parameters);

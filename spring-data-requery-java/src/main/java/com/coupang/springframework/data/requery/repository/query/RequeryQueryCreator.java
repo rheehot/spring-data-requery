@@ -10,6 +10,7 @@ import io.requery.query.FieldExpression;
 import io.requery.query.NamedExpression;
 import io.requery.query.Return;
 import io.requery.query.element.QueryElement;
+import io.requery.query.element.WhereConditionElement;
 import io.requery.query.function.Count;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,9 @@ import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static org.springframework.data.repository.query.parser.Part.Type.CONTAINING;
@@ -112,19 +113,33 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
     protected QueryElement<?> and(Part part,
                                   QueryElement<?> base,
                                   Iterator<Object> iterator) {
+        log.trace("add AND condition");
+        Set<WhereConditionElement<?>> elements = toQueryElement(part, root).getWhereElements();
 
-        return RequeryUtils.buildWhereClause(base,
-                                             Collections.singletonList(toQueryElement(part, root).getWhereElements().iterator().next().getCondition()),
-                                             true);
+        log.debug("elements size={}", elements.size());
+
+        if (elements.size() > 0) {
+            Condition<?, ?> condition = elements.iterator().next().getCondition();
+            return unwrap(base.where(condition));
+        } else {
+            return unwrap(base);
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected QueryElement<?> or(QueryElement<?> base,
                                  QueryElement<?> criteria) {
+        // TODO: base에 왜 이미 where condition이 있는지 ????
+        base.getWhereElements().clear();
+        log.trace("add OR condition. base condition size={}", base.getWhereElements().size());
+        log.trace("add OR condition. criteria condition size={}", criteria.getWhereElements().size());
 
-        Iterable<Condition<?, ?>> conditions = RequeryUtils.getConditions(criteria);
-        return unwrap(RequeryUtils.buildWhereClause(base, conditions, false));
+        criteria.getWhereElements().forEach(element -> {
+            log.trace("operator={}, condition={}", element.getOperator(), element.getCondition());
+        });
+
+        return unwrap(RequeryUtils.applyWhereClause(base, criteria.getWhereElements(), false));
     }
 
     @Override
@@ -136,11 +151,10 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
     protected QueryElement<?> complete(QueryElement<?> criteria,
                                        Sort sort,
                                        QueryElement<?> root) {
-        QueryElement<?> queryElement = criteria != null ? criteria : root;
+        log.trace("Comple query. criteria={}, sort={}, root={}", criteria, sort, root);
 
-        return RequeryUtils.applySort(returnedType.getDomainType(),
-                                      queryElement,
-                                      sort);
+        QueryElement<?> queryElement = criteria != null ? criteria : root;
+        return RequeryUtils.applySort(returnedType.getDomainType(), queryElement, sort);
     }
 
     private QueryElement<?> toQueryElement(Part part, QueryElement<?> root) {
@@ -173,7 +187,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
 
             NamedExpression expr = NamedExpression.of(part.getProperty().getSegment(), part.getProperty().getType());
 
-            log.debug("Build QueryElement ... property={}, type={}", property, type);
+            log.debug("Build QueryElement ... property={}, type={}, expr={}", property, type, expr);
 
             Return<?> whereClause;
 
@@ -182,25 +196,25 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     ParameterMetadata<Comparable> first = provider.next(part);
                     ParameterMetadata<Comparable> second = provider.next(part);
 
-                    whereClause = root.where(expr.between(first.getExpression(), second.getExpression()));
+                    whereClause = root.where(expr.between(first.getValue(), second.getValue()));
                     break;
 
                 case AFTER:
                 case GREATER_THAN:
-                    whereClause = root.where(expr.greaterThan(provider.next(part, Comparable.class).getExpression()));
+                    whereClause = root.where(expr.greaterThan(provider.next(part, Comparable.class).getValue()));
                     break;
 
                 case GREATER_THAN_EQUAL:
-                    whereClause = root.where(expr.greaterThanOrEqual(provider.next(part, Comparable.class).getExpression()));
+                    whereClause = root.where(expr.greaterThanOrEqual(provider.next(part, Comparable.class).getValue()));
                     break;
 
                 case BEFORE:
                 case LESS_THAN:
-                    whereClause = root.where(expr.lt(provider.next(part, Comparable.class).getExpression()));
+                    whereClause = root.where(expr.lt(provider.next(part, Comparable.class).getValue()));
                     break;
 
                 case LESS_THAN_EQUAL:
-                    whereClause = root.where(expr.lte(provider.next(part, Comparable.class).getExpression()));
+                    whereClause = root.where(expr.lte(provider.next(part, Comparable.class).getValue()));
                     break;
 
                 case IS_NULL:
@@ -212,11 +226,11 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     break;
 
                 case NOT_IN:
-                    whereClause = root.where(expr.notIn(provider.next(part, Collection.class).getExpression()));
+                    whereClause = root.where(expr.notIn(provider.next(part, Collection.class).getValue()));
                     break;
 
                 case IN:
-                    whereClause = root.where(expr.in(provider.next(part, Collection.class).getExpression()));
+                    whereClause = root.where(expr.in(provider.next(part, Collection.class).getValue()));
                     break;
 
                 case STARTING_WITH:
@@ -226,6 +240,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
 
                     whereClause = root.where(expr.like(provider.next(part, String.class).getValue() + "%"));
                     break;
+
                 case ENDING_WITH:
                     if (property.getLeafProperty().isCollection()) {
                         throw new NotSupportedException("Not supported keyword " + type);
@@ -286,6 +301,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                 case NEGATING_SIMPLE_PROPERTY:
                     ParameterMetadata<Object> simpleNotExpr = provider.next(part);
                     upperIfIgnoreCase(simpleNotExpr.getExpression());
+
                     whereClause = root.where(upperIfIgnoreCase(expr).notEqual(simpleNotExpr.getValue()));
                     break;
 
@@ -295,6 +311,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     throw new NotSupportedException("Not supported keyword " + type);
             }
 
+            log.trace("whereClause={}", whereClause);
             return unwrap(whereClause);
         }
 

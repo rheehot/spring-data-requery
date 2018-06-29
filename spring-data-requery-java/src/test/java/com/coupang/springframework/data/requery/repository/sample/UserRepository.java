@@ -5,6 +5,7 @@ import com.coupang.springframework.data.requery.annotation.Query;
 import com.coupang.springframework.data.requery.domain.sample.Role;
 import com.coupang.springframework.data.requery.domain.sample.SpecialUser;
 import com.coupang.springframework.data.requery.domain.sample.User;
+import com.coupang.springframework.data.requery.domain.sample.User_Colleagues;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -124,7 +125,7 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 
     List<User> findByAgeLessThanEqual(int age);
 
-    @Query("select u.lastname from SD_User u group by u.lastname")
+    @Query("select u.lastname from SD_User u group by u.lastname ")
     Page<String> findByLastnameGrouped(Pageable pageable);
 
     // DATAJPA-117
@@ -137,8 +138,16 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     // DATAJPA-132
     List<User> findByActiveFalse();
 
-    @Query("select u.colleagues from User u where u = ?1")
-    List<User> findColleaguesFor(User user);
+    // HINT: @Query 를 쓰던가, requery api 를 사용하던가 같다. 
+    // @Query("select u.* from SD_User u inner join User_Colleagues uc on (u.id = uc.SD_UserId1) where uc.SD_UserId2 = ?")
+    default List<User> findColleaguesFor(Integer userId) {
+        return getOperations()
+            .select(User.class)
+            .join(User_Colleagues.class).on(User.ID.eq(User_Colleagues.SD_USER_ID1))
+            .where(User_Colleagues.SD_USER_ID2.eq(userId))
+            .get()
+            .toList();
+    }
 
     // DATAJPA-188
     List<User> findByCreatedAtBefore(Date date);

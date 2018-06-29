@@ -241,19 +241,31 @@ public class RequeryUtils {
         } else {
 
             WhereAndOr<?>[] whereClause = new WhereAndOr[1];
-            whereClause[0] = baseQuery.where(conditionElements.iterator().next().getCondition());
+
+            WhereConditionElement<?> firstElement = conditionElements.stream().findFirst().get();
+            whereClause[0] = baseQuery.where(firstElement.getCondition());
+            LogicalOperator prevOperator = firstElement.getOperator();
 
             conditionElements.stream()
                 .skip(1)
                 .forEach(conditionElement -> {
                     Condition<?, ?> condition = conditionElement.getCondition();
-                    LogicalOperator op = conditionElement.getOperator();
-                    if (op == LogicalOperator.AND) {
-                        whereClause[0] = whereClause[0].and(condition);
-                    } else if (op == LogicalOperator.OR) {
-                        whereClause[0] = whereClause[0].or(condition);
-                    } else if (op == LogicalOperator.NOT) {
-                        whereClause[0] = whereClause[0].and(condition).not();
+                    LogicalOperator operator = conditionElement.getOperator();
+
+                    log.trace("Where condition={}, operator={}", condition, operator);
+
+                    switch (operator) {
+                        case AND:
+                            whereClause[0] = whereClause[0].and(condition);
+                            break;
+                        case OR:
+                            whereClause[0] = whereClause[0].or(condition);
+                            break;
+                        case NOT:
+                            whereClause[0] = whereClause[0].and(condition).not();
+                            break;
+                        default:
+                            // Nothing to do.
                     }
                 });
 
@@ -261,11 +273,36 @@ public class RequeryUtils {
         }
     }
 
-    /**
-     * @deprecated use applyWhereClause
-     */
-    @Deprecated
     @SuppressWarnings("unchecked")
+    public static QueryElement<?> applyWhereClause(QueryElement<?> baseQuery,
+                                                   Set<WhereConditionElement<?>> conditionElements,
+                                                   boolean isAnd) {
+
+        List<Condition<?, ?>> conds = conditionElements.stream().map(it -> it.getCondition()).collect(Collectors.toList());
+
+        if (conds.isEmpty()) {
+            return baseQuery;
+        } else if (conds.size() == 1) {
+            return unwrap(baseQuery.where(conds.get(0)));
+        } else {
+            final List<WhereAndOr<?>> whereClauses = new ArrayList<>();
+            whereClauses.add(baseQuery.where(conds.get(0)));
+
+            conds.stream()
+                .skip(1)
+                .forEach(condition -> {
+                    if (isAnd) {
+                        whereClauses.set(0, whereClauses.get(0).and(condition));
+                    } else {
+                        whereClauses.set(0, whereClauses.get(0).or(condition));
+                    }
+                });
+
+            return unwrap(whereClauses.get(0));
+        }
+    }
+
+    @Deprecated
     public static QueryElement<?> buildWhereClause(QueryElement<?> baseQuery,
                                                    Iterable<Condition<?, ?>> conditions,
                                                    boolean isAnd) {
@@ -277,7 +314,6 @@ public class RequeryUtils {
         } else if (conds.size() == 1) {
             return unwrap(baseQuery.where(conds.get(0)));
         } else {
-
             final List<WhereAndOr<?>> whereClauses = new ArrayList<>();
             whereClauses.add(baseQuery.where(conds.get(0)));
 

@@ -1,5 +1,6 @@
 package com.coupang.springframework.data.requery.repository;
 
+import com.coupang.springframework.data.requery.NotSupportedException;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.domain.sample.AbstractUser;
 import com.coupang.springframework.data.requery.domain.sample.Role;
@@ -25,9 +26,12 @@ import org.springframework.data.domain.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -86,10 +90,11 @@ public class UserRepositoryTest {
         user.setFirstname(firstname);
         user.setLastname(lastname);
         user.setEmailAddress(email);
+        user.setActive(true);
+        user.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
 
-        for (Role role : roles) {
-            user.getRoles().add(role);
-        }
+        user.getRoles().addAll(Arrays.asList(roles));
+
         return user;
     }
 
@@ -109,7 +114,7 @@ public class UserRepositoryTest {
         thirdUser.setAge(26);
 
         fourthUser = createUser("Nickoon", "Jeon", "nickoon@coupang.com");
-        fourthUser.setAge(30);
+        fourthUser.setAge(35);
 
         adminRole = new Role("admin");
 
@@ -166,7 +171,7 @@ public class UserRepositoryTest {
 
         flushTestUsers();
 
-        User foundPerson = repository.findById(id).get();
+        User foundPerson = repository.findById(id).orElseThrow(() -> new IllegalStateException("Not Found"));
         foundPerson.setLastname("Kwon");
 
         repository.upsert(foundPerson);
@@ -187,7 +192,7 @@ public class UserRepositoryTest {
     public void deletesAUserById() {
         flushTestUsers();
 
-        repository.deleteById(firstUser.getId());
+        repository.deleteById(requireNonNull(firstUser.getId()));
     }
 
     @Test
@@ -217,8 +222,8 @@ public class UserRepositoryTest {
 
         repository.deleteAll(Arrays.asList(firstUser, secondUser));
 
-        assertThat(repository.existsById(firstUser.getId())).isFalse();
-        assertThat(repository.existsById(secondUser.getId())).isFalse();
+        assertThat(repository.existsById(requireNonNull(firstUser.getId()))).isFalse();
+        assertThat(repository.existsById(requireNonNull(secondUser.getId()))).isFalse();
 
         assertThat(repository.count()).isEqualTo(before - 2);
     }
@@ -231,8 +236,8 @@ public class UserRepositoryTest {
 
         repository.deleteInBatch(Arrays.asList(firstUser, secondUser));
 
-        assertThat(repository.existsById(firstUser.getId())).isFalse();
-        assertThat(repository.existsById(secondUser.getId())).isFalse();
+        assertThat(repository.existsById(requireNonNull(firstUser.getId()))).isFalse();
+        assertThat(repository.existsById(requireNonNull(secondUser.getId()))).isFalse();
 
         assertThat(repository.count()).isEqualTo(before - 2);
     }
@@ -304,7 +309,7 @@ public class UserRepositoryTest {
 
         flushTestUsers();
 
-        User firstReferenceUser = repository.findById(firstUser.getId()).get();
+        User firstReferenceUser = repository.findById(requireNonNull(firstUser.getId())).get();
         assertThat(firstReferenceUser).isEqualTo(firstUser);
 
         Set<AbstractUser> colleagues = firstReferenceUser.getColleagues();
@@ -327,7 +332,7 @@ public class UserRepositoryTest {
         firstUser.getColleagues().add(createUser("Tao", "Kim", "tagkim@coupang.com"));
         firstUser = repository.upsert(firstUser);
 
-        User reference = repository.findById(firstUser.getId()).get();
+        User reference = repository.findById(requireNonNull(firstUser.getId())).get();
         Set<AbstractUser> colleagues = reference.getColleagues();
 
         assertThat(colleagues).hasSize(2).contains(secondUser);
@@ -568,6 +573,109 @@ public class UserRepositoryTest {
 
         assertThat(repository.findByColleaguesLastname(secondUser.getLastname())).containsOnly(firstUser);
         assertThat(repository.findByColleaguesLastname("Bae")).containsOnly(secondUser, thirdUser);
+    }
+
+    @Test
+    public void executesFindByNotNullLastnameCorrectly() {
+
+        flushTestUsers();
+
+        assertThat(repository.findByLastnameNotNull()).containsOnly(firstUser, secondUser, thirdUser, fourthUser);
+    }
+
+    @Test
+    public void findsSortedByLastname() {
+
+        flushTestUsers();
+
+        assertThat(repository.findByEmailAddressLike("%@%", Sort.by(Sort.Direction.ASC, "lastname")))
+            .containsExactly(secondUser, firstUser, fourthUser, thirdUser);
+    }
+
+    // TODO: @Query 에 대한 Paging 은 아직 지원하지 않습니다.
+    @Test(expected = NotSupportedException.class)
+    public void readsPageWithGroupByClauseCorrectly() {
+
+        flushTestUsers();
+
+        Page<String> result = repository.findByLastnameGrouped(PageRequest.of(0, 10));
+        assertThat(result.getTotalPages()).isEqualTo(1);
+    }
+
+    @Test
+    public void executesLessThatOrEqualQueriesCorrectly() {
+
+        flushTestUsers();
+
+        assertThat(repository.findByAgeLessThanEqual(35)).containsOnly(secondUser, thirdUser, fourthUser);
+    }
+
+    @Test
+    public void executesGreaterThatOrEqualQueriesCorrectly() {
+
+        flushTestUsers();
+
+        assertThat(repository.findByAgeGreaterThanEqual(35)).containsOnly(firstUser, fourthUser);
+    }
+
+    @Test
+    public void executesNativeQueryCorrectly() {
+
+        flushTestUsers();
+        assertThat(repository.findNativeByLastname("Bae")).containsOnly(firstUser);
+    }
+
+    @Test
+    public void executesFinderWithTrueKeywordCorrectly() {
+
+        flushTestUsers();
+        firstUser.setActive(false);
+        repository.upsert(firstUser);
+
+        assertThat(repository.findByActiveTrue()).containsOnly(secondUser, thirdUser, fourthUser);
+    }
+
+    @Test
+    public void executesFinderWithFalseKeywordCorrectly() {
+
+        flushTestUsers();
+        firstUser.setActive(false);
+        repository.upsert(firstUser);
+
+        assertThat(repository.findByActiveFalse()).containsOnly(firstUser);
+    }
+
+    @Test
+    public void executesAnnotatedCollectionMethodCorrectly() throws InterruptedException {
+
+        flushTestUsers();
+
+        firstUser.getColleagues().add(thirdUser);
+        repository.save(firstUser);
+
+        List<User> result = repository.findColleaguesFor(firstUser.getId());
+        assertThat(result).containsOnly(thirdUser);
+    }
+
+    @Test
+    public void executesFinderWithAfterKeywordCorrectly() {
+
+        flushTestUsers();
+        assertThat(repository.findByCreatedAtAfter(secondUser.getCreatedAt())).containsOnly(thirdUser, fourthUser);
+    }
+
+    @Test
+    public void executesFinderWithBeforeKeywordCorrectly() {
+
+        flushTestUsers();
+        assertThat(repository.findByCreatedAtBefore(thirdUser.getCreatedAt())).containsOnly(firstUser, secondUser);
+    }
+
+    @Test
+    public void executesFinderWithStartingWithCorrectly() {
+
+        flushTestUsers();
+        assertThat(repository.findByFirstnameStartingWith("Deb")).containsOnly(firstUser);
     }
 
     protected void flushTestUsers() {
