@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.applyWhereClause;
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 
 /**
@@ -241,22 +242,21 @@ public abstract class RequeryQueryExecution {
 
         private final RequeryOperations operations;
 
-        public DeleteExecution(@NotNull RequeryOperations operations) {
+        DeleteExecution(@NotNull RequeryOperations operations) {
             Assert.notNull(operations, "operations must not be null!");
             this.operations = operations;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected @Nullable Object doExecute(AbstractRequeryQuery query, Object[] values) {
 
-            QueryElement<?> deleteQuery = query.createQueryElement(values);
+            QueryElement<?> whereClause = query.createQueryElement(values);
+            QueryElement<?> deleteQuery = applyWhereClause((QueryElement<?>) operations.delete(query.getDomainClass()),
+                                                           whereClause.getWhereElements());
 
-            //
-            // TODO: 삭제관련 효율을 높히기 위한 방안을 찾아야한다.
-            //
-
-            Result<?> result = (Result<?>) deleteQuery.get();
-            return result.first();
+            Scalar<Integer> result = ((QueryElement<? extends Scalar<Integer>>) deleteQuery).get();
+            return result.value();
         }
     }
 
@@ -264,7 +264,6 @@ public abstract class RequeryQueryExecution {
         @Override
         protected @Nullable Object doExecute(AbstractRequeryQuery query, Object[] values) {
             Result<?> result = (Result<?>) query.createQueryElement(values).limit(1).get();
-
             return result.firstOrNull() != null;
         }
     }
