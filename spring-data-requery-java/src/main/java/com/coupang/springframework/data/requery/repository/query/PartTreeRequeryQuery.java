@@ -5,6 +5,7 @@ import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider;
 import com.coupang.springframework.data.requery.repository.query.RequeryQueryExecution.DeleteExecution;
 import com.coupang.springframework.data.requery.repository.query.RequeryQueryExecution.ExistsExecution;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.NamedExpression;
 import io.requery.query.Scalar;
 import io.requery.query.element.QueryElement;
@@ -15,6 +16,8 @@ import org.springframework.data.repository.query.ResultProcessor;
 import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
+
+import java.util.Optional;
 
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.*;
 
@@ -149,22 +152,30 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
 
             QueryElement<?> query = creator.createQuery(getDynamicSort(values));
 
+            if (getQueryMethod().isPageQuery()) {
+                query = RequeryUtils.applyPageable(getDomainClass(), query, accessor.getPageable());
+            }
             return restrictMaxResultsIfNecessary(query);
         }
 
         private QueryElement<?> restrictMaxResultsIfNecessary(QueryElement<?> baseQuery) {
 
             QueryElement<?> query = baseQuery;
+
             if (tree.isLimiting()) {
-                if (query.getLimit() != null && query.getLimit() > 0) {
+                if (query.getLimit() != null) {
+                    if (query.getOffset() == null) {
+                        query.offset(0);
+                    }
                     /*
                      * In order to return the correct results, we have to adjust the first result offset to be returned if:
                      * - a Pageable parameter is present
                      * - AND the requested page number > 0
                      * - AND the requested page size was bigger than the derived result limitation via the First/Top keyword.
                      */
-                    if (query.getLimit() > tree.getMaxResults() && query.getOffset() > 0) {
-                        query = unwrap(query.offset(query.getOffset() - (query.getLimit() - tree.getMaxResults())));
+                    if (query.getLimit() > Optional.ofNullable(tree.getMaxResults()).orElse(0) && query.getOffset() > 0) {
+                        int offset = query.getOffset() - (query.getLimit() - tree.getMaxResults());
+                        query = unwrap(query.offset(offset));
                     }
                 }
                 query = unwrap(query.limit(tree.getMaxResults()));

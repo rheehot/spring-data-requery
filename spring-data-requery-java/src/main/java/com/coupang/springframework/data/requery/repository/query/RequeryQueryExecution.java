@@ -174,7 +174,10 @@ public abstract class RequeryQueryExecution {
             ParameterAccessor accessor = new ParametersParameterAccessor(parameters, values);
             QueryElement<?> queryElement = unwrap(query.createQueryElement(values));
 
-            queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, accessor.getPageable());
+            // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+            if (queryElement.getLimit() == null) {
+                queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, accessor.getPageable());
+            }
             Result<?> result = (Result<?>) queryElement.get();
 
             return new PageImpl(result.toList(), accessor.getPageable(), count(query, values));

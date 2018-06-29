@@ -54,6 +54,7 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
 
         // TODO: Refactoring이 필요하다.
         // TODO: Entity 나 Tuple 에 대해 ReturnedType에 맞게 casting 해야 한다.
+        // TODO: Paging 에 대해서는 처리했는데, Sort 는 넣지 못했음. 이 부분도 추가해야 함.
 
         if (getQueryMethod().isPageQuery()) {
             RequeryParametersParameterAccessor accessor = new RequeryParametersParameterAccessor(getQueryMethod().getParameters(), parameters);
@@ -69,7 +70,6 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
                 }
                 values[j++] = parameters[i];
             }
-
 
             if (pageable.isUnpaged()) {
                 List<?> rows = operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, values).toList();

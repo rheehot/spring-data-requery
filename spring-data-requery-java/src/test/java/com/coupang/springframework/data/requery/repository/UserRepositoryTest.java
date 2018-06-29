@@ -1120,6 +1120,38 @@ public class UserRepositoryTest {
         assertThat(repository.findTop2UsersBy(Sort.by("age"))).containsOnly(youngest1, youngest2);
     }
 
+    @Test
+    public void find3YoungestUsersPageableWithPageSize2() {
+
+        flushTestUsers();
+
+        User youngest1 = secondUser;
+        User youngest2 = thirdUser;
+        User youngest3 = fourthUser;
+
+        Page<User> firstPage = repository.findFirst3UsersBy(PageRequest.of(0, 2, Sort.Direction.ASC, "age"));
+        assertThat(firstPage.getContent()).containsOnly(youngest1, youngest2);
+
+        Page<User> secondPage = repository.findFirst3UsersBy(PageRequest.of(1, 2, Sort.Direction.ASC, "age"));
+        assertThat(secondPage.getContent()).contains(youngest3);
+    }
+
+    @Test
+    public void find2YoungestUsersPageableWithPageSize3() {
+
+        flushTestUsers();
+
+        User youngest1 = secondUser;
+        User youngest2 = thirdUser;
+        User youngest3 = fourthUser;
+
+        Page<User> firstPage = repository.findFirst2UsersBy(PageRequest.of(0, 3, Sort.Direction.ASC, "age"));
+        assertThat(firstPage.getContent()).contains(youngest1, youngest2);
+
+        Page<User> secondPage = repository.findFirst2UsersBy(PageRequest.of(1, 3, Sort.Direction.ASC, "age"));
+        assertThat(secondPage.getContent()).contains(youngest3);
+    }
+
 
     @SuppressWarnings("unchecked")
     private Page<User> executeSpecWithSort(Sort sort) {
