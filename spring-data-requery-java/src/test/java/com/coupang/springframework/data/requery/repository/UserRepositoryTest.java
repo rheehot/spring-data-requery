@@ -1,9 +1,9 @@
 package com.coupang.springframework.data.requery.repository;
 
-import com.coupang.springframework.data.requery.NotSupportedException;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.domain.sample.AbstractUser;
 import com.coupang.springframework.data.requery.domain.sample.Role;
+import com.coupang.springframework.data.requery.domain.sample.SpecialUser;
 import com.coupang.springframework.data.requery.domain.sample.User;
 import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
 import com.coupang.springframework.data.requery.repository.config.InfrastructureConfig;
@@ -18,6 +18,7 @@ import io.requery.query.element.QueryElement;
 import io.requery.sql.StatementExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,6 +38,7 @@ import java.util.*;
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.data.domain.ExampleMatcher.matching;
 
 /**
  * UserRepositoryTest
@@ -595,8 +598,7 @@ public class UserRepositoryTest {
             .containsExactly(secondUser, firstUser, fourthUser, thirdUser);
     }
 
-    // TODO: @Query 에 대한 Paging 은 아직 지원하지 않습니다.
-    @Test(expected = NotSupportedException.class)
+    @Test
     public void readsPageWithGroupByClauseCorrectly() {
 
         flushTestUsers();
@@ -785,7 +787,7 @@ public class UserRepositoryTest {
         assertThat(all.getContent()).isNotEmpty();
     }
 
-    @Test(expected = NotSupportedException.class)
+    @Test
     public void bindsSortingToOuterJoinCorrectly() {
 
         flushTestUsers();
@@ -878,7 +880,7 @@ public class UserRepositoryTest {
         assertThat(repository.findAllById(Collections.emptySet())).isEmpty();
     }
 
-    // TODO: 결과가 Tuple 인 경우 원하는 데이터로 casting 해야 하는데 ...
+    @Ignore("결과가 Tuple 인 경우 ReturnedType 으로 변환하는 기능이 필요하다")
     @Test
     public void executesManuallyDefinedQueryWithFieldProjection() {
 
@@ -906,6 +908,218 @@ public class UserRepositoryTest {
         Collection<User> result = repository.findByIdIn(firstUser.getId(), secondUser.getId());
         assertThat(result).containsOnly(firstUser, secondUser);
     }
+
+    @Test
+    public void shouldSupportModifyingQueryWithVarArgs() {
+
+        flushTestUsers();
+
+        repository.updateUserActiveState(false, firstUser.getId(), secondUser.getId(), thirdUser.getId(), fourthUser.getId());
+
+        long expectedCount = repository.count();
+        assertThat(repository.findByActiveFalse()).hasSize((int) expectedCount);
+        assertThat(repository.findByActiveTrue()).isEmpty();
+    }
+
+    @Test
+    public void executesFinderWithOrderClauseOnly() {
+
+        flushTestUsers();
+
+        assertThat(repository.findAllByOrderByLastnameAsc())
+            .containsExactly(secondUser, firstUser, fourthUser, thirdUser);
+    }
+
+
+    // NOTE: Not Supported
+    @Test
+    public void sortByEmbeddedProperty() {
+
+        thirdUser.getAddress().setCountry("South Korea");
+        thirdUser.getAddress().setCity("Seoul");
+        thirdUser.getAddress().setStreetName("Songpa");
+        thirdUser.getAddress().setStreetNo("570");
+
+        flushTestUsers();
+
+        Page<User> page = repository.findAll(PageRequest.of(0, 10, Sort.by("address.streetName")));
+        assertThat(page.getContent()).hasSize(4);
+
+        // Not supported
+        // assertThat(page.getContent().get(3)).isEqualTo(thirdUser);
+    }
+
+    @Test
+    public void findsUserByBinaryDataReference() {
+
+        flushTestUsers();
+
+        Collection<User> result = repository.findByIdsCustomWithPositionalVarArgs(firstUser.getId(), secondUser.getId());
+
+        assertThat(result).containsOnly(firstUser, secondUser);
+    }
+
+    @Test
+    public void customFindByQueryWithNamedVarargsParameters() {
+
+        flushTestUsers();
+
+        Collection<User> result = repository.findByIdsCustomWithNamedVarArgs(firstUser.getId(), secondUser.getId());
+
+        assertThat(result).containsOnly(firstUser, secondUser);
+    }
+
+    @Ignore("Not support derived class from entity class")
+    @Test
+    public void saveAndFlushShouldSupportReturningSubTypesOfRepositoryEntity() {
+
+        SpecialUser user = new SpecialUser();
+        user.setFirstname("Thomas");
+        user.setEmailAddress("thomas@example.org");
+
+        // HINT: Entity class 를 상속받은 Derived class를 부모 클래스용 Repository를 사용하면 안된다.
+        SpecialUser savedUser = repository.insert(user);
+
+        assertThat(savedUser.getFirstname()).isEqualTo(user.getFirstname());
+        assertThat(savedUser.getEmailAddress()).isEqualTo(user.getEmailAddress());
+    }
+
+    @Test
+    public void findAllByUntypedExampleShouldReturnSubTypesOfRepositoryEntity() {
+
+        flushTestUsers();
+
+        List<User> result = repository.findAll(Example.of(createUser(null, null, null),
+                                                          matching().withIgnorePaths("age", "createdAt", "dateOfBirth")));
+        assertThat(result).hasSize(4);
+    }
+
+    @Test
+    public void findAllByTypedUserExampleShouldReturnSubTypesOfRepositoryEntity() {
+
+        flushTestUsers();
+
+        Example<User> example = Example.of(createUser(null, null, null),
+                                           matching().withIgnorePaths("age", "createdAt", "dateOfBirth"));
+        List<User> result = repository.findAll(example);
+
+        assertThat(result).hasSize(4);
+    }
+
+    @Test
+    public void deleteByShouldReturnListOfDeletedElementsWhenRetunTypeIsCollectionLike() {
+
+        flushTestUsers();
+
+        Integer deletedCount = repository.deleteByLastname(firstUser.getLastname());
+        assertThat(deletedCount).isEqualTo(1);
+
+        assertThat(repository.countByLastname(firstUser.getLastname())).isEqualTo(0L);
+    }
+
+    @Test
+    public void deleteByShouldReturnNumberOfEntitiesRemovedIfReturnTypeIsInteger() {
+
+        flushTestUsers();
+
+        Integer removedCount = repository.removeByLastname(firstUser.getLastname());
+        assertThat(removedCount).isEqualTo(1);
+    }
+
+
+    @Test
+    public void deleteByShouldReturnZeroInCaseNoEntityHasBeenRemovedAndReturnTypeIsNumber() {
+
+        flushTestUsers();
+
+        Integer removedCount = repository.removeByLastname("Not exists");
+        assertThat(removedCount).isEqualTo(0);
+    }
+
+    @Ignore("Tuple 을 returned type 으로 추출하는 작업이 필요하다.")
+    @Test
+    public void findBinaryDataByIdNative() {
+
+        byte[] data = "Woho!!".getBytes(StandardCharsets.UTF_8);
+        firstUser.setBinaryData(data);
+
+        flushTestUsers();
+
+        // TODO: Tuple 을 returned type 으로 추출하는 작업이 필요하다.
+        // TODO: @Convert 를 사용한 property 에 대해서 변환작업도 필요하다. Blob 를 byte[] 로 바꾸는 ...
+        byte[] result = repository.findBinaryDataByIdNative(firstUser.getId());
+
+        assertThat(result).isNotNull();
+        assertThat(result.length).isEqualTo(data.length);
+        assertThat(result).isEqualTo(data);
+    }
+
+    @Test
+    public void findPaginatedExplicitQueryWithEmpty() {
+
+        firstUser.setFirstname(null);
+
+        flushTestUsers();
+
+        Page<User> result = repository.findAllByFirstnameLike("%", PageRequest.of(0, 10));
+        assertThat(result.getContent()).hasSize(3);
+    }
+
+    @Test
+    public void findPaginatedExplicitQuery() {
+
+        flushTestUsers();
+
+        Page<User> result = repository.findAllByFirstnameLike("De%", PageRequest.of(0, 10));
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    public void findOldestUser() {
+
+        flushTestUsers();
+
+        User oldest = firstUser;
+
+        assertThat(repository.findFirstByOrderByAgeDesc()).isEqualTo(oldest);
+        assertThat(repository.findFirst1ByOrderByAgeDesc()).isEqualTo(oldest);
+    }
+
+    @Test
+    public void findYoungestUser() {
+
+        flushTestUsers();
+
+        User youngest = thirdUser;
+
+        assertThat(repository.findTopByOrderByAgeAsc()).isEqualTo(youngest);
+        assertThat(repository.findTop1ByOrderByAgeAsc()).isEqualTo(youngest);
+    }
+
+    @Test
+    public void find2OldestUser() {
+
+        flushTestUsers();
+
+        User oldest1 = firstUser;
+        User oldest2 = fourthUser;
+
+        assertThat(repository.findFirst2ByOrderByAgeDesc()).containsOnly(oldest1, oldest2);
+        assertThat(repository.findTop2ByOrderByAgeDesc()).containsOnly(oldest1, oldest2);
+    }
+
+    @Test
+    public void find2YoungestUser() {
+
+        flushTestUsers();
+
+        User youngest1 = thirdUser;
+        User youngest2 = secondUser;
+
+        assertThat(repository.findFirst2UsersBy(Sort.by("age"))).containsOnly(youngest1, youngest2);
+        assertThat(repository.findTop2UsersBy(Sort.by("age"))).containsOnly(youngest1, youngest2);
+    }
+
 
     @SuppressWarnings("unchecked")
     private Page<User> executeSpecWithSort(Sort sort) {

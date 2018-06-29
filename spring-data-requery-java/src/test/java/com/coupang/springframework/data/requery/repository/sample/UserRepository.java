@@ -38,7 +38,7 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 
     User findByEmailAddress(String emailAddress);
 
-    @Query("select * from SD_User u left outer join SD_User m on (u.manager = m.id)")
+    @Query("select u.* from SD_User u left outer join SD_User m on (u.manager = m.id)")
     Page<User> findAllPaged(Pageable pageable);
 
     User findByEmailAddressAndLastname(String emailAddress, String lastname);
@@ -183,19 +183,19 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     Collection<User> findByIdIn(Integer... ids);
 
     // DATAJPA-461
-    @Query("select u from SD_User u where u.id in ?1")
+    @Query("select * from SD_User u where u.id in ?")
     Collection<User> findByIdsCustomWithPositionalVarArgs(Integer... ids);
 
     // DATAJPA-461
-    @Query("select u from SD_User u where u.id in :ids")
-    Collection<User> findByIdsCustomWithNamedVarArgs(@Param("ids") Integer... ids);
+    @Query("select * from SD_User u where u.id in ?")
+    Collection<User> findByIdsCustomWithNamedVarArgs(Integer... ids);
 
 
     // NOTE: Not supported Spring expression
     // DATAJPA-415
     @Modifying
-    @Query("update #{#entityName} u set u.active = :activeState where u.id in :ids")
-    void updateUserActiveState(@Param("activeState") boolean activeState, @Param("ids") Integer... ids);
+    @Query("update SD_User u set u.active = ? where u.id in ?")
+    void updateUserActiveState(boolean activeState, Integer... ids);
 
     // DATAJPA-405
     List<User> findAllByOrderByLastnameAsc();
@@ -216,35 +216,35 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     Integer deleteByLastname(String lastname);
 
 
-    @Query(value = "select * from SD_User where u u.firstname like ?%", countProjection = "u.firstname")
+    @Query(value = "select * from SD_User u where u.firstname like ?")
     Page<User> findAllByFirstnameLike(String firstname, Pageable page);
 
 
     User findFirstByOrderByAgeDesc();
-//
-//    User findFirst1ByOrderByAgeDesc();
-//
-//    User findTopByOrderByAgeDesc();
-//
-//    User findTopByOrderByAgeAsc();
-//
-//    User findTop1ByOrderByAgeAsc();
-//
-//    List<User> findTop2ByOrderByAgeDesc();
-//
-//    List<User> findFirst2ByOrderByAgeDesc();
-//
-//    List<User> findFirst2UsersBy(Sort sort);
-//
-//    List<User> findTop2UsersBy(Sort sort);
-//
-//    Page<User> findFirst3UsersBy(Pageable page);
-//
-//    Page<User> findFirst2UsersBy(Pageable page);
-//
-//    Slice<User> findTop3UsersBy(Pageable page);
-//
-//    Slice<User> findTop2UsersBy(Pageable page);
+
+    User findFirst1ByOrderByAgeDesc();
+
+    User findTopByOrderByAgeDesc();
+
+    User findTopByOrderByAgeAsc();
+
+    User findTop1ByOrderByAgeAsc();
+
+    List<User> findTop2ByOrderByAgeDesc();
+
+    List<User> findFirst2ByOrderByAgeDesc();
+
+    List<User> findFirst2UsersBy(Sort sort);
+
+    List<User> findTop2UsersBy(Sort sort);
+
+    Page<User> findFirst3UsersBy(Pageable page);
+
+    Page<User> findFirst2UsersBy(Pageable page);
+
+    Slice<User> findTop3UsersBy(Pageable page);
+
+    Slice<User> findTop2UsersBy(Pageable page);
 
 
     @Query("select u.binaryData from SD_User u where u.id = ?")

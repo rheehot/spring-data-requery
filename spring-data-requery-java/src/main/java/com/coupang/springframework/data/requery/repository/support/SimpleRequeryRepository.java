@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.repository.support;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
-import com.coupang.springframework.data.requery.utils.RequeryUtils;
+import com.coupang.springframework.data.requery.repository.query.QueryByExampleBuilder;
 import io.requery.meta.Attribute;
 import io.requery.query.*;
 import io.requery.query.element.QueryElement;
@@ -9,7 +9,6 @@ import io.requery.query.function.Count;
 import io.requery.sql.EntityDataStore;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.*;
@@ -19,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.*;
 
 /**
  * Default implementation of the {@link org.springframework.data.repository.CrudRepository} interface.
@@ -54,6 +55,31 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     public void setRepositoryMethodMetadata(CrudMethodMetadata crudMethodMetadata) {
         this.crudMethodMetadata = crudMethodMetadata;
     }
+
+    @Transactional
+    @Override
+    public <S extends T> S insert(S entity) {
+        return operations.insert(entity);
+    }
+
+    @Transactional
+    @Override
+    public <S extends T, K> K insert(S entity, Class<K> keyClass) {
+        return operations.insert(entity, keyClass);
+    }
+
+    @Transactional
+    @Override
+    public <S extends T> List<S> insert(Iterable<S> entities) {
+        return operations.insertAll(entities);
+    }
+
+    @Transactional
+    @Override
+    public <S extends T, K> List<K> insert(Iterable<S> entities, Class<K> keyClass) {
+        return operations.insertAll(entities, keyClass);
+    }
+
 
     @Transactional
     @Override
@@ -104,7 +130,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         log.debug("Find all {} with sort, sort={}", domainClassName, sort);
 
         if (sort.isSorted()) {
-            OrderingExpression<?>[] orderingExprs = RequeryUtils.getOrderingExpressions(domainClass, sort);
+            OrderingExpression<?>[] orderingExprs = getOrderingExpressions(domainClass, sort);
 
             if (orderingExprs.length > 0) {
                 return operations
@@ -130,9 +156,9 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
         if (pageable.isPaged()) {
             QueryElement<? extends Result<T>> query = (QueryElement<? extends Result<T>>)
-                RequeryUtils.applyPageable(domainClass,
-                                           (QueryElement<? extends Result<T>>) operations.select(domainClass),
-                                           pageable);
+                applyPageable(domainClass,
+                              (QueryElement<? extends Result<T>>) operations.select(domainClass),
+                              pageable);
             List<T> content = query.get().toList();
             long total = operations.count(domainClass).get().value().longValue();
 
@@ -169,7 +195,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @SuppressWarnings("unchecked")
     @Override
     public boolean existsById(@NotNull ID id) {
-        NamedExpression<ID> keyExpr = (NamedExpression<ID>) RequeryUtils.getKeyExpression(domainClass);
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) getKeyExpression(domainClass);
 
         Tuple result = operations
             .select(Count.count(domainClass))
@@ -194,7 +220,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
         for (ID id : ids) {
             idSet.add(id);
         }
-        NamedExpression<ID> keyExpr = (NamedExpression<ID>) RequeryUtils.getKeyExpression(domainClass);
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) getKeyExpression(domainClass);
 
         return operations
             .select(domainClass)
@@ -214,7 +240,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     public void deleteById(@NotNull ID id) {
         log.debug("Delete {} by id. id={}", domainClassName, id);
 
-        NamedExpression<ID> keyExpr = (NamedExpression<ID>) RequeryUtils.getKeyExpression(domainClass);
+        NamedExpression<ID> keyExpr = (NamedExpression<ID>) getKeyExpression(domainClass);
 
         Integer deletedCount = operations
             .delete(domainClass)
@@ -250,37 +276,60 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @NotNull
     @Override
     public <S extends T> Optional<S> findOne(@NotNull Example<S> example) {
-        throw new NotImplementedException("구현 중");
+        return Optional.ofNullable(buildQueryByExample(example).get().firstOrNull());
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     @Override
     public <S extends T> List<S> findAll(@NotNull Example<S> example) {
-        throw new NotImplementedException("구현 중");
+        return buildQueryByExample(example).get().toList();
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     @Override
     public <S extends T> List<S> findAll(@NotNull Example<S> example, @NotNull Sort sort) {
-        throw new NotImplementedException("구현 중");
+        QueryElement<?> query = applySort(domainClass,
+                                          unwrap(buildQueryByExample(example)),
+                                          sort);
+        return ((QueryElement<? extends Result<S>>) query).get().toList();
     }
 
-
+    @SuppressWarnings("unchecked")
     @NotNull
     @Override
     public <S extends T> Page<S> findAll(@NotNull Example<S> example, @NotNull Pageable pageable) {
-        throw new NotImplementedException("구현 중");
+
+        QueryElement<?> baseQuery = unwrap(buildQueryByExample(example));
+        long total = count((QueryElement<? extends Result<T>>) baseQuery);
+
+        QueryElement<?> query = applyPageable(domainClass,
+                                              unwrap(buildQueryByExample(example)),
+                                              pageable);
+        return new PageImpl<>(((QueryElement<? extends Result<S>>) query).get().toList(),
+                              pageable,
+                              total);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <S extends T> long count(@NotNull Example<S> example) {
-        throw new NotImplementedException("구현 중");
+        return count((QueryElement<? extends Result<T>>) buildQueryByExample(example));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <S extends T> boolean exists(@NotNull Example<S> example) {
-        throw new NotImplementedException("구현 중");
+        return count((QueryElement<? extends Result<T>>) buildQueryByExample(example)) > 0;
     }
+
+    @SuppressWarnings("unchecked")
+    private <S extends T> Return<? extends Result<S>> buildQueryByExample(@NotNull Example<S> example) {
+        QueryElement<? extends Result<S>> root = (QueryElement<? extends Result<S>>) unwrap(operations.select(domainClass));
+        return QueryByExampleBuilder.getWhereAndOr(root, example);
+    }
+
 
     @Override
     public Optional<T> findOne(Return<? extends Result<T>> whereClause) {
@@ -305,7 +354,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
         int total = count(whereClause);
 
-        Return<?> query = RequeryUtils.applyPageable(domainClass, whereClause, pageable);
+        Return<?> query = applyPageable(domainClass, whereClause, pageable);
         List<T> contents = ((Return<? extends Result<T>>) query).get().toList();
 
         return new PageImpl<>(contents, pageable, total);
@@ -316,12 +365,11 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     public List<T> findAll(Iterable<Condition<T, ?>> conditions, Sort sort) {
 
         QueryElement<? extends Result<T>> baseQuery = (QueryElement<? extends Result<T>>) getOperations().select(domainClass);
-        baseQuery = (QueryElement<? extends Result<T>>) RequeryUtils
-            .buildWhereClause(baseQuery,
-                              RequeryUtils.getGenericConditions(conditions),
-                              true);
+        baseQuery = (QueryElement<? extends Result<T>>) buildWhereClause(baseQuery,
+                                                                         getGenericConditions(conditions),
+                                                                         true);
 
-        Return<? extends Result<T>> query = (Return<? extends Result<T>>) RequeryUtils.applySort(domainClass, baseQuery, sort);
+        Return<? extends Result<T>> query = (Return<? extends Result<T>>) applySort(domainClass, baseQuery, sort);
 
         return query.get().toList();
     }
@@ -333,7 +381,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
 
 
         Return<? extends Result<T>> query = (Return<? extends Result<T>>)
-            RequeryUtils.buildWhereClause(baseQuery, RequeryUtils.getGenericConditions(conditions), true);
+            buildWhereClause(baseQuery, getGenericConditions(conditions), true);
 
         return query.get().toList();
     }

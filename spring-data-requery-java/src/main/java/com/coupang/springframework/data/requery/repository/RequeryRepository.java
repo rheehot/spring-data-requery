@@ -36,6 +36,14 @@ public interface RequeryRepository<T, ID>
     @Override
     <S extends T> List<S> saveAll(Iterable<S> entities);
 
+    <S extends T> S insert(S entity);
+
+    <S extends T, K> K insert(S entity, Class<K> keyClass);
+
+    <S extends T> List<S> insert(Iterable<S> entities);
+
+    <S extends T, K> List<K> insert(Iterable<S> entities, Class<K> keyClass);
+
     <S extends T> S upsert(S entity);
 
     <S extends T> List<S> upsertAll(Iterable<S> entities);

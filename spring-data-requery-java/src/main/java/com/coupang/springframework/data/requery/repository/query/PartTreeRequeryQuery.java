@@ -153,10 +153,10 @@ public class PartTreeRequeryQuery extends AbstractRequeryQuery {
         }
 
         private QueryElement<?> restrictMaxResultsIfNecessary(QueryElement<?> baseQuery) {
+
             QueryElement<?> query = baseQuery;
             if (tree.isLimiting()) {
-
-                if (query.getLimit() > 0) {
+                if (query.getLimit() != null && query.getLimit() > 0) {
                     /*
                      * In order to return the correct results, we have to adjust the first result offset to be returned if:
                      * - a Pageable parameter is present

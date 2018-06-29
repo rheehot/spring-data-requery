@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.buildWhereClause;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher;
 
 /**
@@ -55,7 +56,7 @@ public class QueryByExampleBuilder {
 
         List<Condition<?, ?>> conds = RequeryUtils.getGenericConditions(conditions);
 
-        return (QueryElement<? extends Result<E>>) RequeryUtils.buildWhereClause(root, conds, matcher.isAllMatching());
+        return (QueryElement<? extends Result<E>>) buildWhereClause(root, conds, matcher.isAllMatching());
     }
 
     @SuppressWarnings("unchecked")
@@ -75,6 +76,10 @@ public class QueryByExampleBuilder {
                                         RequeryUtils.isEmbededField(field) ||
                                         RequeryUtils.isTransientField(field);
             if (notSupportedField) {
+                continue;
+            }
+
+            if (exampleAccessor.isIgnoredPath(field.getName())) {
                 continue;
             }
 
