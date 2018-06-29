@@ -4,6 +4,7 @@ import com.coupang.springframework.data.requery.NotSupportedException;
 import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.repository.query.ParameterMetadataProvider.ParameterMetadata;
+import com.coupang.springframework.data.requery.utils.Iterables;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.Condition;
 import io.requery.query.FieldExpression;
@@ -23,14 +24,10 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
-import static org.springframework.data.repository.query.parser.Part.Type.CONTAINING;
-import static org.springframework.data.repository.query.parser.Part.Type.LIKE;
+import static org.springframework.data.repository.query.parser.Part.Type.*;
 
 /**
  * Query creator to create a {@link io.requery.sql.QueryBuilder} from a {@link PartTree}.
@@ -130,7 +127,9 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
     @Override
     protected QueryElement<?> or(QueryElement<?> base,
                                  QueryElement<?> criteria) {
+
         // TODO: base에 왜 이미 where condition이 있는지 ????
+        // TODO: 이렇게 지우는게 맞는지???
         base.getWhereElements().clear();
         log.trace("add OR condition. base condition size={}", base.getWhereElements().size());
         log.trace("add OR condition. criteria condition size={}", criteria.getWhereElements().size());
@@ -151,7 +150,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
     protected QueryElement<?> complete(QueryElement<?> criteria,
                                        Sort sort,
                                        QueryElement<?> root) {
-        log.trace("Comple query. criteria={}, sort={}, root={}", criteria, sort, root);
+        log.trace("Complete query...");
 
         QueryElement<?> queryElement = criteria != null ? criteria : root;
         return RequeryUtils.applySort(returnedType.getDomainType(), queryElement, sort);
@@ -226,11 +225,20 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     break;
 
                 case NOT_IN:
-                    whereClause = root.where(expr.notIn(provider.next(part, Collection.class).getValue()));
-                    break;
-
                 case IN:
-                    whereClause = root.where(expr.in(provider.next(part, Collection.class).getValue()));
+                    Object values = provider.next(part, Collection.class).getValue();
+                    log.trace("in ({}), class={}", values, values.getClass());
+
+                    if (values instanceof Iterable) {
+                        Collection cols = Iterables.toList((Iterable) values);
+                        log.trace("cols = {}", cols);
+                        whereClause = (type == IN) ? root.where(expr.in(cols)) : root.where(expr.notIn(cols));
+                    } else if (values instanceof Object[]) {
+                        List list = Arrays.asList((Object[]) values);
+                        whereClause = (type == IN) ? root.where(expr.in(list)) : root.where(expr.notIn(list));
+                    } else {
+                        whereClause = (type == IN) ? root.where(expr.in(values)) : root.where(expr.notIn(values));
+                    }
                     break;
 
                 case STARTING_WITH:
@@ -311,7 +319,6 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     throw new NotSupportedException("Not supported keyword " + type);
             }
 
-            log.trace("whereClause={}", whereClause);
             return unwrap(whereClause);
         }
 

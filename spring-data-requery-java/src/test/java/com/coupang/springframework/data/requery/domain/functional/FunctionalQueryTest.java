@@ -268,8 +268,10 @@ public class FunctionalQueryTest extends AbstractDomainTest {
     }
 
     @Test
-    public void query_not_null() {
+    public void query_not_null() throws Exception {
         requeryTemplate.insertAll(RandomData.randomPeople(10));
+
+        Thread.sleep(10L);
 
         Result<Person> result = requeryTemplate.select(Person.class).where(Person.NAME.notNull()).get();
         assertThat(result.toList()).hasSize(10);

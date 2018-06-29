@@ -5,7 +5,7 @@ import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.Result;
 import io.requery.query.Scalar;
-import io.requery.query.Selection;
+import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import lombok.extern.slf4j.Slf4j;
@@ -183,10 +183,15 @@ public abstract class RequeryQueryExecution {
         @SuppressWarnings("unchecked")
         private long count(AbstractRequeryQuery query, Object[] values) {
             QueryElement<?> queryElement = unwrap(query.createQueryElement(values));
-            Selection<?> selection = query.getOperations().select(Count.count(query.getDomainClass()));
+            QueryElement<?> selection = (QueryElement<?>) query.getOperations().select(Count.count(query.getDomainClass()));
 
-            Scalar<Integer> result = (Scalar<Integer>) queryElement.select(Count.count(query.getDomainClass())).get();
-            return result.value();
+            QueryElement<? extends Result<Tuple>> countQuery = (QueryElement<? extends Result<Tuple>>)
+                unwrap(RequeryUtils.applyWhereClause(selection, queryElement.getWhereElements()));
+
+            Tuple countResult = countQuery.get().firstOrNull();
+
+            Integer count = (Integer) RequeryResultConverter.convertResult(countResult, 0);
+            return count.longValue();
         }
     }
 

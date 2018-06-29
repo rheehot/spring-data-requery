@@ -7,6 +7,7 @@ import com.coupang.springframework.data.requery.domain.sample.SpecialUser;
 import com.coupang.springframework.data.requery.domain.sample.User;
 import com.coupang.springframework.data.requery.domain.sample.User_Colleagues;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
+import io.requery.query.Tuple;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -37,8 +38,8 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 
     User findByEmailAddress(String emailAddress);
 
-//    @Query("select * from SD_User u left outer join u.manager as manager")
-//    Page<User> findAllPages(Pageable pageable);
+    @Query("select * from SD_User u left outer join SD_User m on (u.manager = m.id)")
+    Page<User> findAllPaged(Pageable pageable);
 
     User findByEmailAddressAndLastname(String emailAddress, String lastname);
 
@@ -64,14 +65,12 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 
     List<User> findByFirstnameNotIn(Collection<String> firstname);
 
-    // NOTE: 이건 아마 안될거야 ...
-    @Query("select * from SD_User u wehre u.firstname like ?%")
+    @Query("select * from SD_User u where u.firstname like ?")
     List<User> findByFirstnameLike(String firstname);
 
-    // NOTE: 이건 아마 안될거야 ...
-    @Query("select * from SD_User u wehre u.firstname like :firstname%")
+    // NOTE: Not supported Named Parameter
+    @Query("select * from SD_User u where u.firstname like :firstname%")
     List<User> findByFirstnameLikeNamed(@Param("firstname") String firstname);
-
 
     /**
      * Manipulating query to set all {@link User}'s names to the given one.
@@ -165,7 +164,7 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     List<User> findByFirstnameContaining(String firstname);
 
     @Query(value = "SELECT 1 FROM SD_User")
-    List<Integer> findOnesByNativeQuery();
+    List<Tuple> findOnesByNativeQuery();
 
     // DATAJPA-231
     long countByLastname(String lastname);

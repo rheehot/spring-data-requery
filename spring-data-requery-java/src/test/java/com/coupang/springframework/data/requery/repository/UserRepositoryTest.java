@@ -13,7 +13,9 @@ import com.coupang.springframework.data.requery.repository.sample.UserRepository
 import com.coupang.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean;
 import com.coupang.springframework.data.requery.repository.support.SimpleRequeryRepository;
 import io.requery.query.Result;
+import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
+import io.requery.sql.StatementExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -105,7 +107,7 @@ public class UserRepositoryTest {
         firstUser = createUser("Debop", "Bae", "debop@coupang.com");
         firstUser.setAge(51);
 
-        secondUser = createUser("HyoungGab", "Ahn", "diego@coupang.com");
+        secondUser = createUser("Diego", "Ahn", "diego@coupang.com");
         secondUser.setAge(30);
 
         Thread.sleep(10);
@@ -463,7 +465,6 @@ public class UserRepositoryTest {
             .containsOnly(firstUser, secondUser);
     }
 
-    // BUG: where 절에 반복해서 두 번 나온다.
     @Test
     public void executesMethodWithNamedParametersCorrectlyOnMethodsWithQueryCreation() {
 
@@ -678,6 +679,60 @@ public class UserRepositoryTest {
         assertThat(repository.findByFirstnameStartingWith("Deb")).containsOnly(firstUser);
     }
 
+    @Test
+    public void executesFinderWithEndingWithCorrectly() {
+
+        flushTestUsers();
+        assertThat(repository.findByFirstnameEndingWith("bop")).containsOnly(firstUser);
+    }
+
+    @Test
+    public void executesFinderWithContainingCorrectly() {
+
+        flushTestUsers();
+        assertThat(repository.findByFirstnameContaining("n")).containsOnly(thirdUser, fourthUser);
+    }
+
+    @Test
+    public void allowsExecutingPageableMethodWithUnpagedArgument() {
+
+        flushTestUsers();
+
+        assertThat(repository.findByFirstname("Debop", null)).containsOnly(firstUser);
+
+        Page<User> page = repository.findByFirstnameIn(Pageable.unpaged(), "Debop", "Diego");
+        assertThat(page).isNotNull();
+        assertThat(page.getNumberOfElements()).isEqualTo(2);
+        assertThat(page.getContent()).containsOnly(firstUser, secondUser);
+
+        page = repository.findAll(Pageable.unpaged());
+        assertThat(page.getNumberOfElements()).isEqualTo(4);
+        assertThat(page.getContent()).contains(firstUser, secondUser, thirdUser, fourthUser);
+    }
+
+    @Test
+    public void executesNativeQueryForNonEntitiesCorrectly() {
+
+        flushTestUsers();
+
+        List<Tuple> result = repository.findOnesByNativeQuery();
+
+        assertThat(result.size()).isEqualTo(4);
+        assertThat(result.get(0).<Integer>get(0)).isEqualTo(1);
+    }
+
+    @Test
+    public void handlesIterableOfIdsCorrectly() {
+
+        flushTestUsers();
+
+        Set<Integer> set = new HashSet<>();
+        set.add(firstUser.getId());
+        set.add(secondUser.getId());
+
+        assertThat(repository.findAllById(set)).containsOnly(firstUser, secondUser);
+    }
+
     protected void flushTestUsers() {
 
         operations.upsert(adminRole);
@@ -714,6 +769,81 @@ public class UserRepositoryTest {
 
         repository.deleteAll(collection);
         assertThat(repository.count()).isEqualTo(count);
+    }
+
+    @Test
+    public void ordersByReferencedEntityCorrectly() {
+
+        flushTestUsers();
+        firstUser.setManager(thirdUser);
+        repository.upsert(firstUser);
+
+        Page<User> all = repository.findAll(PageRequest.of(0, 10, Sort.by("manager")));
+
+        assertThat(all.getContent()).isNotEmpty();
+    }
+
+    @Test(expected = NotSupportedException.class)
+    public void bindsSortingToOuterJoinCorrectly() {
+
+        flushTestUsers();
+
+        Page<User> result = repository.findAllPaged(PageRequest.of(0, 10, Sort.by("manager.lastname")));
+        assertThat(result.getContent()).hasSize((int) repository.count());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void doesNotDropNullValuesOnPagedSpecificationExecution() {
+
+        flushTestUsers();
+
+        // NOTE: Not support association property. (ex, manager.lastname)
+        QueryElement<?> whereClause = unwrap(operations.select(User.class).where(User.LASTNAME.eq("Bae")));
+        Page<User> page = repository.findAll((QueryElement<? extends Result<User>>) whereClause,
+                                             PageRequest.of(0, 20, Sort.by("manager.lastname")));
+
+        assertThat(page.getNumberOfElements()).isEqualTo(1);
+        assertThat(page).containsOnly(firstUser);
+    }
+
+    @Test
+    public void shouldGenerateLeftOuterJoinInfindAllWithPaginationAndSortOnNestedPropertyPath() {
+
+        firstUser.setManager(null);
+        secondUser.setManager(null);
+        thirdUser.setManager(firstUser);    // manager Debop
+        fourthUser.setManager(secondUser);  // manager Diego
+
+        flushTestUsers();
+
+        // NOTE: Not support association property. (ex, manager.lastname)
+        Page<User> pages = repository.findAll(PageRequest.of(0, 4, Sort.by("manager")));
+
+        assertThat(pages.getSize()).isEqualTo(4);
+        assertThat(pages.getContent().get(0).getManager()).isNull();
+        assertThat(pages.getContent().get(1).getManager()).isNull();
+        assertThat(pages.getContent().get(2).getManager().getFirstname()).isEqualTo("Debop");
+        assertThat(pages.getContent().get(3).getManager().getFirstname()).isEqualTo("Diego");
+    }
+
+    @Test
+    public void executesManualQueryWithPositionLikeExpressionCorrectly() {
+
+        flushTestUsers();
+
+        List<User> result = repository.findByFirstnameLike("Ni%");
+        assertThat(result).containsOnly(fourthUser);
+    }
+
+    // NOTE: Not supported Named parameter
+    @Test(expected = StatementExecutionException.class)
+    public void executesManualQueryWithNamedLikeExpressionCorrectly() {
+
+        flushTestUsers();
+
+        List<User> result = repository.findByFirstnameLikeNamed("Ni%");
+        assertThat(result).containsOnly(fourthUser);
     }
 
     @SuppressWarnings("unchecked")

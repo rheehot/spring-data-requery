@@ -201,7 +201,6 @@ public class RequeryUtils {
             Field field = findField(domainClass, propertyName);
             if (field != null) {
                 NamedExpression<?> expr = NamedExpression.of(propertyName, field.getType());
-
                 query = unwrap(baseQuery.orderBy(direction.isAscending() ? expr.asc() : expr.desc()));
             }
         }
