@@ -1129,10 +1129,10 @@ public class UserRepositoryTest {
         User youngest2 = thirdUser;
         User youngest3 = fourthUser;
 
-        Page<User> firstPage = repository.findFirst3UsersBy(PageRequest.of(0, 2, Sort.Direction.ASC, "age"));
-        assertThat(firstPage.getContent()).containsOnly(youngest1, youngest2);
+        Page<User> firstPage = repository.findFirst3UsersBy(PageRequest.of(0, 2, Sort.by("age")));
+        assertThat(firstPage.getContent()).contains(youngest1, youngest2);
 
-        Page<User> secondPage = repository.findFirst3UsersBy(PageRequest.of(1, 2, Sort.Direction.ASC, "age"));
+        Page<User> secondPage = repository.findFirst3UsersBy(PageRequest.of(1, 2, Sort.by("age")));
         assertThat(secondPage.getContent()).contains(youngest3);
     }
 
@@ -1145,10 +1145,10 @@ public class UserRepositoryTest {
         User youngest2 = thirdUser;
         User youngest3 = fourthUser;
 
-        Page<User> firstPage = repository.findFirst2UsersBy(PageRequest.of(0, 3, Sort.Direction.ASC, "age"));
+        Page<User> firstPage = repository.findFirst2UsersBy(PageRequest.of(0, 3, Sort.by("age")));
         assertThat(firstPage.getContent()).contains(youngest1, youngest2);
 
-        Page<User> secondPage = repository.findFirst2UsersBy(PageRequest.of(1, 3, Sort.Direction.ASC, "age"));
+        Page<User> secondPage = repository.findFirst2UsersBy(PageRequest.of(1, 3, Sort.by("age")));
         assertThat(secondPage.getContent()).contains(youngest3);
     }
 

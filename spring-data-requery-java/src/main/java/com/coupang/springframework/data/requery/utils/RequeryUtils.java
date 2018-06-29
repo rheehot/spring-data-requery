@@ -170,12 +170,15 @@ public class RequeryUtils {
             return baseQuery;
         }
 
-        QueryElement<?> query = applySort(domainClass, baseQuery, pageable.getSort());
+        QueryElement<?> query = baseQuery;
 
-        if (pageable.getPageSize() > 0) {
+        if (pageable.getSort().isSorted()) {
+            query = applySort(domainClass, query, pageable.getSort());
+        }
+        if (pageable.getPageSize() > 0 && query.getLimit() == null) {
             query = unwrap(query.limit(pageable.getPageSize()));
         }
-        if (pageable.getOffset() > 0) {
+        if (pageable.getOffset() > 0 && query.getOffset() == null) {
             query = unwrap(query.offset((int) pageable.getOffset()));
         }
 
@@ -188,20 +191,33 @@ public class RequeryUtils {
                                                 @NotNull Sort sort) {
         log.trace("Apply sort, domainClass={}, sort={}", domainClass.getSimpleName(), sort);
 
-        if (sort.isUnsorted()) {
-            return baseQuery;
-        }
-
         QueryElement<?> query = baseQuery;
 
-        for (Sort.Order order : sort) {
-            String propertyName = order.getProperty();
-            Sort.Direction direction = order.getDirection();
+        if (sort.isUnsorted()) {
+            return query;
+        }
 
-            Field field = findField(domainClass, propertyName);
-            if (field != null) {
-                NamedExpression<?> expr = NamedExpression.of(propertyName, field.getType());
-                query = unwrap(baseQuery.orderBy(direction.isAscending() ? expr.asc() : expr.desc()));
+        for (Sort.Order order : sort) {
+
+            final String propertyName = order.getProperty();
+            final Sort.Direction direction = order.getDirection();
+
+            // 이미 있을 수 있다 ...
+            Expression<?> orderExpr = null;
+            if (query.getOrderByExpressions() != null) {
+                orderExpr = query.getOrderByExpressions()
+                    .stream()
+                    .filter(it -> propertyName.equals(it.getName()))
+                    .findFirst()
+                    .orElse(null);
+            }
+
+            if (orderExpr == null) {
+                Field field = findField(domainClass, propertyName);
+                if (field != null) {
+                    NamedExpression<?> expr = NamedExpression.of(propertyName, field.getType());
+                    query = unwrap(query.orderBy(direction.isAscending() ? expr.asc() : expr.desc()));
+                }
             }
         }
 

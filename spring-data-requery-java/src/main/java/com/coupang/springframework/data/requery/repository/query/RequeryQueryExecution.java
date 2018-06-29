@@ -175,7 +175,7 @@ public abstract class RequeryQueryExecution {
             QueryElement<?> queryElement = unwrap(query.createQueryElement(values));
 
             // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
-            if (queryElement.getLimit() == null) {
+            if (queryElement.getLimit() == null && queryElement.getOffset() == null) {
                 queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, accessor.getPageable());
             }
             Result<?> result = (Result<?>) queryElement.get();
