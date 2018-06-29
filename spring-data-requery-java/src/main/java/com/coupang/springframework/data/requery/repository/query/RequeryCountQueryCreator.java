@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
+import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class RequeryCountQueryCreator extends RequeryQueryCreator {
                 query = unwrap(query.distinct());
             }
 
-            return unwrap(query.where().exists(criteria));
+            return unwrap(RequeryUtils.applyWhereClause(query, criteria.getWhereElements()));
         }
         return query;
     }

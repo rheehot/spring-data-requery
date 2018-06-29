@@ -846,6 +846,13 @@ public class UserRepositoryTest {
         assertThat(result).containsOnly(fourthUser);
     }
 
+    @Test
+    public void executesDerivedCountQueryToLong() {
+
+        flushTestUsers();
+        assertThat(repository.countByLastname("Bae")).isEqualTo(1L);
+    }
+
     @SuppressWarnings("unchecked")
     private Page<User> executeSpecWithSort(Sort sort) {
 
