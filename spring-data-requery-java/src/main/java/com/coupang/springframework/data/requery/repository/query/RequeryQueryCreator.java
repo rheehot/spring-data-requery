@@ -5,13 +5,11 @@ import com.coupang.springframework.data.requery.core.RequeryOperations;
 import com.coupang.springframework.data.requery.mapping.RequeryMappingContext;
 import com.coupang.springframework.data.requery.repository.query.ParameterMetadataProvider.ParameterMetadata;
 import com.coupang.springframework.data.requery.utils.Iterables;
-import com.coupang.springframework.data.requery.utils.RequeryUtils;
 import io.requery.query.Condition;
 import io.requery.query.FieldExpression;
+import io.requery.query.LogicalCondition;
 import io.requery.query.NamedExpression;
-import io.requery.query.Return;
 import io.requery.query.element.QueryElement;
-import io.requery.query.element.WhereConditionElement;
 import io.requery.query.function.Count;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +22,12 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
-import static com.coupang.springframework.data.requery.utils.RequeryUtils.applyWhereClause;
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.applySort;
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static org.springframework.data.repository.query.parser.Part.Type.*;
 
@@ -38,7 +39,7 @@ import static org.springframework.data.repository.query.parser.Part.Type.*;
  */
 @Slf4j
 @Getter
-public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, QueryElement<?>> {
+public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, LogicalCondition<?, ?>> {
 
     private final RequeryOperations operations;
     private final RequeryMappingContext context;
@@ -102,92 +103,69 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
 
     @SuppressWarnings("unchecked")
     @Override
-    protected QueryElement<?> create(Part part, Iterator<Object> iterator) {
-        return toQueryElement(part, root);
+    protected LogicalCondition<?, ?> create(Part part, Iterator<Object> iterator) {
+        log.trace("Build new condition...");
+        return buildWhereCondition(part);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected QueryElement<?> and(Part part,
-                                  QueryElement<?> base,
-                                  Iterator<Object> iterator) {
+    protected LogicalCondition<?, ?> and(Part part,
+                                         LogicalCondition<?, ?> base,
+                                         Iterator<Object> iterator) {
         log.trace("add AND condition");
-        Set<WhereConditionElement<?>> elements = toQueryElement(part, root).getWhereElements();
 
-        log.debug("elements size={}", elements.size());
+        Condition<?, ?> condition = buildWhereCondition(part);
 
-        if (elements.size() > 0) {
-            Condition<?, ?> condition = elements.iterator().next().getCondition();
-            return unwrap(base.where(condition));
-        } else {
-            return unwrap(base);
-        }
+        log.trace("add where criteria. criteria={}", condition);
+
+        return base.and(condition);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected QueryElement<?> or(QueryElement<?> base,
-                                 QueryElement<?> criteria) {
-
-        log.trace("add OR condition. base condition size={}", base.getWhereElements().size());
-        log.trace("add OR condition. criteria condition size={}", criteria.getWhereElements().size());
-
-        base.getWhereElements().forEach(element -> {
-            log.trace("base where element. operator={}, left operand={}", element.getOperator(), element.getCondition().getLeftOperand());
-        });
-
-        criteria.getWhereElements().forEach(element -> {
-            log.trace("criteria where element. operator={}, left operand={}", element.getOperator(), element.getCondition().getLeftOperand());
-        });
-
-        Set<WhereConditionElement<?>> whereElements = criteria.getWhereElements();
-        if (base == criteria) {
-            whereElements = new HashSet(criteria.getWhereElements());
-            base.getWhereElements().clear();
-        }
-
-        return unwrap(applyWhereClause(base, whereElements, false));
+    protected LogicalCondition<?, ?> or(LogicalCondition<?, ?> base,
+                                        LogicalCondition<?, ?> criteria) {
+        return base.or(criteria);
     }
 
     @Override
-    protected QueryElement<?> complete(QueryElement<?> criteria, Sort sort) {
+    protected QueryElement<?> complete(LogicalCondition<?, ?> criteria, Sort sort) {
         return complete(criteria, sort, root);
     }
 
     @SuppressWarnings("unchecked")
-    protected QueryElement<?> complete(QueryElement<?> criteria,
+    protected QueryElement<?> complete(LogicalCondition<?, ?> criteria,
                                        Sort sort,
                                        QueryElement<?> root) {
         log.trace("Complete query...");
 
-        QueryElement<?> queryElement = criteria != null ? criteria : root;
-        return RequeryUtils.applySort(returnedType.getDomainType(), queryElement, sort);
+        // TODO: returnType.needsCustomConstruction() 을 이용해서 Custom Type 에 대한 작업을 수행할 수 있다.
+
+        QueryElement<?> queryElement = criteria != null ? unwrap(root.where(criteria)) : root;
+        return applySort(returnedType.getDomainType(), queryElement, sort);
     }
 
-    private QueryElement<?> toQueryElement(Part part, QueryElement<?> root) {
-        return new QueryElementBuilder(part, root).build();
+    private LogicalCondition<?, ?> buildWhereCondition(Part part) {
+        return new QueryElementBuilder(part).build();
     }
-
 
     private class QueryElementBuilder {
 
         private final Part part;
-        private final QueryElement<?> root;
 
-        public QueryElementBuilder(Part part, QueryElement<?> root) {
-            log.debug("Create QueryElementBuilder. part={}, root={}", part, root);
+        public QueryElementBuilder(Part part) {
+            log.debug("Create QueryElementBuilder. part={}l", part);
 
             Assert.notNull(part, "Part must not be null!");
-            Assert.notNull(root, "Root must not be null!");
             this.part = part;
-            this.root = root;
         }
 
         /**
          * Build Requery {@link QueryElement} from the underlying {@link Part}
          */
         @SuppressWarnings("unchecked")
-        public QueryElement<?> build() {
+        public LogicalCondition<?, ?> build() {
 
             PropertyPath property = part.getProperty();
             Part.Type type = part.getType();
@@ -196,40 +174,40 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
 
             log.debug("Build QueryElement ... property={}, type={}, expr={}", property, type, expr);
 
-            Return<?> whereClause;
+            LogicalCondition<?, ?> condition;
 
             switch (type) {
                 case BETWEEN:
                     ParameterMetadata<Comparable> first = provider.next(part);
                     ParameterMetadata<Comparable> second = provider.next(part);
 
-                    whereClause = root.where(expr.between(first.getValue(), second.getValue()));
+                    condition = expr.between(first.getValue(), second.getValue());
                     break;
 
                 case AFTER:
                 case GREATER_THAN:
-                    whereClause = root.where(expr.greaterThan(provider.next(part, Comparable.class).getValue()));
+                    condition = expr.greaterThan(provider.next(part, Comparable.class).getValue());
                     break;
 
                 case GREATER_THAN_EQUAL:
-                    whereClause = root.where(expr.greaterThanOrEqual(provider.next(part, Comparable.class).getValue()));
+                    condition = expr.greaterThanOrEqual(provider.next(part, Comparable.class).getValue());
                     break;
 
                 case BEFORE:
                 case LESS_THAN:
-                    whereClause = root.where(expr.lt(provider.next(part, Comparable.class).getValue()));
+                    condition = expr.lt(provider.next(part, Comparable.class).getValue());
                     break;
 
                 case LESS_THAN_EQUAL:
-                    whereClause = root.where(expr.lte(provider.next(part, Comparable.class).getValue()));
+                    condition = expr.lte(provider.next(part, Comparable.class).getValue());
                     break;
 
                 case IS_NULL:
-                    whereClause = root.where(expr.isNull());
+                    condition = expr.isNull();
                     break;
 
                 case IS_NOT_NULL:
-                    whereClause = root.where(expr.notNull());
+                    condition = expr.notNull();
                     break;
 
                 case NOT_IN:
@@ -240,12 +218,12 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     if (values instanceof Iterable) {
                         Collection cols = Iterables.toList((Iterable) values);
                         log.trace("cols = {}", cols);
-                        whereClause = (type == IN) ? root.where(expr.in(cols)) : root.where(expr.notIn(cols));
+                        condition = (type == IN) ? expr.in(cols) : expr.notIn(cols);
                     } else if (values instanceof Object[]) {
                         List list = Arrays.asList((Object[]) values);
-                        whereClause = (type == IN) ? root.where(expr.in(list)) : root.where(expr.notIn(list));
+                        condition = (type == IN) ? expr.in(list) : expr.notIn(list);
                     } else {
-                        whereClause = (type == IN) ? root.where(expr.in(values)) : root.where(expr.notIn(values));
+                        condition = (type == IN) ? expr.in(values) : expr.notIn(values);
                     }
                     break;
 
@@ -254,7 +232,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                         throw new NotSupportedException("Not supported keyword " + type);
                     }
 
-                    whereClause = root.where(expr.like(provider.next(part, String.class).getValue() + "%"));
+                    condition = expr.like(provider.next(part, String.class).getValue() + "%");
                     break;
 
                 case ENDING_WITH:
@@ -262,7 +240,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                         throw new NotSupportedException("Not supported keyword " + type);
                     }
 
-                    whereClause = root.where(expr.like("%" + provider.next(part, String.class).getValue()));
+                    condition = expr.like("%" + provider.next(part, String.class).getValue());
                     break;
 
                 case CONTAINING:
@@ -270,7 +248,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                         throw new NotSupportedException("Not supported keyword " + type);
                     }
 
-                    whereClause = root.where(expr.like("%" + provider.next(part, String.class).getValue() + "%"));
+                    condition = expr.like("%" + provider.next(part, String.class).getValue() + "%");
                     break;
 
                 case NOT_CONTAINING:
@@ -278,7 +256,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                         throw new NotSupportedException("Not supported keyword " + type);
                     }
 
-                    whereClause = root.where(expr.notLike("%" + provider.next(part, String.class).getValue() + "%"));
+                    condition = expr.notLike("%" + provider.next(part, String.class).getValue() + "%");
                     break;
 
                 case LIKE:
@@ -291,17 +269,17 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                         value = "%" + value + "%";
                     }
 
-                    whereClause = (type.equals(LIKE) || type.equals(CONTAINING))
-                                  ? root.where(fieldExpr.like(value))
-                                  : root.where(fieldExpr.notLike(value));
+                    condition = (type.equals(LIKE) || type.equals(CONTAINING))
+                                ? fieldExpr.like(value)
+                                : fieldExpr.notLike(value);
                     break;
 
                 case TRUE:
-                    whereClause = root.where(expr.eq(true));
+                    condition = expr.eq(true);
                     break;
 
                 case FALSE:
-                    whereClause = root.where(expr.eq(false));
+                    condition = expr.eq(false);
                     break;
 
                 // IS, Equals 
@@ -309,16 +287,16 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     ParameterMetadata<Object> simpleExpr = provider.next(part);
                     upperIfIgnoreCase(simpleExpr.getExpression());
 
-                    whereClause = simpleExpr.isIsNullParameter()
-                                  ? root.where(expr.isNull())
-                                  : root.where(upperIfIgnoreCase(expr).eq(simpleExpr.getValue()));
+                    condition = simpleExpr.isIsNullParameter()
+                                ? expr.isNull()
+                                : upperIfIgnoreCase(expr).eq(simpleExpr.getValue());
                     break;
 
                 case NEGATING_SIMPLE_PROPERTY:
                     ParameterMetadata<Object> simpleNotExpr = provider.next(part);
                     upperIfIgnoreCase(simpleNotExpr.getExpression());
 
-                    whereClause = root.where(upperIfIgnoreCase(expr).notEqual(simpleNotExpr.getValue()));
+                    condition = upperIfIgnoreCase(expr).notEqual(simpleNotExpr.getValue());
                     break;
 
                 case IS_EMPTY:
@@ -327,7 +305,7 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
                     throw new NotSupportedException("Not supported keyword " + type);
             }
 
-            return unwrap(whereClause);
+            return condition;
         }
 
         private <T> FieldExpression<T> upperIfIgnoreCase(FieldExpression<T> expression) {

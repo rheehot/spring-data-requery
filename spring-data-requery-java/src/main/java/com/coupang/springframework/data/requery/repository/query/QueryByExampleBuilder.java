@@ -1,10 +1,8 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.utils.RequeryUtils;
-import io.requery.query.Condition;
-import io.requery.query.NamedExpression;
-import io.requery.query.Result;
-import io.requery.query.WhereAndOr;
+import io.requery.query.*;
+import io.requery.query.element.LogicalOperator;
 import io.requery.query.element.QueryElement;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +18,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.coupang.springframework.data.requery.utils.RequeryUtils.buildWhereClause;
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher;
 
 /**
@@ -52,9 +50,19 @@ public class QueryByExampleBuilder {
                                                          example.getProbeType(),
                                                          new ExampleMatcherAccessor(matcher));
 
-        List<Condition<?, ?>> conds = RequeryUtils.getGenericConditions(conditions);
+//        List<Condition<?, ?>> conds = RequeryUtils.getGenericConditions(conditions);
+//        return (QueryElement<? extends Result<E>>) buildWhereClause(root, conds, matcher.isAllMatching());
 
-        return (QueryElement<? extends Result<E>>) buildWhereClause(root, conds, matcher.isAllMatching());
+        LogicalCondition<E, ?> whereCondition = null;
+        if (matcher.isAllMatching()) {
+            whereCondition = RequeryUtils.foldConditions(conditions, LogicalOperator.AND);
+        } else if (matcher.isAnyMatching()) {
+            whereCondition = RequeryUtils.foldConditions(conditions, LogicalOperator.OR);
+        }
+
+        return (whereCondition != null)
+               ? (QueryElement<? extends Result<E>>) unwrap(root.where(whereCondition))
+               : root;
     }
 
     @SuppressWarnings("unchecked")
@@ -122,7 +130,7 @@ public class QueryByExampleBuilder {
             case EXACT:
                 return (Condition<E, ?>) (ignoreCase
                                           ? expression.function("Lower").eq((fieldValue).toLowerCase())
-                                          : expression.eq((String) fieldValue));
+                                          : expression.eq(fieldValue));
             case CONTAINING:
                 return (Condition<E, ?>) (ignoreCase
                                           ? expression.function("Lower").like(("%" + fieldValue + "%").toLowerCase())

@@ -43,7 +43,7 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 
     User findByEmailAddressAndLastname(String emailAddress, String lastname);
 
-    User findByEmailAddressAndLastnameOrFirstname(String emailAddress, String lastname, String username);
+    List<User> findByEmailAddressAndLastnameOrFirstname(String emailAddress, String lastname, String firstname);
 
     @Query("select * from SD_User u where u.emailAddress = ?")
     @Transactional(readOnly = true)

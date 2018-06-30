@@ -369,26 +369,17 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @Override
     public List<T> findAll(Iterable<Condition<T, ?>> conditions, Sort sort) {
 
-        QueryElement<? extends Result<T>> baseQuery = (QueryElement<? extends Result<T>>) getOperations().select(domainClass);
-        baseQuery = (QueryElement<? extends Result<T>>) buildWhereClause(baseQuery,
-                                                                         getGenericConditions(conditions),
-                                                                         true);
-
-        Return<? extends Result<T>> query = (Return<? extends Result<T>>) applySort(domainClass, baseQuery, sort);
-
-        return query.get().toList();
+        LogicalCondition<T, ?> condition = foldConditions(conditions);
+        QueryElement<?> query = unwrap(operations.select(domainClass).where(condition));
+        return ((QueryElement<? extends Result<T>>) applySort(domainClass, query, sort)).get().toList();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll(Iterable<Condition<T, ?>> conditions) {
-        QueryElement<?> baseQuery = (QueryElement<?>) getOperations().select(domainClass);
 
-
-        Return<? extends Result<T>> query = (Return<? extends Result<T>>)
-            buildWhereClause(baseQuery, getGenericConditions(conditions), true);
-
-        return query.get().toList();
+        LogicalCondition<T, ?> condition = foldConditions(conditions);
+        return operations.select(domainClass).where(condition).get().toList();
     }
 
     @SuppressWarnings("unchecked")

@@ -248,6 +248,43 @@ public class RequeryUtils {
         return orderingExprs.toArray(new OrderingExpression<?>[0]);
     }
 
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public static <E> LogicalCondition<E, ?> foldConditions(Iterable<Condition<E, ?>> conditions) {
+        LogicalCondition<E, ?> condition = null;
+        for (Condition<E, ?> cond : conditions) {
+            if (condition == null) {
+                condition = (LogicalCondition<E, ?>) cond;
+            } else {
+                condition.and(cond);
+            }
+        }
+        return condition;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public static <E> LogicalCondition<E, ?> foldConditions(Iterable<Condition<E, ?>> conditions, LogicalOperator operator) {
+        LogicalCondition<E, ?> condition = null;
+        for (Condition<E, ?> cond : conditions) {
+            if (condition == null) {
+                condition = (LogicalCondition<E, ?>) cond;
+            } else {
+                switch (operator) {
+                    case AND:
+                        condition.and(cond);
+                        break;
+                    case OR:
+                        condition.or(cond);
+                        break;
+                    case NOT:
+                        condition.and(((LogicalCondition<E, ?>) cond).not());
+                }
+            }
+        }
+        return condition;
+    }
+
     public static QueryElement<?> applyWhereClause(QueryElement<?> baseQuery,
                                                    Set<WhereConditionElement<?>> conditionElements) {
         if (conditionElements.isEmpty()) {
@@ -289,72 +326,14 @@ public class RequeryUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static QueryElement<?> applyWhereClause(QueryElement<?> baseQuery,
-                                                   Set<WhereConditionElement<?>> conditionElements,
-                                                   boolean isAnd) {
-
-        List<Condition<?, ?>> conds = conditionElements.stream().map(it -> it.getCondition()).collect(toList());
-
-        log.trace("where conditions={}", conds);
-
-        if (conds.isEmpty()) {
-            return baseQuery;
-        } else if (conds.size() == 1) {
-            return unwrap(baseQuery.where(conds.get(0)));
-        } else {
-            WhereAndOr<?>[] whereClauses = new WhereAndOr[1];
-            whereClauses[0] = baseQuery.where(conds.get(0));
-
-            conds.stream()
-                .skip(1)
-                .forEach(condition -> {
-                    log.trace("where clause = {}", whereClauses[0]);
-                    if (isAnd) {
-                        whereClauses[0] = whereClauses[0].and(condition);
-                    } else {
-                        whereClauses[0] = whereClauses[0].or(condition);
-                    }
-                });
-
-            return unwrap(whereClauses[0]);
-        }
-    }
-
-    public static QueryElement<?> buildWhereClause(QueryElement<?> baseQuery,
-                                                   Iterable<Condition<?, ?>> conditions,
-                                                   boolean isAnd) {
-
-        List<Condition<?, ?>> conds = Iterables.toList(conditions);
-
-        if (conds.isEmpty()) {
-            return baseQuery;
-        } else if (conds.size() == 1) {
-            return unwrap(baseQuery.where(conds.get(0)));
-        } else {
-            final List<WhereAndOr<?>> whereClauses = new ArrayList<>();
-            whereClauses.add(baseQuery.where(conds.get(0)));
-
-            conds.stream()
-                .skip(1)
-                .forEach(condition -> {
-                    if (isAnd) {
-                        whereClauses.set(0, whereClauses.get(0).and(condition));
-                    } else {
-                        whereClauses.set(0, whereClauses.get(0).or(condition));
-                    }
-                });
-
-            return unwrap(whereClauses.get(0));
-        }
-    }
-
+    @Deprecated
     public static List<Condition<?, ?>> getConditions(QueryElement<?> query) {
         return query.getWhereElements().stream()
             .map(it -> it.getCondition())
             .collect(toList());
     }
 
+    @Deprecated
     public static <T> List<Condition<?, ?>> getGenericConditions(Iterable<Condition<T, ?>> conditions) {
         List<Condition<?, ?>> conds = new ArrayList<>();
         for (Condition<T, ?> condition : conditions) {

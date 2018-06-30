@@ -197,10 +197,13 @@ public abstract class RequeryQueryExecution {
             QueryElement<?> queryElement = unwrap(query.createQueryElement(values));
             QueryElement<?> selection = (QueryElement<?>) query.getOperations().select(Count.count(query.getDomainClass()));
 
-            QueryElement<? extends Result<Tuple>> countQuery = (QueryElement<? extends Result<Tuple>>)
-                unwrap(RequeryUtils.applyWhereClause(selection, queryElement.getWhereElements()));
+            selection.getWhereElements().addAll(queryElement.getWhereElements());
 
-            Tuple countResult = countQuery.get().firstOrNull();
+//            QueryElement<? extends Result<Tuple>> countQuery = (QueryElement<? extends Result<Tuple>>)
+//                unwrap(RequeryUtils.applyWhereClause(selection, queryElement.getWhereElements()));
+//            Tuple countResult = countQuery.get().firstOrNull();
+
+            Tuple countResult = ((QueryElement<? extends Result<Tuple>>) selection).get().firstOrNull();
 
             Integer count = (Integer) RequeryResultConverter.convertResult(countResult, 0);
             return count.longValue();

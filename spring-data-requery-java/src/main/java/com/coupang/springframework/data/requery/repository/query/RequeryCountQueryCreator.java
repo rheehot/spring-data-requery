@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.repository.query;
 
 import com.coupang.springframework.data.requery.core.RequeryOperations;
-import com.coupang.springframework.data.requery.utils.RequeryUtils;
+import io.requery.query.LogicalCondition;
 import io.requery.query.element.QueryElement;
 import io.requery.query.function.Count;
 import lombok.extern.slf4j.Slf4j;
@@ -35,19 +35,23 @@ public class RequeryCountQueryCreator extends RequeryQueryCreator {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected QueryElement<?> complete(QueryElement<?> criteria,
+    protected QueryElement<?> complete(LogicalCondition<?, ?> criteria,
                                        Sort sort,
                                        QueryElement<?> root) {
 
-        QueryElement<?> query = unwrap(getOperations().select(Count.count(getDomainClass())));
+        return unwrap(getOperations()
+                          .select(Count.count(getDomainClass()))
+                          .where(criteria));
 
-        if (criteria != null) {
-            if (criteria.isDistinct()) {
-                query = unwrap(query.distinct());
-            }
+//        QueryElement<?> query = unwrap(getOperations().select(Count.count(getDomainClass())));
 
-            return unwrap(RequeryUtils.applyWhereClause(query, criteria.getWhereElements()));
-        }
-        return query;
+//        if (criteria != null) {
+//            if (criteria.isDistinct()) {
+//                query = unwrap(query.distinct());
+//            }
+//
+//            return unwrap(RequeryUtils.applyWhereClause(query, criteria.getWhereElements()));
+//        }
+//        return query;
     }
 }
