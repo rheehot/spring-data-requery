@@ -16,8 +16,6 @@ import org.springframework.data.repository.query.ResultProcessor;
 import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-
 /**
  * {@link Query} annotation이 정의된 메소드, interface default method, custom defined method를 실행하는 {@link RepositoryQuery}
  *
@@ -56,9 +54,10 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
         // TODO: Entity 나 Tuple 에 대해 ReturnedType에 맞게 casting 해야 한다.
         // TODO: Paging 에 대해서는 처리했는데, Sort 는 넣지 못했음. 이 부분도 추가해야 함.
 
-        if (getQueryMethod().isPageQuery()) {
-            RequeryParametersParameterAccessor accessor = new RequeryParametersParameterAccessor(getQueryMethod().getParameters(), parameters);
-            Pageable pageable = accessor.getPageable();
+        RequeryParametersParameterAccessor accessor = new RequeryParametersParameterAccessor(getQueryMethod().getParameters(), parameters);
+        Pageable pageable = accessor.getPageable();
+
+        if (pageable.isPaged()) {
 
             int pageableIndex = accessor.getParameters().getPageableIndex();
 
@@ -72,8 +71,8 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
             }
 
             if (pageable.isUnpaged()) {
-                List<?> rows = operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, values).toList();
-                return new PageImpl(rows);
+                result = operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, values);
+                return castResult(result);
             } else {
 
                 String countQuery = "select count(cnt_tbl.*) from (" + query + ") as cnt_tbl";
@@ -83,11 +82,11 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
                 int limit = pageable.getPageSize();
 
                 query = query + " offset " + offset + " limit " + limit;
-                List<?> rows = (getQueryMethod().isQueryForEntity())
-                               ? operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, values).toList()
-                               : operations.raw(query, values).toList();
+                result = (getQueryMethod().isQueryForEntity())
+                         ? operations.raw(getQueryMethod().getEntityInformation().getJavaType(), query, values)
+                         : operations.raw(query, values);
 
-                return new PageImpl(rows, pageable, countResult.<Long>get(0));
+                return castResult(result, pageable, countResult.<Long>get(0));
             }
         }
 
@@ -101,14 +100,27 @@ public class DeclaredRequeryQuery extends AbstractRequeryQuery {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     private Object castResult(Result<?> result) {
+        return castResult(result, Pageable.unpaged(), null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private Object castResult(Result<?> result, Pageable pageable, Long totals) {
         // TODO: List<Tuple> 인 경우 returned type 으로 변경해야 한다.
 
         if (getQueryMethod().isCollectionQuery()) {
             return result.toList();
         } else if (getQueryMethod().isStreamQuery()) {
             return result.stream();
+        } else if (getQueryMethod().isPageQuery()) {
+            if (pageable.isPaged()) {
+                return new PageImpl<>(result.toList(), pageable, totals);
+            } else {
+                return new PageImpl<>(result.toList());
+            }
         } else {
             return RequeryResultConverter.convertResult(result.firstOrNull());
         }

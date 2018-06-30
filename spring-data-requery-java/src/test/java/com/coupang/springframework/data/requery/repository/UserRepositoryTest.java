@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.*;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -34,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static java.util.Objects.requireNonNull;
@@ -91,6 +93,10 @@ public class UserRepositoryTest {
     User firstUser, secondUser, thirdUser, fourthUser;
     Integer id;
     Role adminRole;
+
+    private static User createUser() {
+        return createUser(null, null, null);
+    }
 
     private static User createUser(String firstname, String lastname, String email, Role... roles) {
         User user = new User();
@@ -989,7 +995,7 @@ public class UserRepositoryTest {
 
         flushTestUsers();
 
-        List<User> result = repository.findAll(Example.of(createUser(null, null, null),
+        List<User> result = repository.findAll(Example.of(createUser(),
                                                           matching().withIgnorePaths("age", "createdAt", "dateOfBirth")));
         assertThat(result).hasSize(4);
     }
@@ -999,7 +1005,7 @@ public class UserRepositoryTest {
 
         flushTestUsers();
 
-        Example<User> example = Example.of(createUser(null, null, null),
+        Example<User> example = Example.of(createUser(),
                                            matching().withIgnorePaths("age", "createdAt", "dateOfBirth"));
         List<User> result = repository.findAll(example);
 
@@ -1150,6 +1156,371 @@ public class UserRepositoryTest {
 
         Page<User> secondPage = repository.findFirst2UsersBy(PageRequest.of(1, 3, Sort.by("age")));
         assertThat(secondPage.getContent()).contains(youngest3);
+    }
+
+    @Test
+    public void find3YoungestUsersPageableWithPageSize2Sliced() {
+
+        flushTestUsers();
+
+        User youngest1 = secondUser;
+        User youngest2 = thirdUser;
+        User youngest3 = fourthUser;
+
+        Slice<User> firstPage = repository.findTop3UsersBy(PageRequest.of(0, 2, Sort.by("age")));
+        assertThat(firstPage.getContent()).contains(youngest1, youngest2);
+
+        Slice<User> secondPage = repository.findTop3UsersBy(PageRequest.of(1, 2, Sort.by("age")));
+        assertThat(secondPage.getContent()).contains(youngest3);
+    }
+
+    @Test
+    public void find2YoungestUsersPageableWithPageSize3Sliced() {
+        flushTestUsers();
+
+        User youngest1 = secondUser;
+        User youngest2 = thirdUser;
+        User youngest3 = fourthUser;
+
+        Slice<User> firstPage = repository.findTop2UsersBy(PageRequest.of(0, 3, Sort.by("age")));
+        assertThat(firstPage.getContent()).contains(youngest1, youngest2);
+
+        Slice<User> secondPage = repository.findTop2UsersBy(PageRequest.of(1, 3, Sort.by("age")));
+        assertThat(secondPage.getContent()).contains(youngest3);
+    }
+
+    @Test
+    public void pageableQueryReportsTotalFromResult() {
+
+        flushTestUsers();
+
+        Page<User> firstPage = repository.findAll(PageRequest.of(0, 10));
+        assertThat(firstPage.getContent()).hasSize(4);
+        assertThat(firstPage.getTotalElements()).isEqualTo(4L);
+
+        Page<User> secondPage = repository.findAll(PageRequest.of(1, 3));
+        assertThat(secondPage.getContent()).hasSize(1);
+        assertThat(secondPage.getTotalElements()).isEqualTo(4L);
+    }
+
+    @Test
+    public void pageableQueryReportsTotalFromCount() {
+
+        flushTestUsers();
+
+        Page<User> firstPage = repository.findAll(PageRequest.of(0, 4));
+        assertThat(firstPage.getContent()).hasSize(4);
+        assertThat(firstPage.getTotalElements()).isEqualTo(4L);
+
+        Page<User> secondPage = repository.findAll(PageRequest.of(10, 10));
+        assertThat(secondPage.getContent()).hasSize(0);
+        assertThat(secondPage.getTotalElements()).isEqualTo(4L);
+    }
+
+    @Test
+    public void invokesQueryWithWrapperType() {
+
+        flushTestUsers();
+
+        // TODO: Query by property 에서는 ReturnedType 에 맞게 변형해준다. Query by Raw Query 에서 이 것을 참조해서 변경해야 한다.
+        Optional<User> result = repository.findOptionalByEmailAddress("debop@coupang.com");
+
+        assertThat(result.isPresent()).isEqualTo(true);
+        assertThat(result.get()).isEqualTo(firstUser);
+    }
+
+    // NOTE: We will not support Spring Expression !!!
+
+
+    @Test
+    public void findByEmptyCollectionOfIntegers() {
+
+        flushTestUsers();
+
+        List<User> users = repository.findByAgeIn(Collections.emptyList());
+        assertThat(users).isEmpty();
+    }
+
+    @Test
+    public void findByEmptyArrayOfIntegers() {
+
+        flushTestUsers();
+
+        List<User> users = repository.queryByAgeIn(new Integer[0]);
+        assertThat(users).isEmpty();
+    }
+
+    @Test
+    public void findByAgeWithEmptyArrayOfIntegersOrFirstName() {
+
+        flushTestUsers();
+
+        List<User> users = repository.queryByAgeInOrFirstname(new Integer[0], secondUser.getFirstname());
+        assertThat(users).hasSize(1).containsOnly(secondUser);
+    }
+
+    @Test
+    public void shouldSupportJava8StreamsForRepositoryFinderMethods() {
+
+        flushTestUsers();
+
+        try (Stream<User> stream = repository.findAllByCustomQueryAndStream()) {
+            assertThat(stream).hasSize(4);
+        }
+    }
+
+    @Test
+    public void shouldSupportJava8StreamsForRepositoryDerivedFinderMethods() {
+
+        flushTestUsers();
+
+        try (Stream<User> stream = repository.readAllByFirstnameNotNull()) {
+            assertThat(stream).hasSize(4);
+        }
+    }
+
+    @Test
+    public void supportsJava8StreamForPageableMethod() {
+
+        flushTestUsers();
+
+        try (Stream<User> stream = repository.streamAllPaged(PageRequest.of(0, 2))) {
+            assertThat(stream).hasSize(2);
+        }
+    }
+
+    @Test
+    public void findAllByExample() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setAge(51);
+        prototype.setCreatedAt(null);
+
+        List<User> users = repository.findAll(Example.of(prototype));
+
+        assertThat(users).hasSize(1).containsOnly(firstUser);
+    }
+
+    @Test
+    public void findAllByExampleWithEmptyProbe() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setCreatedAt(null);
+
+        List<User> users = repository.findAll(Example.of(prototype, matching().withIgnorePaths("age", "createdAt", "active")));
+
+        assertThat(users).hasSize(4);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void findAllByNullExample() {
+        repository.findAll((Example<User>) null);
+    }
+
+    @Test
+    public void findAllByExampleWithExcludedAttributes() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setAge(51);
+        Example<User> example = Example.of(prototype, matching().withIgnorePaths("createdAt"));
+
+        List<User> users = repository.findAll(example);
+
+        assertThat(users).containsOnly(firstUser);
+    }
+
+    @Test
+    public void findAllByExampleWithStartingStringMatcher() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setFirstname("De");
+        Example<User> example = Example.of(prototype,
+                                           matching()
+                                               .withStringMatcher(ExampleMatcher.StringMatcher.STARTING)
+                                               .withIgnorePaths("age", "createdAt"));
+
+        List<User> users = repository.findAll(example);
+
+        assertThat(users).containsOnly(firstUser);
+    }
+
+    @Test
+    public void findAllByExampleWithEndingStringMatcher() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setFirstname("op");
+        Example<User> example = Example.of(prototype,
+                                           matching()
+                                               .withStringMatcher(ExampleMatcher.StringMatcher.ENDING)
+                                               .withIgnorePaths("age", "createdAt"));
+
+        List<User> users = repository.findAll(example);
+
+        assertThat(users).containsOnly(firstUser);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void findAllByExampleWithRegexStringMatcher() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setFirstname("^Debop$");
+        Example<User> example = Example.of(prototype,
+                                           matching().withStringMatcher(ExampleMatcher.StringMatcher.REGEX));
+
+        List<User> users = repository.findAll(example);
+    }
+
+    @Test
+    public void findAllByExampleWithIgnoreCase() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setFirstname("dEBoP");
+        Example<User> example = Example.of(prototype,
+                                           matching().withIgnoreCase().withIgnorePaths("age", "createdAt"));
+
+        List<User> users = repository.findAll(example);
+        assertThat(users).containsOnly(firstUser);
+    }
+
+    @Test
+    public void findAllByExampleWithStringMatcherAndIgnoreCase() {
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setFirstname("dEB");
+        Example<User> example = Example.of(prototype,
+                                           matching()
+                                               .withStringMatcher(ExampleMatcher.StringMatcher.STARTING)
+                                               .withIgnoreCase()
+                                               .withIgnorePaths("age", "createdAt"));
+
+        List<User> users = repository.findAll(example);
+        assertThat(users).containsOnly(firstUser);
+    }
+
+    @Test
+    public void findAllByExampleWithIncludeNull() {
+
+        flushTestUsers();
+
+        firstUser.setDateOfBirth(new Date());
+
+        User fifthUser = createUser(firstUser.getFirstname(), firstUser.getLastname(), "foo@bar.com");
+        fifthUser.setActive(firstUser.isActive());
+        fifthUser.setAge(firstUser.getAge());
+
+        repository.saveAll(Arrays.asList(firstUser, fifthUser));
+
+        User prototype = createUser();
+        prototype.setFirstname(firstUser.getFirstname());
+
+        Example<User> example = Example.of(prototype,
+                                           matching()
+                                               .withIncludeNullValues()
+                                               .withIgnorePaths("id", "binaryData", "lastname", "emailAddress", "age", "createdAt"));
+
+        List<User> users = repository.findAll(example);
+        assertThat(users).contains(fifthUser);
+    }
+
+    @Test
+    public void findAllByExampleWithPropertySpecifier() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setFirstname("dEb");
+
+        Example<User> example = Example.of(prototype,
+                                           matching()
+                                               .withIgnoreCase()
+                                               .withIgnorePaths("age", "createdAt")
+                                               .withMatcher("firstname", new GenericPropertyMatcher().startsWith()));
+
+        List<User> users = repository.findAll(example);
+        assertThat(users).contains(firstUser);
+    }
+
+    @Test
+    public void findAllByExampleWithSort() {
+
+        flushTestUsers();
+
+        User user1 = createUser("Debop", "Spring", "d@c.kr");
+        user1.setAge(30);
+        repository.save(user1);
+
+        User prototype = createUser();
+        prototype.setFirstname("dEb");
+
+        Example<User> example = Example.of(prototype,
+                                           matching()
+                                               .withIgnoreCase()
+                                               .withIgnorePaths("age", "createdAt")
+                                               .withStringMatcher(ExampleMatcher.StringMatcher.STARTING));
+
+        List<User> users = repository.findAll(example, Sort.by(Sort.Direction.DESC, "age"));
+        assertThat(users).contains(firstUser, user1);
+    }
+
+    @Test
+    public void findAllByExampleWithPageable() {
+
+        flushTestUsers();
+
+        int count = 99;
+        for (int i = 0; i < count; i++) {
+            User user = createUser("Debop-" + i, "Spring", "debop-" + i + "@example.org");
+            user.setAge(100 + i);
+            repository.save(user);
+        }
+
+        User prototype = createUser();
+        prototype.setFirstname("dEb");
+
+        Example<User> example = Example.of(prototype,
+                                           matching()
+                                               .withIgnoreCase()
+                                               .withIgnorePaths("age", "createdAt")
+                                               .withStringMatcher(ExampleMatcher.StringMatcher.STARTING));
+
+        Page<User> users = repository.findAll(example, PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "age")));
+
+        assertThat(users.getSize()).isEqualTo(10);
+        assertThat(users.hasNext()).isTrue();
+        assertThat(users.getTotalElements()).isEqualTo(count + 1);
+    }
+
+    // NOTE: Association 조회를 지원하지 않기 때문에, 검증조차 하지 않습니다 ^^
+    @Test // (expected = IllegalArgumentException.class)
+    public void findAllByExampleShouldNotAllowCycles() {
+
+        flushTestUsers();
+
+        User prototype = createUser("user1", "", "");
+        prototype.setManager(prototype);
+
+        Example<User> example = Example.of(prototype,
+                                           matching()
+                                               .withIgnoreCase()
+                                               .withIgnorePaths("age", "createdAt")
+                                               .withStringMatcher(ExampleMatcher.StringMatcher.STARTING));
+
+        repository.findAll(example);
     }
 
 

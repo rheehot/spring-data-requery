@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 
 import java.util.*;
 
+import static com.coupang.springframework.data.requery.utils.RequeryUtils.applyWhereClause;
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.unwrap;
 import static org.springframework.data.repository.query.parser.Part.Type.*;
 
@@ -128,17 +129,24 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, Q
     protected QueryElement<?> or(QueryElement<?> base,
                                  QueryElement<?> criteria) {
 
-        // TODO: base에 왜 이미 where condition이 있는지 ????
-        // TODO: 이렇게 지우는게 맞는지???
-        base.getWhereElements().clear();
         log.trace("add OR condition. base condition size={}", base.getWhereElements().size());
         log.trace("add OR condition. criteria condition size={}", criteria.getWhereElements().size());
 
-        criteria.getWhereElements().forEach(element -> {
-            log.trace("operator={}, condition={}", element.getOperator(), element.getCondition());
+        base.getWhereElements().forEach(element -> {
+            log.trace("base where element. operator={}, left operand={}", element.getOperator(), element.getCondition().getLeftOperand());
         });
 
-        return unwrap(RequeryUtils.applyWhereClause(base, criteria.getWhereElements(), false));
+        criteria.getWhereElements().forEach(element -> {
+            log.trace("criteria where element. operator={}, left operand={}", element.getOperator(), element.getCondition().getLeftOperand());
+        });
+
+        Set<WhereConditionElement<?>> whereElements = criteria.getWhereElements();
+        if (base == criteria) {
+            whereElements = new HashSet(criteria.getWhereElements());
+            base.getWhereElements().clear();
+        }
+
+        return unwrap(applyWhereClause(base, whereElements, false));
     }
 
     @Override

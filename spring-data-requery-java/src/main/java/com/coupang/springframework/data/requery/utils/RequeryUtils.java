@@ -27,7 +27,8 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Requery 사용을 위한 Utility class
@@ -102,7 +103,7 @@ public class RequeryUtils {
 
         return getEntityTypes(entityDataStore).stream()
             .map(Type::getClassType)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -164,11 +165,11 @@ public class RequeryUtils {
         Assert.notNull(baseQuery, "baseQuery must not be null!");
         Assert.notNull(pageable, "pageable must not be null!");
 
-        log.trace("Apply paging, domainClass={}, pageable={}", domainClass.getSimpleName(), pageable);
-
         if (pageable.isUnpaged()) {
             return baseQuery;
         }
+
+        log.trace("Apply paging, domainClass={}, pageable={}", domainClass.getSimpleName(), pageable);
 
         QueryElement<?> query = baseQuery;
 
@@ -293,31 +294,33 @@ public class RequeryUtils {
                                                    Set<WhereConditionElement<?>> conditionElements,
                                                    boolean isAnd) {
 
-        List<Condition<?, ?>> conds = conditionElements.stream().map(it -> it.getCondition()).collect(Collectors.toList());
+        List<Condition<?, ?>> conds = conditionElements.stream().map(it -> it.getCondition()).collect(toList());
+
+        log.trace("where conditions={}", conds);
 
         if (conds.isEmpty()) {
             return baseQuery;
         } else if (conds.size() == 1) {
             return unwrap(baseQuery.where(conds.get(0)));
         } else {
-            final List<WhereAndOr<?>> whereClauses = new ArrayList<>();
-            whereClauses.add(baseQuery.where(conds.get(0)));
+            WhereAndOr<?>[] whereClauses = new WhereAndOr[1];
+            whereClauses[0] = baseQuery.where(conds.get(0));
 
             conds.stream()
                 .skip(1)
                 .forEach(condition -> {
+                    log.trace("where clause = {}", whereClauses[0]);
                     if (isAnd) {
-                        whereClauses.set(0, whereClauses.get(0).and(condition));
+                        whereClauses[0] = whereClauses[0].and(condition);
                     } else {
-                        whereClauses.set(0, whereClauses.get(0).or(condition));
+                        whereClauses[0] = whereClauses[0].or(condition);
                     }
                 });
 
-            return unwrap(whereClauses.get(0));
+            return unwrap(whereClauses[0]);
         }
     }
 
-    @Deprecated
     public static QueryElement<?> buildWhereClause(QueryElement<?> baseQuery,
                                                    Iterable<Condition<?, ?>> conditions,
                                                    boolean isAnd) {
@@ -349,7 +352,7 @@ public class RequeryUtils {
     public static List<Condition<?, ?>> getConditions(QueryElement<?> query) {
         return query.getWhereElements().stream()
             .map(it -> it.getCondition())
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     public static <T> List<Condition<?, ?>> getGenericConditions(Iterable<Condition<T, ?>> conditions) {

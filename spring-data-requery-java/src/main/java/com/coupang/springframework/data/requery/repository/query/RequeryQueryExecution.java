@@ -137,28 +137,29 @@ public abstract class RequeryQueryExecution {
         protected @Nullable SliceImpl doExecute(AbstractRequeryQuery query, Object[] values) {
             ParametersParameterAccessor accessor = new ParametersParameterAccessor(parameters, values);
             Pageable pageable = accessor.getPageable();
-            int pageSize = pageable.getPageSize();
 
             QueryElement<?> queryElement = query.createQueryElement(values);
 
-            Result<Object> result = (Result<Object>) queryElement.limit(pageSize).get();
-            List<Object> resultList = result.toList();
-            boolean hasNext = resultList.size() > pageSize;
+            if (pageable.isPaged()) {
+                // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+                if (queryElement.getLimit() == null && queryElement.getOffset() == null) {
+                    queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, pageable);
+                }
 
-            return new SliceImpl(hasNext ? resultList.subList(0, pageSize) : resultList, pageable, hasNext);
+                queryElement = unwrap(queryElement.limit(pageable.getPageSize() + 1));
+                int pageSize = queryElement.getLimit();
+                Result<?> result = (Result<?>) queryElement.get();
+                List<?> resultList = result.toList();
+                boolean hasNext = resultList.size() > pageSize;
+
+                return new SliceImpl(hasNext ? resultList.subList(0, pageSize) : resultList, pageable, hasNext);
+            } else {
+                Result<?> result = (Result<?>) queryElement.get();
+                return new SliceImpl(result.toList());
+            }
         }
     }
 
-
-    static class StreamExecution extends RequeryQueryExecution {
-
-        @Override
-        @SuppressWarnings("unchecked")
-        protected @Nullable Stream<?> doExecute(AbstractRequeryQuery query, Object[] values) {
-            Result<?> result = (Result<?>) query.createQueryElement(values).get();
-            return result.stream();
-        }
-    }
 
     static class PagedExecution extends RequeryQueryExecution {
 
@@ -172,15 +173,23 @@ public abstract class RequeryQueryExecution {
         @SuppressWarnings("unchecked")
         protected @Nullable Page<?> doExecute(AbstractRequeryQuery query, Object[] values) {
             ParameterAccessor accessor = new ParametersParameterAccessor(parameters, values);
-            QueryElement<?> queryElement = unwrap(query.createQueryElement(values));
+            Pageable pageable = accessor.getPageable();
 
-            // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
-            if (queryElement.getLimit() == null && queryElement.getOffset() == null) {
-                queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, accessor.getPageable());
+            QueryElement<?> queryElement = query.createQueryElement(values);
+
+            if (pageable.isPaged()) {
+
+                // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+                if (queryElement.getLimit() == null && queryElement.getOffset() == null) {
+                    queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, accessor.getPageable());
+                }
+                Result<?> result = (Result<?>) queryElement.get();
+
+                return new PageImpl(result.toList(), accessor.getPageable(), count(query, values));
+            } else {
+                Result<?> result = (Result<?>) queryElement.get();
+                return new PageImpl(result.toList());
             }
-            Result<?> result = (Result<?>) queryElement.get();
-
-            return new PageImpl(result.toList(), accessor.getPageable(), count(query, values));
         }
 
         @SuppressWarnings("unchecked")
@@ -198,7 +207,6 @@ public abstract class RequeryQueryExecution {
         }
     }
 
-
     static class SingleEntityExecution extends RequeryQueryExecution {
 
         @Override
@@ -207,6 +215,41 @@ public abstract class RequeryQueryExecution {
             Result<?> result = (Result<?>) query.createQueryElement(values).get();
             Object value = result.firstOrNull();
             return RequeryResultConverter.convertResult(value);
+        }
+    }
+
+
+    /**
+     * {@link RequeryQueryExecution} executing a Java 8 Stream.
+     */
+    static class StreamExecution extends RequeryQueryExecution {
+
+        private final RequeryParameters parameters;
+
+        public StreamExecution(RequeryParameters parameters) {
+            this.parameters = parameters;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        protected @Nullable Stream<?> doExecute(AbstractRequeryQuery query, Object[] values) {
+
+            ParameterAccessor accessor = new ParametersParameterAccessor(parameters, values);
+            Pageable pageable = accessor.getPageable();
+
+            QueryElement<?> queryElement = query.createQueryElement(values);
+
+            if (pageable.isPaged()) {
+                // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+                if (queryElement.getLimit() == null && queryElement.getOffset() == null) {
+                    queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, accessor.getPageable());
+                }
+                Result<?> result = (Result<?>) queryElement.get();
+                return result.stream();
+            } else {
+                Result<?> result = (Result<?>) queryElement.get();
+                return result.stream();
+            }
         }
     }
 

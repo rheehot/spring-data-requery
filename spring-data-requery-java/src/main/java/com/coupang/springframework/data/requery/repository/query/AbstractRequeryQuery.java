@@ -60,9 +60,11 @@ public abstract class AbstractRequeryQuery implements RepositoryQuery {
     }
 
     protected RequeryQueryExecution getExecution() {
+        // NOTE: 검사하는 순서가 중요합니다.
+        //
         if (queryMethod.isStreamQuery()) {
             log.debug("Create StreamExecution. queryMethod={}", queryMethod);
-            return new StreamExecution();
+            return new StreamExecution(queryMethod.getParameters());
         } else if (queryMethod.isCollectionQuery()) {
             log.debug("Create CollectionExecution. queryMethod={}", queryMethod);
             return new CollectionExecution();

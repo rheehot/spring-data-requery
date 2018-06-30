@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.NullHandler;
-import org.springframework.data.domain.ExampleMatcher.PropertySpecifier;
 import org.springframework.data.support.ExampleMatcherAccessor;
 import org.springframework.data.util.DirectFieldAccessFallbackBeanWrapper;
 import org.springframework.util.Assert;
@@ -20,7 +19,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.coupang.springframework.data.requery.utils.RequeryUtils.buildWhereClause;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher;
@@ -75,15 +73,10 @@ public class QueryByExampleBuilder {
             boolean notSupportedField = RequeryUtils.isAssociationField(field) ||
                                         RequeryUtils.isEmbededField(field) ||
                                         RequeryUtils.isTransientField(field);
-            if (notSupportedField) {
+
+            if (notSupportedField || exampleAccessor.isIgnoredPath(field.getName())) {
                 continue;
             }
-
-            if (exampleAccessor.isIgnoredPath(field.getName())) {
-                continue;
-            }
-
-            log.trace("Build condition... field={}", field);
 
             String fieldName = field.getName();
             Class<?> fieldType = field.getType();
@@ -118,19 +111,17 @@ public class QueryByExampleBuilder {
                                                      NamedExpression<String> expression,
                                                      String fieldName,
                                                      String fieldValue) {
+        Boolean ignoreCase = exampleAccessor.isIgnoreCaseForPath(fieldName);
 
-        Boolean ignoreCase = false;
-        PropertySpecifier specifier = exampleAccessor.getPropertySpecifier(fieldName);
-        if (specifier != null) {
-            ignoreCase = Optional.ofNullable(specifier.getIgnoreCase()).orElse(false);
-        }
+        log.trace("Matching with ignoreCase? ignoreCase={}", ignoreCase);
+
         StringMatcher matcher = exampleAccessor.getStringMatcherForPath(fieldName);
 
         switch (matcher) {
             case DEFAULT:
             case EXACT:
                 return (Condition<E, ?>) (ignoreCase
-                                          ? expression.function("Lower").eq(((String) fieldValue).toLowerCase())
+                                          ? expression.function("Lower").eq((fieldValue).toLowerCase())
                                           : expression.eq((String) fieldValue));
             case CONTAINING:
                 return (Condition<E, ?>) (ignoreCase
