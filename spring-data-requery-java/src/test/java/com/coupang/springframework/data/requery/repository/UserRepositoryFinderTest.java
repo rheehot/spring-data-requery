@@ -12,6 +12,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 /**
  * Integration test for executing finders, thus testing various query lookup strategies.
@@ -73,7 +79,7 @@ public class UserRepositoryFinderTest {
 
         dave = userRepository.save(createUser("Dave", "Matthews", "dave@dmband.com", singer));
         carter = userRepository.save(createUser("Carter", "Beauford", "carter@dmband.com", singer, drummer));
-        oliver = userRepository.save(createUser("Oliver Auguest", "Matthews", "oliver@dmband.com"));
+        oliver = userRepository.save(createUser("Oliver August", "Matthews", "oliver@dmband.com"));
     }
 
     @After
@@ -108,5 +114,83 @@ public class UserRepositoryFinderTest {
         assertThat(users)
             .hasSize(2)
             .containsOnly(dave, carter);
+    }
+
+    @Test
+    public void executesPagingMethodToPageCorrectly() {
+
+        List<User> list = userRepository.findByFirstname("Carter", PageRequest.of(0, 1));
+        assertThat(list).hasSize(1);
+    }
+
+    @Test
+    public void executeInKeywordForPageCollectly() {
+
+        Page<User> page = userRepository.findByFirstnameIn(PageRequest.of(0, 1), "Dave", "Oliver August");
+
+        assertThat(page.getNumberOfElements()).isEqualTo(1);
+        assertThat(page.getTotalElements()).isEqualTo(2L);
+        assertThat(page.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
+    public void executesNotInQueryCorrectly() {
+
+        List<User> result = userRepository.findByFirstnameNotIn(Arrays.asList("Dave", "Carter"));
+        assertThat(result).hasSize(1).containsOnly(oliver);
+    }
+
+    @Test
+    public void findsByLastnameIgnoringCase() {
+
+        List<User> result = userRepository.findByLastnameIgnoringCase("BeAUfoRd");
+        assertThat(result).hasSize(1).containsOnly(carter);
+    }
+
+    @Test
+    public void findsByLastnameIgnoringCaseLike() {
+
+        List<User> result = userRepository.findByLastnameIgnoringCaseLike("BeAUfo%");
+        assertThat(result).hasSize(1).containsOnly(carter);
+    }
+
+    @Test
+    public void findByLastnameAndFirstnameAllIgnoringCase() {
+        List<User> result = userRepository.findByLastnameAndFirstnameAllIgnoringCase("MaTTheWs", "DaVe");
+        assertThat(result).hasSize(1).containsOnly(dave);
+    }
+
+    @Test
+    public void respectsPageableOrderOnQueryGenerateFromMethodName() {
+
+        Page<User> ascending = userRepository.findByLastnameIgnoringCase(PageRequest.of(0, 10, Sort.by(ASC, "firstname")),
+                                                                         "Matthews");
+
+        Page<User> desending = userRepository.findByLastnameIgnoringCase(PageRequest.of(0, 10, Sort.by(DESC, "firstname")),
+                                                                         "Matthews");
+        assertThat(ascending.getTotalElements()).isEqualTo(2L);
+        assertThat(desending.getTotalElements()).isEqualTo(2L);
+
+        assertThat(ascending.getContent().get(0).getFirstname())
+            .isNotEqualTo(desending.getContent().get(0).getFirstname());
+
+        assertThat(ascending.getContent().get(1).getFirstname())
+            .isEqualTo(desending.getContent().get(0).getFirstname());
+    }
+
+    @Test
+    public void executesQueryToSlice() {
+
+        Slice<User> slice = userRepository.findSliceByLastname("Matthews",
+                                                               PageRequest.of(0, 1, ASC, "firstname"));
+
+        assertThat(slice.getContent()).contains(dave);
+        assertThat(slice.hasNext()).isTrue();
+    }
+
+    @Test
+    public void executesMethodWithNotContainingOnStringCorrectly() {
+        List<User> users = userRepository.findByLastnameNotContaining("u");
+        assertThat(users).containsOnly(dave, oliver);
     }
 }

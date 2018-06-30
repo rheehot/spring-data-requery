@@ -142,12 +142,16 @@ public abstract class RequeryQueryExecution {
 
             if (pageable.isPaged()) {
                 // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
-                if (queryElement.getLimit() == null && queryElement.getOffset() == null) {
+                if (queryElement.getLimit() == null) {
                     queryElement = RequeryUtils.applyPageable(query.getDomainClass(), queryElement, pageable);
                 }
 
-                queryElement = unwrap(queryElement.limit(pageable.getPageSize() + 1));
+                int minLimit = Math.min(queryElement.getLimit(), pageable.getPageSize());
+                queryElement = unwrap(queryElement.offset(pageable.getPageNumber() * minLimit));
+
                 int pageSize = queryElement.getLimit();
+                queryElement = unwrap(queryElement.limit(pageSize + 1));
+
                 Result<?> result = (Result<?>) queryElement.get();
                 List<?> resultList = result.toList();
                 boolean hasNext = resultList.size() > pageSize;
@@ -198,11 +202,6 @@ public abstract class RequeryQueryExecution {
             QueryElement<?> selection = (QueryElement<?>) query.getOperations().select(Count.count(query.getDomainClass()));
 
             selection.getWhereElements().addAll(queryElement.getWhereElements());
-
-//            QueryElement<? extends Result<Tuple>> countQuery = (QueryElement<? extends Result<Tuple>>)
-//                unwrap(RequeryUtils.applyWhereClause(selection, queryElement.getWhereElements()));
-//            Tuple countResult = countQuery.get().firstOrNull();
-
             Tuple countResult = ((QueryElement<? extends Result<Tuple>>) selection).get().firstOrNull();
 
             Integer count = (Integer) RequeryResultConverter.convertResult(countResult, 0);

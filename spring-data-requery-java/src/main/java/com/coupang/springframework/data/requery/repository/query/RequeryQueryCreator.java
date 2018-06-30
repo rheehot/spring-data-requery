@@ -213,11 +213,10 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, L
                 case NOT_IN:
                 case IN:
                     Object values = provider.next(part, Collection.class).getValue();
-                    log.trace("in ({}), class={}", values, values.getClass());
+                    // log.trace("in ({}), class={}", values, values.getClass());
 
                     if (values instanceof Iterable) {
                         Collection cols = Iterables.toList((Iterable) values);
-                        log.trace("cols = {}", cols);
                         condition = (type == IN) ? expr.in(cols) : expr.notIn(cols);
                     } else if (values instanceof Object[]) {
                         List list = Arrays.asList((Object[]) values);
@@ -264,11 +263,12 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, L
                     FieldExpression<String> fieldExpr = upperIfIgnoreCase(expr);
                     Object paramValue = provider.next(part, String.class).getValue();
                     String value = (paramValue != null) ? paramValue.toString() : "";
-
+                    if (shouldIgnoreCase()) {
+                        value = value.toUpperCase();
+                    }
                     if (!value.startsWith("%") && !value.endsWith("%")) {
                         value = "%" + value + "%";
                     }
-
                     condition = (type.equals(LIKE) || type.equals(CONTAINING))
                                 ? fieldExpr.like(value)
                                 : fieldExpr.notLike(value);
@@ -289,14 +289,18 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, L
 
                     condition = simpleExpr.isIsNullParameter()
                                 ? expr.isNull()
-                                : upperIfIgnoreCase(expr).eq(simpleExpr.getValue());
+                                : upperIfIgnoreCase(expr).eq(shouldIgnoreCase()
+                                                             ? upperCase(simpleExpr.getValue())
+                                                             : simpleExpr.getValue());
                     break;
 
                 case NEGATING_SIMPLE_PROPERTY:
                     ParameterMetadata<Object> simpleNotExpr = provider.next(part);
                     upperIfIgnoreCase(simpleNotExpr.getExpression());
 
-                    condition = upperIfIgnoreCase(expr).notEqual(simpleNotExpr.getValue());
+                    condition = upperIfIgnoreCase(expr).notEqual(shouldIgnoreCase()
+                                                                 ? upperCase(simpleNotExpr.getValue())
+                                                                 : simpleNotExpr.getValue());
                     break;
 
                 case IS_EMPTY:
@@ -329,6 +333,14 @@ public class RequeryQueryCreator extends AbstractQueryCreator<QueryElement<?>, L
 
         private boolean canUpperCase(FieldExpression<?> expression) {
             return String.class.equals(expression.getClassType());
+        }
+
+        private boolean shouldIgnoreCase() {
+            return part.shouldIgnoreCase() != Part.IgnoreCaseType.NEVER;
+        }
+
+        private String upperCase(Object value) {
+            return value.toString().toUpperCase();
         }
     }
 }
