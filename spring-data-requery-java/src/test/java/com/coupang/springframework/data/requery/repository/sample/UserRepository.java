@@ -367,54 +367,57 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     List<User> findByStringAge(String age);
 
 
+    //    // DATAJPA-1185
+    <T> Stream<T> findAsStreamByFirstnameLike(String name, Class<T> projectionType);
+
+    //
+//    // DATAJPA-1185
+    <T> List<T> findAsListByFirstnameLike(String name, Class<T> projectionType);
+
+    @Query("SELECT u.firstname, u.lastname from SD_User u WHERE u.id=?")
+    NameOnly findByNativeQuery(Integer id);
+
+    //
+    @Query("SELECT u.emailaddress from SD_User u WHERE u.id=?")
+    EmailOnly findEmailOnlyByNativeQuery(Integer id);
+
     // NOTE: Not Supported
 
-//    // DATAJPA-1185
-//    <T> Stream<T> findAsStreamByFirstnameLike(String name, Class<T> projectionType);
-//
-//    // DATAJPA-1185
-//    <T> List<T> findAsListByFirstnameLike(String name, Class<T> projectionType);
+    //    // DATAJPA-1235
+    @Query("SELECT u.* FROM SD_User u where u.firstname >= ? and u.lastname = '000:1'")
+    List<User> queryWithIndexedParameterAndColonFollowedByIntegerInString(String firstname);
 
-//    @Query("SELECT u.firstname, u.lastname from SD_User u WHERE u.id=?")
-//    NameOnly findByNativeQuery(Integer id);
-//
-//    @Query("SELECT u.emailaddress from SD_User u WHERE u.id=?")
-//    EmailOnly findEmailOnlyByNativeQuery(Integer id);
 
-    // NOTE: Not Supported
+    // DATAJPA-1233
+    @Query(value = "SELECT u.* FROM SD_User u ORDER BY CASE WHEN (u.firstname  >= ?) THEN 0 ELSE 1 END, u.firstname")
+    Page<User> findAllOrderedBySpecialNameSingleParam(String name, Pageable page);
 
-//    // DATAJPA-1235
-//    @Query("SELECT u FROM User u where u.firstname >= ?1 and u.lastname = '000:1'")
-//    List<User> queryWithIndexedParameterAndColonFollowedByIntegerInString(String firstname);
-//
-//    // DATAJPA-1233
-//    @Query(value = "SELECT u FROM User u ORDER BY CASE WHEN (u.firstname  >= :name) THEN 0 ELSE 1 END, u.firstname")
-//    Page<User> findAllOrderedBySpecialNameSingleParam(@Param("name") String name, Pageable page);
-//
-//    // DATAJPA-1233
-//    @Query(value = "SELECT u FROM User u WHERE :other = 'x' ORDER BY CASE WHEN (u.firstname  >= :name) THEN 0 ELSE 1 END, u.firstname")
-//    Page<User> findAllOrderedBySpecialNameMultipleParams(@Param("name") String name, @Param("other") String other, Pageable page);
-//
-//    // DATAJPA-1233
-//    @Query(value = "SELECT u FROM User u WHERE ?2 = 'x' ORDER BY CASE WHEN (u.firstname  >= ?1) THEN 0 ELSE 1 END, u.firstname")
-//    Page<User> findAllOrderedBySpecialNameMultipleParamsIndexed(String name, String other, Pageable page);
+
+    // DATAJPA-1233
+    @Query(value = "SELECT u.* FROM SD_User u WHERE 'x' = ? ORDER BY CASE WHEN (u.firstname  >= ?) THEN 0 ELSE 1 END, u.firstname")
+    Page<User> findAllOrderedBySpecialNameMultipleParams(String other, String name, Pageable page);
+
+    // DATAJPA-1233
+    @Query(value = "SELECT u.* FROM SD_User u WHERE 'x' = ? ORDER BY CASE WHEN (u.firstname  >= ?) THEN 0 ELSE 1 END, u.firstname")
+    Page<User> findAllOrderedBySpecialNameMultipleParamsIndexed(String other, String name, Pageable page);
 
 //    // DATAJPA-928
-//    Page<User> findByNativeNamedQueryWithPageable(Pageable pageable);
+@Query(value = "SELECT u.* FROM SD_User u")
+Page<User> findByNativQueryWithPageable(Pageable pageable);
 
     // DATAJPA-928
     @Query(value = "SELECT firstname FROM SD_User ORDER BY UCASE(firstname)", countQuery = "SELECT count(*) FROM SD_User")
-    Page<String> findByNativeQueryWithPageable(Pageable pageable);
+    Page<String> findAsStringByNativeQueryWithPageable(Pageable pageable);
 
 //    // DATAJPA-1273
 //    List<NameOnly> findByNamedQueryWithAliasInInvertedOrder();
 
     // DATAJPA-1301
-    @Query("select firstname as firstname, lastname as lastname from SD_User u where u.firstname = 'Oliver'")
-    Map<String, Object> findMapWithNullValues();
+    @Query("select u.firstname as firstname, u.lastname as lastname from SD_User u where u.firstname = 'Debop'")
+    Tuple findTupleWithNullValues();
 
     // DATAJPA-1307
-    @Query(value = "select * from SD_User u where u.emailAddress = ?")
+    @Query(value = "select u.* from SD_User u where u.emailAddress = ?")
     User findByEmailNativeAddressJdbcStyleParameter(String emailAddress);
 
     // NOTE: Not Supported

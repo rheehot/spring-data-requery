@@ -17,6 +17,7 @@ import io.requery.query.Tuple;
 import io.requery.query.element.QueryElement;
 import io.requery.sql.StatementExecutionException;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -1523,6 +1524,226 @@ public class UserRepositoryTest {
         repository.findAll(example);
     }
 
+    @Test
+    public void findOneByExampleWithExcludedAttributes() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setAge(firstUser.getAge());
+
+        Example<User> example = Example.of(prototype, matching().withIgnorePaths("createdAt"));
+
+        assertThat(repository.findOne(example)).contains(firstUser);
+    }
+
+    @Test
+    public void countByExampleWithExcludedAttributes() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setAge(firstUser.getAge());
+
+        Example<User> example = Example.of(prototype, matching().withIgnorePaths("createdAt"));
+
+        long count = repository.count(example);
+
+        assertThat(count).isEqualTo(1L);
+    }
+
+    @Test
+    public void existsByExampleWithExcludedAttributes() {
+
+        flushTestUsers();
+
+        User prototype = createUser();
+        prototype.setAge(firstUser.getAge());
+
+        Example<User> example = Example.of(prototype, matching().withIgnorePaths("createdAt"));
+
+        boolean exists = repository.exists(example);
+
+        assertThat(exists).isTrue();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void executesPagedWhereClauseAnOrder() {
+
+        flushTestUsers();
+
+        QueryElement<?> whereClause = unwrap(operations
+                                                 .select(User.class)
+                                                 .where(User.LASTNAME.like("%e%"))
+                                                 .orderBy(User.LASTNAME.asc()));
+
+        Page<User> result = repository.findAll((QueryElement<? extends Result<User>>) whereClause, PageRequest.of(0, 1));
+
+        assertThat(result.getTotalElements()).isEqualTo(2L);
+        assertThat(result.getNumberOfElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0)).isEqualTo(firstUser);
+    }
+
+    // TODO: 수형 검사를 해야 하는데 Raw String 에서는 수행하지 않는다. (requery에서 지원하지 않는다)
+    @Test
+    public void exceptionsDuringParameterSettingGetThrown() {
+
+        List<User> users = repository.findByStringAge("twelve");
+        assertThat(users).isEmpty();
+    }
+
+    @Test
+    public void dynamicProjectionReturningStream() {
+
+        flushTestUsers();
+
+        assertThat(repository.findAsStreamByFirstnameLike("%De%", User.class)).hasSize(1);
+    }
+
+    @Test
+    public void dynamicProjectionReturningList() {
+
+        flushTestUsers();
+
+        List<User> users = repository.findAsListByFirstnameLike("%De%", User.class);
+        assertThat(users).hasSize(1);
+    }
+
+    @Ignore("Raw SQL 의 Tuple을 Custom type 변환이 가능하도록 해야 한다.")
+    @Test
+    public void supportsProjectionsWithNativeQueries() {
+
+        flushTestUsers();
+
+        User user = repository.findAll().get(0);
+
+        // TODO: Raw SQL 의 Tuple을 Custom type 변환이 가능하도록 해야 한다.
+        UserRepository.NameOnly result = repository.findByNativeQuery(user.getId());
+
+        assertThat(result.getFirstname()).isEqualTo(user.getFirstname());
+        assertThat(result.getLastname()).isEqualTo(user.getLastname());
+    }
+
+    @Ignore("Raw SQL 의 Tuple을 Custom type 변환이 가능하도록 해야 한다.")
+    @Test
+    public void supportsProjectionsWithNativeQueriesAndCamelCaseProperty() {
+
+        flushTestUsers();
+
+        User user = repository.findAll().get(0);
+
+        // TODO: Raw SQL 의 Tuple을 Custom type 변환이 가능하도록 해야 한다.
+        UserRepository.EmailOnly result = repository.findEmailOnlyByNativeQuery(user.getId());
+
+        String emailAddress = result.getEmailAddress();
+
+        assertThat(emailAddress)
+            .isEqualTo(user.getEmailAddress())
+            .as("ensuring email is actually not null")
+            .isNotNull();
+    }
+
+    @Test
+    public void handlesColonsFollowedByIntegerInStringLiteral() {
+
+        String firstName = "aFirstName";
+
+        User expected = createUser(firstName, "000:1", "something@something");
+        User notExpected = createUser(firstName, "000\\:1", "something@something.else");
+
+        repository.save(expected);
+        repository.save(notExpected);
+
+        assertThat(repository.findAll()).hasSize(2);
+
+        List<User> users = repository.queryWithIndexedParameterAndColonFollowedByIntegerInString(firstName);
+
+        assertThat(users).extracting(User::getId).containsExactly(expected.getId());
+    }
+
+    @Test // DATAJPA-1233
+    public void handlesCountQueriesWithLessParametersSingleParam() {
+        repository.findAllOrderedBySpecialNameSingleParam("Debop", PageRequest.of(2, 3));
+    }
+
+    @Test // DATAJPA-1233
+    public void handlesCountQueriesWithLessParametersMoreThanOne() {
+        repository.findAllOrderedBySpecialNameMultipleParams("x", "Debop", PageRequest.of(2, 3));
+    }
+
+    @Test // DATAJPA-1233
+    public void handlesCountQueriesWithLessParametersMoreThanOneIndexed() {
+        repository.findAllOrderedBySpecialNameMultipleParamsIndexed("x", "Debop", PageRequest.of(2, 3));
+    }
+
+    @Test
+    public void executeNativeQueryWithPage() {
+
+        flushTestUsers();
+
+        Page<User> firstPage = repository.findByNativQueryWithPageable(PageRequest.of(0, 3));
+        Page<User> secondPage = repository.findByNativQueryWithPageable(PageRequest.of(1, 3));
+
+        assertThat(firstPage.getTotalElements()).isEqualTo(4);
+        assertThat(firstPage.getNumberOfElements()).isEqualTo(3);
+        assertThat(firstPage.getContent())
+            .extracting(User::getFirstname)
+            .containsExactly("Debop", "Diego", "Jinie");
+
+        assertThat(secondPage.getTotalElements()).isEqualTo(4);
+        assertThat(secondPage.getNumberOfElements()).isEqualTo(1);
+        assertThat(secondPage.getContent())
+            .extracting(User::getFirstname)
+            .containsExactly("Nickoon");
+    }
+
+    @Ignore("아직 List<Tuple> 을 원하는 수형으로 변환하는 기능을 제공하지 않습니다.")
+    @Test
+    public void executeNativeQueryWithPageWorkaround() {
+
+        flushTestUsers();
+
+        Page<String> firstPage = repository.findAsStringByNativeQueryWithPageable(PageRequest.of(0, 3));
+        Page<String> secondPage = repository.findAsStringByNativeQueryWithPageable(PageRequest.of(1, 3));
+
+        assertThat(firstPage.getTotalElements()).isEqualTo(4);
+        assertThat(firstPage.getNumberOfElements()).isEqualTo(3);
+        assertThat(firstPage.getContent())
+            .containsExactly("Debop", "Diego", "Jinie");
+
+        assertThat(secondPage.getTotalElements()).isEqualTo(4);
+        assertThat(secondPage.getNumberOfElements()).isEqualTo(1);
+        assertThat(secondPage.getContent())
+            .containsExactly("Nickoon");
+    }
+
+    @Test // DATAJPA-1301
+    public void returnsNullValueInMap() {
+
+        firstUser.setLastname(null);
+        flushTestUsers();
+
+        Tuple tuple = repository.findTupleWithNullValues();
+
+        SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(tuple.<String>get("firstname")).isEqualTo("Debop");
+        softly.assertThat(tuple.<String>get("lastname")).isNull();
+
+        softly.assertThat(tuple.<String>get("non-existent")).isNull();
+
+        softly.assertAll();
+    }
+
+    @Test // DATAJPA-1307
+    public void testFindByEmailAddressJdbcStyleParameter() {
+
+        flushTestUsers();
+
+        User user = repository.findByEmailNativeAddressJdbcStyleParameter("debop@coupang.com");
+        assertThat(user).isEqualTo(firstUser);
+    }
 
     @SuppressWarnings("unchecked")
     private Page<User> executeSpecWithSort(Sort sort) {

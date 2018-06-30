@@ -321,11 +321,16 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     @SuppressWarnings("unchecked")
     @Override
     public <S extends T> boolean exists(@NotNull Example<S> example) {
-        return count((QueryElement<? extends Result<T>>) buildQueryByExample(example)) > 0;
+        // TODO: 환경설정에서 count 냐 entity loading 이냐로 결정하도록 하자 
+        // count 가 빠를까? 레코드 1개 read 하는게 빠를까?
+        // entity cache 가 있다면, read 가 낫고, 아니라면 count 가 낫겠지 ...
+        //
+        return buildQueryByExample(example).limit(1).get().firstOrNull() != null;
+        // return count((QueryElement<? extends Result<T>>) buildQueryByExample(example)) > 0;
     }
 
     @SuppressWarnings("unchecked")
-    private <S extends T> Return<? extends Result<S>> buildQueryByExample(@NotNull Example<S> example) {
+    private <S extends T> QueryElement<? extends Result<S>> buildQueryByExample(@NotNull Example<S> example) {
         QueryElement<? extends Result<S>> root = (QueryElement<? extends Result<S>>) unwrap(operations.select(domainClass));
         return QueryByExampleBuilder.getWhereAndOr(root, example);
     }
