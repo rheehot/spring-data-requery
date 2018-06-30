@@ -8,6 +8,7 @@ import com.coupang.springframework.data.requery.repository.sample.RoleRepository
 import com.coupang.springframework.data.requery.repository.sample.UserRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -192,5 +194,32 @@ public class UserRepositoryFinderTest {
     public void executesMethodWithNotContainingOnStringCorrectly() {
         List<User> users = userRepository.findByLastnameNotContaining("u");
         assertThat(users).containsOnly(dave, oliver);
+    }
+
+    @Test
+    public void translatesContainsToMemberOf() {
+
+        List<User> singers = userRepository.findByRolesContaining(singer);
+
+        assertThat(singers).hasSize(2).contains(dave, carter);
+
+        assertThat(userRepository.findByRolesContaining(drummer)).contains(carter);
+    }
+
+    @Test
+    public void translatesNotContainsToNotMemberOf() {
+        assertThat(userRepository.findByRolesNotContaining(drummer)).contains(dave, oliver);
+    }
+
+    @Test // (expected = InvalidDataAccessApiUsageException.class) // DATAJPA-1023, DATACMNS-959
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void rejectsStreamExecutionIfNoSurroundingTransactionActive() {
+        userRepository.findAllByCustomQueryAndStream();
+    }
+
+    @Ignore("Not support Named query")
+    @Test // DATAJPA-1334
+    public void executesNamedQueryWithConstructorExpression() {
+        userRepository.findByNamedQueryWithConstructorExpression();
     }
 }

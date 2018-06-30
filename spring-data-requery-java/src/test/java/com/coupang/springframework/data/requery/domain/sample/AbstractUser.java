@@ -3,6 +3,7 @@ package com.coupang.springframework.data.requery.domain.sample;
 import com.coupang.kotlinx.data.requery.conveters.ByteArrayBlobConverter;
 import com.coupang.kotlinx.objectx.ToStringBuilder;
 import com.coupang.springframework.data.requery.domain.AbstractPersistable;
+import com.coupang.springframework.data.requery.repository.sample.UserRepository;
 import io.requery.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "SD_User")
-public abstract class AbstractUser extends AbstractPersistable<Integer> {
+public abstract class AbstractUser extends AbstractPersistable<Integer> implements UserRepository.RolesAndFirstname {
 
     private static final long serialVersionUID = -2977575626321229838L;
 

@@ -2,10 +2,7 @@ package com.coupang.springframework.data.requery.repository.sample;
 
 import com.coupang.springframework.data.requery.annotation.Modifying;
 import com.coupang.springframework.data.requery.annotation.Query;
-import com.coupang.springframework.data.requery.domain.sample.Role;
-import com.coupang.springframework.data.requery.domain.sample.SpecialUser;
-import com.coupang.springframework.data.requery.domain.sample.User;
-import com.coupang.springframework.data.requery.domain.sample.User_Colleagues;
+import com.coupang.springframework.data.requery.domain.sample.*;
 import com.coupang.springframework.data.requery.repository.RequeryRepository;
 import io.requery.query.Tuple;
 import org.springframework.data.domain.Page;
@@ -16,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -350,18 +348,45 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
 
     // NOTE: Not Supported
 
-//    List<User> findByRolesContaining(AbstractRole role);
-//
-//    List<User> findByRolesNotContaining(AbstractRole role);
-//
-//    List<User> findByRolesNameContaining(String name);
+    default List<User> findByRolesContaining(AbstractRole role) {
+        return getOperations()
+            .select(User.class)
+            .join(User_Role.class).on(User_Role.SD_USER_ID.eq(User.ID).and(User_Role.SD_ROLES_ID.eq(role.getId())))
+            .get()
+            .toList();
+    }
+
+    default List<User> findByRolesNotContaining(AbstractRole role) {
+        return getOperations()
+            .select(User.class)
+            .distinct()
+            .leftJoin(User_Role.class).on(User_Role.SD_USER_ID.eq(User.ID))
+            .where(User_Role.SD_ROLES_ID.ne(role.getId()).or(User_Role.SD_ROLES_ID.isNull()))
+            .get()
+            .toList();
+    }
+
+    default List<User> findByRolesNameContaining(String roleName) {
+        return getOperations()
+            .select(User.class)
+            .join(User_Role.class).on(User_Role.SD_USER_ID.eq(User.ID))
+            .join(Role.class).on(User_Role.SD_ROLES_ID.eq(Role.ID))
+            .where(Role.NAME.eq(roleName))
+            .get()
+            .toList();
+    }
 
 
-//    // DATAJPA-1179
+    //    // DATAJPA-1179
 //    @Query("select u from User u where u.firstname = :#{#firstname} and u.firstname = :#{#firstname}")
 //    List<User> findUsersByDuplicateSpel(@Param("firstname") String firstname);
 //
-//    List<RolesAndFirstname> findRolesAndFirstnameBy();
+    default List<User> findRolesAndFirstnameBy() {
+        return getOperations()
+            .select(User.class)
+            .get()
+            .toList();
+    }
 
     @Query("select * from SD_User u where u.age = ?")
     List<User> findByStringAge(String age);
@@ -401,9 +426,9 @@ public interface UserRepository extends RequeryRepository<User, Integer>, UserRe
     @Query(value = "SELECT u.* FROM SD_User u WHERE 'x' = ? ORDER BY CASE WHEN (u.firstname  >= ?) THEN 0 ELSE 1 END, u.firstname")
     Page<User> findAllOrderedBySpecialNameMultipleParamsIndexed(String other, String name, Pageable page);
 
-//    // DATAJPA-928
-@Query(value = "SELECT u.* FROM SD_User u")
-Page<User> findByNativQueryWithPageable(Pageable pageable);
+    //    // DATAJPA-928
+    @Query(value = "SELECT u.* FROM SD_User u")
+    Page<User> findByNativQueryWithPageable(Pageable pageable);
 
     // DATAJPA-928
     @Query(value = "SELECT firstname FROM SD_User ORDER BY UCASE(firstname)", countQuery = "SELECT count(*) FROM SD_User")
@@ -421,15 +446,22 @@ Page<User> findByNativQueryWithPageable(Pageable pageable);
     User findByEmailNativeAddressJdbcStyleParameter(String emailAddress);
 
     // NOTE: Not Supported
-//    // DATAJPA-1334
-//    List<NameOnlyDto> findByNamedQueryWithConstructorExpression();
+    // DATAJPA-1334
+    default List<RolesAndFirstname> findByNamedQueryWithConstructorExpression() {
+        return getOperations()
+            .select(User.class)
+            .get()
+            .stream()
+            .map(it -> (RolesAndFirstname) it)
+            .collect(Collectors.toList());
+    }
 
 
     interface RolesAndFirstname {
 
         String getFirstname();
 
-        Set<Role> getRoles();
+        Set<AbstractRole> getRoles();
     }
 
 
