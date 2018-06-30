@@ -32,6 +32,8 @@ public class RequeryTestConfiguration extends AbstractRequeryConfiguration {
         return new EmbeddedDatabaseBuilder()
             .setName("data")
             .setType(EmbeddedDatabaseType.H2)
+            .setScriptEncoding("UTF-8")
+            .ignoreFailedDrops(true)
             .build();
     }
 }

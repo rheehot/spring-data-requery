@@ -4,7 +4,6 @@ import com.coupang.springframework.data.requery.configs.RequeryTestConfiguration
 import com.coupang.springframework.data.requery.domain.sample.Role;
 import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
 import com.coupang.springframework.data.requery.repository.sample.RoleRepository;
-import com.coupang.springframework.data.requery.repository.sample.UserRepository;
 import com.coupang.springframework.data.requery.repository.support.SimpleRequeryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -25,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = { RequeryTestConfiguration.class })
-@EnableRequeryRepositories(basePackageClasses = { UserRepository.class })
+@EnableRequeryRepositories(basePackageClasses = { RoleRepository.class })
 public class RoleRepositoryTest {
 
     @Inject RoleRepository repository;
