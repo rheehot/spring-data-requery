@@ -39,16 +39,6 @@ dependencies {
     annotationProcessor "io.requery:requery-processor"
     testAnnotationProcessor "io.requery:requery-processor"
 
-    implementation "org.jetbrains:annotations"
-    implementation "com.google.code.findbugs:jsr305"
-
-    implementation "javax.inject:javax.inject:1"
-    implementation "javax.cache:cache-api"
-    implementation "javax.annotation:javax.annotation-api"
-    implementation "javax.interceptor:javax.interceptor-api"
-    implementation "javax.validation:validation-api"
-    implementation "org.eclipse.persistence:javax.persistence"
-
     compile("mysql:mysql-connector-java")
 
     // spring framework

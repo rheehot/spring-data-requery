@@ -2,6 +2,7 @@ package com.coupang.springframework.data.requery.starter.domain.model;
 
 import com.coupang.kotlinx.objectx.ToStringBuilder;
 import com.coupang.springframework.data.requery.domain.AbstractPersistable;
+import com.coupang.springframework.data.requery.starter.dto.PersonDto;
 import io.requery.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -35,5 +36,9 @@ public class AbstractPerson extends AbstractPersistable<Long> {
         return super.buildStringHelper()
             .add("name", name)
             .add("email", email);
+    }
+
+    public PersonDto toPersonDto() {
+        return PersonDto.of(name, email);
     }
 }

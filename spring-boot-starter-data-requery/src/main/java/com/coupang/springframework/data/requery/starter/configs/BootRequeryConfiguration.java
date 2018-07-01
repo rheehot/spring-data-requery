@@ -1,6 +1,7 @@
 package com.coupang.springframework.data.requery.starter.configs;
 
 import com.coupang.springframework.data.requery.configs.AbstractRequeryConfiguration;
+import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
 import com.coupang.springframework.data.requery.starter.domain.model.Models;
 import io.requery.meta.EntityModel;
 import io.requery.sql.TableCreationMode;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
+@EnableRequeryRepositories(basePackages = {"com.coupang.springframework.data.requery.starter.domain.repository"})
 public class BootRequeryConfiguration extends AbstractRequeryConfiguration {
 
     @Override
