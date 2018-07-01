@@ -99,6 +99,8 @@ public class FunctionalQueryTest extends AbstractDomainTest {
             requeryTemplate.insert(person);
         }
 
+        // FIXME: not 연산자가 제대로 동작하지 않는다. (Java 와 Kotlin 모두)
+        //
         Result<Person> result = requeryTemplate.select(Person.class)
             .where(Person.NAME.ne(name).and(Person.EMAIL.ne(email)))
             .get();
@@ -501,7 +503,7 @@ public class FunctionalQueryTest extends AbstractDomainTest {
 
         Result<Person> result = requeryTemplate.select(Person.class)
             .where(Person.AGE.gt(5).and(Person.AGE.lt(75))).and(Person.NAME.ne("Bob"))
-//            .where(Person.AGE.gt(5).and(Person.AGE.lt(75)).and(Person.NAME.ne("Bob"))) TODO?: Error occurs
+//            .where(Person.AGE.gt(5).and(Person.AGE.lt(75)).and(Person.NAME.ne("Bob"))) // TODO?: Error occurs
             .or(Person.NAME.eq("Bob"))
             .get();
 
