@@ -45,16 +45,16 @@ dependencies {
     kapt "io.requery:requery-processor"
     kaptTest "io.requery:requery-processor"
 
-    compile "javax.inject:javax.inject:1"
-    compile "javax.cache:cache-api"
-
     // spring framework
     compile "org.springframework:spring-beans"
     compile "org.springframework:spring-context"
     compile "org.springframework:spring-expression"
+    compile "org.springframework:spring-jdbc"
     compile "org.springframework:spring-tx"
     compile "org.springframework.data:spring-data-commons"
 
+    optional "org.cache2k:cache2k-all"
     optional "org.threeten:threetenbp"
+    optional "joda-time:joda-time"
 
 }

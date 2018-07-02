@@ -1,13 +1,17 @@
 package org.springframework.data.requery
 
 import io.requery.query.*
+import io.requery.query.element.LogicalOperator
 import io.requery.query.element.QueryElement
 import io.requery.query.element.QueryWrapper
-import mu.KLogging
+import io.requery.query.element.WhereConditionElement
+import mu.KotlinLogging
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 
-private object QEX: KLogging()
+private object QEX {
+    val log = KotlinLogging.logger { }
+}
 
 fun <V> nameExpressionOf(name: String, type: Class<V>): NamedExpression<V> = NamedExpression.of(name, type)
 
@@ -25,7 +29,7 @@ fun QueryElement<*>.applyPageable(domainClass: Class<*>, pageable: Pageable): Qu
         return this
     }
 
-    QEX.logger.trace { "Apply paging .. domainClass=${domainClass.simpleName}, pageable=$pageable" }
+    QEX.log.trace { "Apply paging .. domainClass=${domainClass.simpleName}, pageable=$pageable" }
 
     var query: QueryElement<*> = this
 
@@ -44,7 +48,7 @@ fun QueryElement<*>.applyPageable(domainClass: Class<*>, pageable: Pageable): Qu
 
 fun QueryElement<*>.applySort(domainClass: Class<*>, sort: Sort): QueryElement<*> {
 
-    QEX.logger.trace { "Apply sort, domainClass=${domainClass.simpleName}, sort=$sort" }
+    QEX.log.trace { "Apply sort, domainClass=${domainClass.simpleName}, sort=$sort" }
 
     if(sort.isUnsorted) {
         return this
@@ -69,6 +73,43 @@ fun QueryElement<*>.applySort(domainClass: Class<*>, sort: Sort): QueryElement<*
     }
 
     return query
+}
+
+fun Selection<*>.applyWhereConditions(conditionElements: Set<WhereConditionElement<*>>): QueryElement<*> =
+    this.unwrap().applyWhereConditions(conditionElements)
+
+fun QueryElement<*>.applyWhereConditions(conditionElements: Set<WhereConditionElement<*>>): QueryElement<*> {
+    if(conditionElements.isEmpty()) {
+        return this
+    }
+
+    if(conditionElements.size == 1) {
+        return this.where(conditionElements.first().condition).unwrap()
+    }
+
+    var whereElement: WhereAndOr<*> = this.where(conditionElements.first().condition)
+
+    conditionElements
+        .drop(1)
+        .forEach { conditionElement ->
+            val condition = conditionElement.condition
+            val operator = conditionElement.operator
+
+            QEX.log.trace { "Apply where condition=$condition, operator=$operator" }
+
+            operator?.let {
+                when(operator) {
+                    LogicalOperator.AND ->
+                        whereElement = whereElement.and(condition)
+                    LogicalOperator.OR  ->
+                        whereElement = whereElement.or(condition)
+                    LogicalOperator.NOT ->
+                        whereElement = whereElement.and(condition).not()
+                }
+            }
+        }
+
+    return whereElement.unwrap()
 }
 
 fun Class<*>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<*>> {

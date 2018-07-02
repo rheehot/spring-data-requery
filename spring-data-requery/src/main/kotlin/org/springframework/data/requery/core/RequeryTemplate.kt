@@ -1,16 +1,19 @@
 package org.springframework.data.requery.core
 
 import io.requery.sql.EntityDataStore
+import mu.KLogging
 import org.springframework.context.ApplicationContext
 import org.springframework.data.requery.mapping.RequeryMappingContext
 
 /**
- * RequeryTemplate
+ * Java용 RequeryTemplate
  *
  * @author debop@coupang.com
- * @since 18. 7. 2
  */
-class RequeryTemplate(val applicationContext: ApplicationContext,
-                      val dataStore: EntityDataStore<Any>,
-                      val mappingContext: RequeryMappingContext) {
+class RequeryTemplate(override val applicationContext: ApplicationContext,
+                      override val dataStore: EntityDataStore<Any>,
+                      override val mappingContext: RequeryMappingContext): RequeryOperations {
+
+    companion object: KLogging()
+
 }
