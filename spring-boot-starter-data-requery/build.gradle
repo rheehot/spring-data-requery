@@ -29,7 +29,7 @@ idea {
 
 dependencies {
 
-    compile project(":spring-data-requery-java")
+    compile project(":spring-data-requery")
 
     // lombok을 gradle 에서 사용하기 위해 annotation process를 설정해주어야 합니다.
     compileOnly "org.projectlombok:lombok"
