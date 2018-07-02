@@ -13,7 +13,8 @@ private object QEX {
     val log = KotlinLogging.logger { }
 }
 
-fun <V> nameExpressionOf(name: String, type: Class<V>): NamedExpression<V> = NamedExpression.of(name, type)
+fun <V> namedExpresesionOf(name: String, type: Class<V>): NamedExpression<V> =
+    NamedExpression.of(name, type)
 
 fun Return<*>.unwrap(): QueryElement<*> {
     return if(this is QueryWrapper<*>) {
@@ -124,7 +125,7 @@ fun Class<*>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<*>> {
         this@getOrderingExpressions
             .findField(propertyName)
             ?.let { field ->
-                val expr = nameExpressionOf(propertyName, field.type)
+                val expr = namedExpresesionOf(propertyName, field.type)
 
                 when(order.direction) {
                     Sort.Direction.ASC -> expr.asc()
@@ -136,16 +137,33 @@ fun Class<*>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<*>> {
 
 fun <E> Iterable<Condition<E, *>>.foldConditions(): LogicalCondition<E, *>? {
 
-    var condition: LogicalCondition<E, *>? = null
+    var result: LogicalCondition<E, *>? = null
 
     this.forEach { cond ->
-        when(condition) {
-            null -> condition = cond as? LogicalCondition<E, *>
-            else -> condition!!.and(cond)
+        when(result) {
+            null -> result = cond as? LogicalCondition<E, *>
+            else -> result!!.and(cond)
+        }
+    }
+    return result
+}
+
+fun <E> Iterable<Condition<E, *>>.foldConditions(operator: LogicalOperator): LogicalCondition<E, *>? {
+
+    var result: LogicalCondition<E, *>? = null
+
+    this.forEach { cond ->
+        when(result) {
+            null -> result = cond as? LogicalCondition<E, *>
+            else -> when(operator) {
+                LogicalOperator.AND -> result!!.and(cond)
+                LogicalOperator.OR -> result!!.or(cond)
+                LogicalOperator.NOT -> result!!.and(cond).not()
+            }
         }
     }
 
-    return condition
+    return result
 }
 
 
