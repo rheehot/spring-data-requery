@@ -10,7 +10,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-noarg:$kotlin_version"
-        
+
         classpath "io.spring.gradle:propdeps-plugin:0.0.9.RELEASE"
         classpath "org.springframework.boot:spring-boot-gradle-plugin:$spring_boot_version"
         classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
@@ -94,6 +94,8 @@ subprojects {
 
             dependency "org.slf4j:slf4j-api:1.7.25"
             dependency "ch.qos.logback:logback-classic:1.2.3"
+            dependency "io.github.microutils:kotlin-logging:1.5.4"
+
 
             dependency "org.projectlombok:lombok:1.16.16"
 
@@ -137,6 +139,15 @@ subprojects {
 
     dependencies {
 
+        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        optional "org.jetbrains.kotlin:kotlin-reflect"
+
+        optional "org.jetbrains.kotlinx:kotlinx-coroutines-core"
+
+        compile "io.github.microutils:kotlin-logging"
+        compile "org.slf4j:slf4j-api"
+        testCompile "ch.qos.logback:logback-classic"
+
         testImplementation "org.cache2k:cache2k-all"
         testImplementation "org.cache2k:cache2k-jcache"
 
@@ -179,6 +190,39 @@ subprojects {
     compileTestJava {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    compileKotlin {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = ["-Xjsr305=strict", "-Xjvm-target 1.8", "-Xjvm-default=compatibility", "-Xenable-jvm-default"]
+            javaParameters = true
+            apiVersion = "1.2"
+            languageVersion = "1.2"
+            suppressWarnings = false
+        }
+    }
+    compileTestKotlin {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = ["-Xjsr305=strict", "-Xjvm-target 1.8", "-Xjvm-default=compatibility", "-Xenable-jvm-default"]
+            javaParameters = true
+            apiVersion = "1.2"
+            languageVersion = "1.2"
+            suppressWarnings = false
+        }
+    }
+
+    kotlin {
+        experimental {
+            coroutines "enable"
+        }
     }
 
     test {
