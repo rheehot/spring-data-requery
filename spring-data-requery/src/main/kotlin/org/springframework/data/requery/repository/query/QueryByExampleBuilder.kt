@@ -26,7 +26,7 @@ import java.lang.reflect.Field
 fun <E> QueryElement<out Result<E>>.applyExample(example: Example<E>): QueryElement<out Result<E>> {
 
     val matcher = example.matcher
-    val conditions = QueryByExampleBuilder.buildConditions(this, example, ExampleMatcherAccessor(matcher))
+    val conditions = QueryByExampleBuilder.buildConditions(example, ExampleMatcherAccessor(matcher))
 
     val condition = when {
         matcher.isAllMatching -> conditions.foldConditions(LogicalOperator.AND)
@@ -35,7 +35,7 @@ fun <E> QueryElement<out Result<E>>.applyExample(example: Example<E>): QueryElem
     }
 
     return condition?.let {
-        this.where(condition).unwrap() as QueryElement<out Result<E>>
+        this.where(it).unwrap() as QueryElement<out Result<E>>
     } ?: this
 }
 
@@ -50,7 +50,7 @@ object QueryByExampleBuilder {
     fun <E> getWhereAndOr(base: QueryElement<out Result<E>>, example: Example<E>): QueryElement<out Result<E>> {
 
         val matcher = example.matcher
-        val conditions = buildConditions(base, example, ExampleMatcherAccessor(matcher))
+        val conditions = buildConditions(example, ExampleMatcherAccessor(matcher))
 
         val condition = when {
             matcher.isAllMatching -> conditions.foldConditions(LogicalOperator.AND)
@@ -64,8 +64,7 @@ object QueryByExampleBuilder {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <E> buildConditions(base: QueryElement<out Result<E>>,
-                            example: Example<E>,
+    fun <E> buildConditions(example: Example<E>,
                             accessor: ExampleMatcherAccessor): List<Condition<E, *>> {
 
         val conditions = arrayListOf<Condition<E, *>>()

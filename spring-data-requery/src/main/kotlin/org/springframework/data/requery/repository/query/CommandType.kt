@@ -28,7 +28,7 @@ enum class CommandType {
                 return DELETE
             }
             return CommandType.values()
-                       .find { it.name == command!!.toUpperCase() }
+                       .find { it.name == command.toUpperCase() }
                    ?: SELECT
         }
     }
