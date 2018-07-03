@@ -5,6 +5,7 @@ import io.requery.query.Condition
 import io.requery.query.Result
 import io.requery.query.Return
 import io.requery.query.element.QueryElement
+import mu.KotlinLogging
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -27,6 +28,10 @@ import java.util.*
 @Transactional(readOnly = true)
 class SimpleRequeryRepository<E: Any, ID>(final val entityInformation: RequeryEntityInformation<E, ID>,
                                           override val operations: RequeryOperations): RequeryRepositoryImplementation<E, ID> {
+
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
 
     final val domainClass: Class<E> = entityInformation.javaType
     final val domainClassName: String = domainClass.simpleName ?: "Unknown"
@@ -95,16 +100,20 @@ class SimpleRequeryRepository<E: Any, ID>(final val entityInformation: RequeryEn
         TODO("not implemented")
     }
 
-    override fun insertRetunKey(entity: E): ID {
-        TODO("not implemented")
+    override fun <K> insert(entity: E, keyClass: Class<K>): K {
+        return operations.insert(entity, keyClass).also {
+            log.trace { "Insert entity, new key=$it" }
+        }
     }
 
     override fun insertAll(entities: Iterable<E>): List<E> {
-        TODO("not implemented")
+        return operations.insertAll(entities)
     }
 
-    override fun insertAllReturnKey(entities: Iterable<E>): List<ID> {
-        TODO("not implemented")
+    override fun <K> insertAll(entities: Iterable<E>, keyClass: Class<K>): List<K> {
+        return operations.insertAll(entities, keyClass).also {
+            log.trace { "Insert entities, new keys=$it" }
+        }
     }
 
     override fun upsert(entity: E): E {

@@ -30,11 +30,15 @@ interface RequeryRepository<E: Any, ID>: PagingAndSortingRepository<E, ID>,
 
     fun insert(entity: E): E
 
-    fun insertRetunKey(entity: E): ID
+    /**
+     * Entity 추가 후, 발급된 Key 값을 반환합니다.
+     * @param entity
+     */
+    fun <K> insert(entity: E, keyClass: Class<K>): K
 
     fun insertAll(entities: Iterable<E>): List<E>
 
-    fun insertAllReturnKey(entities: Iterable<E>): List<ID>
+    fun <K> insertAll(entities: Iterable<E>, keyClass: Class<K>): List<K>
 
     fun upsert(entity: E): E
 
