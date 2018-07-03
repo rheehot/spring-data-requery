@@ -39,8 +39,8 @@ dependencies {
     annotationProcessor "io.requery:requery-processor"
     testAnnotationProcessor "io.requery:requery-processor"
 
-    compile("mysql:mysql-connector-java")
+    compile "mysql:mysql-connector-java"
 
     // spring framework
-    compile("org.springframework.boot:spring-boot-starter-web")
+    compile "org.springframework.boot:spring-boot-starter-web"
 }

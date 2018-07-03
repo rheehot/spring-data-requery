@@ -2,8 +2,9 @@ package com.coupang.springframework.data.requery.starter.dto;
 
 import com.coupang.kotlinx.objectx.AbstractValueObject;
 import com.coupang.kotlinx.objectx.ToStringBuilder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -11,7 +12,8 @@ import org.jetbrains.annotations.NotNull;
  */
 
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class PersonDto extends AbstractValueObject {
     @NotNull
     @Override

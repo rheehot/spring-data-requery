@@ -2,11 +2,11 @@ package com.coupang.springframework.data.requery.starter.api;
 
 import com.coupang.springframework.data.requery.starter.dto.PersonDto;
 import com.coupang.springframework.data.requery.starter.service.PersonService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author Diego on 2018. 7. 1..
@@ -15,16 +15,49 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/person")
 public class PersonController {
 
-    @Autowired
-    private PersonService service;
+    private final PersonService service;
 
-    // TODO DTO, repository, service 사용하기
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public PersonDto getPerson(@PathVariable("id") Long id) {
+    @Autowired
+    public PersonController(@NotNull PersonService personService) {
+        this.service = personService;
+    }
+
+    // TODO: DTO, repository, service 사용하기
+    @GetMapping("/{id}")
+    public PersonDto get(@PathVariable("id") Long id) {
         if (id == null) {
             return null;
         }
-        PersonDto person = service.getPersonById(id);
-        return person;
+        return service.getPersonById(id);
+    }
+
+    @PostMapping
+    public PersonDto insert(@RequestBody PersonDto personDto) {
+        // TODO: add insert
+        return personDto;
+    }
+
+    @PutMapping
+    public PersonDto upsert(@RequestBody PersonDto personDto) {
+        // TODO: add upsert
+        return personDto;
+    }
+
+    @PutMapping("/batch")
+    public List<PersonDto> upsertAll(@RequestBody List<PersonDto> personDtos) {
+        // TODO: add upsertAll
+        return personDtos;
+    }
+
+    @DeleteMapping
+    public PersonDto delete(@RequestBody PersonDto personDto) {
+        // TODO: add delete
+        return personDto;
+    }
+
+    @DeleteMapping("/batch")
+    public List<PersonDto> deleteAll(@RequestBody List<PersonDto> personDtos) {
+    // TODO: add delete
+        return personDtos;
     }
 }
