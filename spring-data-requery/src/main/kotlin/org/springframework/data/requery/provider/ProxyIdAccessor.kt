@@ -5,7 +5,6 @@ package org.springframework.data.requery.provider
  *
  * @author debop
  */
-@Deprecated("사용할 필요 없다")
 interface ProxyIdAccessor {
 
     fun shouldUseAccessorFor(entity: Any?): Boolean

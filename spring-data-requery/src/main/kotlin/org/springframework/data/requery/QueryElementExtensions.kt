@@ -102,7 +102,7 @@ fun QueryElement<*>.applyWhereConditions(conditionElements: Set<WhereConditionEl
                 when(operator) {
                     LogicalOperator.AND ->
                         whereElement = whereElement.and(condition)
-                    LogicalOperator.OR  ->
+                    LogicalOperator.OR ->
                         whereElement = whereElement.or(condition)
                     LogicalOperator.NOT ->
                         whereElement = whereElement.and(condition).not()
@@ -112,6 +112,8 @@ fun QueryElement<*>.applyWhereConditions(conditionElements: Set<WhereConditionEl
 
     return whereElement.unwrap()
 }
+
+fun Return<*>.getAsResult(): Result<*> = this.get() as Result<*>
 
 fun Class<*>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<*>> {
 
@@ -129,7 +131,7 @@ fun Class<*>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<*>> {
 
                 when(order.direction) {
                     Sort.Direction.ASC -> expr.asc()
-                    else               -> expr.desc()
+                    else -> expr.desc()
                 }
             }
     }.toTypedArray()

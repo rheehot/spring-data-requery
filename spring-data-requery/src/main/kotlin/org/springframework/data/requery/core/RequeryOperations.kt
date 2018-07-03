@@ -26,11 +26,19 @@ interface RequeryOperations {
     val dataStore: EntityDataStore<Any>
     val mappingContext: RequeryMappingContext
 
-    @JvmDefault
-    fun getEntityModel(): EntityModel = dataStore.getEntityModel()
+    //    @JvmDefault
+    //    fun getEntityModel(): EntityModel = dataStore.getEntityModel()
+
+    //    @JvmDefault
+    //    fun getEntityContext(): EntityContext<Any> = dataStore.getEntityContext()
 
     @JvmDefault
-    fun getEntityContext(): EntityContext<Any> = dataStore.getEntityContext()
+    val entityModel: EntityModel
+        get() = dataStore.getEntityModel()
+
+    @JvmDefault
+    val entityContext: EntityContext<Any>
+        get() = dataStore.getEntityContext()
 
     @JvmDefault
     fun <E: Any> select(entityType: Class<E>): Selection<out Result<E>> = dataStore.select(entityType)
