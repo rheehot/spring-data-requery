@@ -19,7 +19,7 @@ import org.springframework.data.requery.query.Expressions
 import org.springframework.data.requery.unwrap
 
 /**
- * RequeryQueryCreator
+ * Query creator to create a [QueryElement] from a [PartTree].
  *
  * @author debop@coupang.com
  */

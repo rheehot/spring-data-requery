@@ -35,8 +35,9 @@ class RequeryQueryMethod(val method: Method,
     val entityInformation: RequeryEntityMetadata<*> = DefaultRequeryEntityMetadata.of(domainClass)
 
     init {
-        log.debug { "Create RequeryQueryMethod. repository=${metadata.repositoryInterface}, method name=${method.name}, method=$method" }
-
+        log.debug {
+            "Create RequeryQueryMethod. repository=${metadata.repositoryInterface}, method name=${method.name}, method=$method"
+        }
         check(!isModifyingQuery || !parameters.hasSpecialParameter()) {
             "Modifying query method must not contains ${Parameters.TYPES}"
         }
@@ -55,8 +56,12 @@ class RequeryQueryMethod(val method: Method,
                 val paramName = it.name.orElse("")
 
                 // Named Parameter 인데 Query에 ':paramName', '#paramName' 구문이 없다면 예외를 발생시킨다.
-                if(query.isNullOrBlank() ||
-                   (query != null && paramName.isNotBlank() && !query.contains(":" + paramName) && !query.contains("#" + paramName))) {
+                val notExistsNamedParameter = query != null &&
+                                              paramName.isNotBlank() &&
+                                              !query.contains(":$paramName") &&
+                                              !query.contains("#$paramName")
+
+                if(query.isNullOrBlank() || notExistsNamedParameter) {
                     error("Using named parameters for query method [$method] but parameter '${it.name}' not found in annotated query '$query'!")
                 }
             }
