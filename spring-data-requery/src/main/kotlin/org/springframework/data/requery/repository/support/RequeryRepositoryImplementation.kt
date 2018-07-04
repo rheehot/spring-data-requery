@@ -7,7 +7,7 @@ import org.springframework.data.requery.repository.RequeryRepository
  *
  * @author debop@coupang.com
  */
-interface RequeryRepositoryImplementation<E: Any, ID>: RequeryRepository<E, ID> {
+interface RequeryRepositoryImplementation<E: Any, ID: Any>: RequeryRepository<E, ID> {
 
     fun setRepositoryMethodMetadata(crudMethodMetadata: CrudMethodMetadata?)
 }

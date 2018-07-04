@@ -7,7 +7,7 @@ import org.springframework.data.repository.core.EntityMetadata
  *
  * @author debop
  */
-interface RequeryEntityMetadata<E>: EntityMetadata<E> {
+interface RequeryEntityMetadata<E: Any>: EntityMetadata<E> {
 
     /** the name of the entity */
     val entityName: String

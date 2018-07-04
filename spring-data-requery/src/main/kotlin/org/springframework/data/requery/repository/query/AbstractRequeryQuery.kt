@@ -15,15 +15,15 @@ import org.springframework.data.requery.utils.RequeryMetamodel
  *
  * @author debop@coupang.com
  */
-abstract class AbstractRequeryQuery(protected val queryMethod: RequeryQueryMethod,
-                                    protected val operations: RequeryOperations): RepositoryQuery {
+abstract class AbstractRequeryQuery(val queryMethod: RequeryQueryMethod,
+                                    val operations: RequeryOperations): RepositoryQuery {
 
     companion object {
         private val log = KotlinLogging.logger { }
     }
 
-    protected val metamodel = RequeryMetamodel(operations.entityModel)
-    protected val domainClass = queryMethod.entityInformation.javaType as Class<out Any>
+    val metamodel = RequeryMetamodel(operations.entityModel)
+    val domainClass = queryMethod.entityInformation.javaType as Class<out Any>
 
     override fun getQueryMethod(): QueryMethod = queryMethod
 

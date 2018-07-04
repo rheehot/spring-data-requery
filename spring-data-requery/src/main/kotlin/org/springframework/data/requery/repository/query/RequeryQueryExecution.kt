@@ -1,13 +1,19 @@
 package org.springframework.data.requery.repository.query
 
 import io.requery.PersistenceException
-import io.requery.query.Result
+import io.requery.query.element.QueryElement
+import io.requery.query.function.Count
 import mu.KotlinLogging
 import org.springframework.core.convert.ConversionService
 import org.springframework.core.convert.support.ConfigurableConversionService
 import org.springframework.core.convert.support.DefaultConversionService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.SliceImpl
+import org.springframework.data.repository.query.ParametersParameterAccessor
+import org.springframework.data.requery.*
 import org.springframework.data.requery.core.RequeryOperations
-import org.springframework.data.requery.getAsResult
 import org.springframework.util.ClassUtils
 
 /**
@@ -19,7 +25,7 @@ abstract class RequeryQueryExecution {
 
     companion object {
 
-        @JvmStatic private val log = KotlinLogging.logger { }
+        private val log = KotlinLogging.logger { }
 
         @JvmStatic
         private val CONVERSION_SERVICE: ConversionService by lazy {
@@ -64,10 +70,28 @@ abstract class RequeryQueryExecution {
 
     protected abstract fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any?
 
+
+    /**
+     * method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+     */
+    protected fun adjustPage(queryElement: QueryElement<out Any>,
+                             domainClass: Class<out Any>,
+                             pageable: Pageable): QueryElement<out Any> {
+
+        // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+        return if(queryElement.limit == null && queryElement.offset == null)
+            queryElement.applyPageable(domainClass, pageable).unwrap()
+        else
+            queryElement
+    }
 }
 
 
 internal class CollectionExecution: RequeryQueryExecution() {
+
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
 
     override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): List<*> {
         return query.createQueryElement(values).getAsResult().toList()
@@ -76,21 +100,97 @@ internal class CollectionExecution: RequeryQueryExecution() {
 
 internal class SlicedExecution(val parameters: RequeryParameters): RequeryQueryExecution() {
 
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
+
     override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
-        TODO("not implemented")
+        log.debug { "execute requery query, then return sliced list" }
+        val accessor = ParametersParameterAccessor(parameters, values)
+        val pageable = accessor.pageable
+
+        var queryElement = query.createQueryElement(values)
+
+        return when {
+            pageable.isPaged -> {
+                // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+                if(queryElement.limit == null) {
+                    queryElement = queryElement.applyPageable(query.domainClass, pageable)
+                }
+                val minLimit = minOf(queryElement.limit, pageable.pageSize)
+                queryElement = queryElement.offset(pageable.pageNumber * minLimit).unwrap()
+
+                val pageSize = queryElement.limit
+                queryElement = queryElement.limit(pageSize + 1).unwrap()
+
+                log.trace { "offset=${queryElement.offset}, limit=${queryElement.limit}, pageSize=$pageSize" }
+
+                val result = queryElement.getAsResult()
+                val resultList = result.toList()
+                val hasNext = resultList.size > pageSize
+
+                SliceImpl(if(hasNext) resultList.subList(0, pageSize) else resultList,
+                          pageable,
+                          hasNext)
+            }
+            else -> {
+                val result = queryElement.getAsResult()
+                SliceImpl(result.toList())
+            }
+        }
     }
 }
 
 internal class PagedExecution(val parameters: RequeryParameters): RequeryQueryExecution() {
-    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
-        TODO("not implemented")
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
+
+    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Page<*>? {
+        log.debug { "Run paged exection... query=$query, values=$values" }
+
+        val accessor = ParametersParameterAccessor(parameters, values)
+        val pageable = accessor.pageable
+
+        var queryElement = query.createQueryElement(values)
+
+        return when {
+            pageable.isPaged -> {
+                // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+                queryElement = adjustPage(queryElement, query.domainClass, pageable)
+                log.trace { "offet=${queryElement.offset}, limit=${queryElement.limit}, pageable=$pageable" }
+
+                val result = queryElement.getAsResult().toList()
+                val totals = doExecuteTotals(query, values)
+
+                log.trace { "Result size=${result.size}, totals=$totals" }
+                PageImpl(result, pageable, totals)
+            }
+            else -> {
+                PageImpl(queryElement.getAsResult().toList())
+            }
+        }
+    }
+
+    private fun doExecuteTotals(query: AbstractRequeryQuery, values: Array<Any?>): Long {
+
+        val queryElement = query.createQueryElement(values).unwrap()
+        val selection = query.operations.select(Count.count(query.domainClass))
+
+        selection.unwrap().whereElements.addAll(queryElement.whereElements)
+
+        return RequeryResultConverter.convert(selection.get().firstOrNull(), 0L) as Long
     }
 }
 
 internal class SingleEntityExecution: RequeryQueryExecution() {
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
+
     override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
-        val result = query.createQueryElement(values).get() as Result<*>
-        val value = result.firstOrNull()
+        log.debug { "Get single entity. query=$query, values=$values" }
+        val value = query.createQueryElement(values).getAsResult().firstOrNull()
         return RequeryResultConverter.convert(value)
     }
 }
@@ -99,21 +199,63 @@ internal class SingleEntityExecution: RequeryQueryExecution() {
  *  [RequeryQueryExecution] executing a Java 8 Stream.
  */
 internal class StreamExecution(val parameters: RequeryParameters): RequeryQueryExecution() {
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
+
     override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
-        TODO("not implemented")
+        log.debug { "Get stream of entities. query=$query, values=$values" }
+
+        val accessor = ParametersParameterAccessor(parameters, values)
+        val pageable = accessor.pageable
+
+        var queryElement = query.createQueryElement(values)
+
+        return when {
+            pageable.isPaged -> {
+                // method name에서 paging을 유추할 수 있을 수 있기 때문에 추가로 paging을 하지 않는다.
+                queryElement = adjustPage(queryElement, query.domainClass, pageable)
+                queryElement.getAsResult().stream()
+            }
+            else ->
+                queryElement.getAsResult().stream()
+        }
+
     }
 }
 
 internal class DeleteExecution(val operations: RequeryOperations): RequeryQueryExecution() {
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
+
     override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
-        TODO("not implemented")
+        log.debug { "execute Delete query. query=$query, values=$values" }
+
+        val deleteConditions = query.createQueryElement(values).whereElements
+
+        val deleteQuery = operations
+            .delete(query.domainClass)
+            .unwrap()
+            .applyWhereConditions(deleteConditions)
+
+        return deleteQuery.getAsScalarInt().value()
     }
 }
 
 internal class ExistsExecution: RequeryQueryExecution() {
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
 
     override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
-        return query.createQueryElement(values).limit(1).getAsResult().firstOrNull() != null
+        // TODO: Entity를 Load하는 것과 Count를 세는 것의 성능 차이 비교가 필요하다.
+        log.debug { "execute Exists query. query=$query, values=$values" }
+        return query
+            .createQueryElement(values)
+            .limit(1)
+            .getAsResult()
+            .firstOrNull() != null
     }
 
 }

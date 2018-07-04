@@ -26,8 +26,8 @@ import java.util.*
 @Suppress("UNCHECKED_CAST")
 @Repository
 @Transactional(readOnly = true)
-class SimpleRequeryRepository<E: Any, ID>(final val entityInformation: RequeryEntityInformation<E, ID>,
-                                          override val operations: RequeryOperations): RequeryRepositoryImplementation<E, ID> {
+class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: RequeryEntityInformation<E, ID>,
+                                               override val operations: RequeryOperations): RequeryRepositoryImplementation<E, ID> {
 
     companion object {
         private val log = KotlinLogging.logger { }

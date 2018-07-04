@@ -32,9 +32,9 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
         private val log = KotlinLogging.logger { }
     }
 
-    private val context = operations.mappingContext
-    private val domainClass = returnedType.domainType
-    private val domainClassName = domainClass.simpleName
+    protected val context = operations.mappingContext
+    protected val domainClass = returnedType.domainType
+    protected val domainClassName = domainClass.simpleName
 
     @Suppress("LeakingThis")
     private val root: QueryElement<out Any> = createQueryElement(returnedType)

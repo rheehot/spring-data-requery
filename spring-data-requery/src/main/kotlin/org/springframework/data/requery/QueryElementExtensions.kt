@@ -113,7 +113,14 @@ fun QueryElement<out Any>.applyWhereConditions(conditionElements: Set<WhereCondi
     return whereElement.unwrap()
 }
 
+@Suppress("UNCHECKED_CAST")
 fun Return<out Any>.getAsResult(): Result<out Any> = this.get() as Result<out Any>
+
+@Suppress("UNCHECKED_CAST")
+fun <E> Return<out Any>.getAsResultEntity(): Result<E> = this.get() as Result<E>
+
+@Suppress("UNCHECKED_CAST")
+fun Return<out Any>.getAsScalarInt(): Scalar<Int> = this.get() as Scalar<Int>
 
 fun Class<out Any>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<out Any>> {
 

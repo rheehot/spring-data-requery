@@ -9,7 +9,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils
  *
  * @author debop@coupang.com
  */
-class DefaultRequeryEntityMetadata<E>(val domainClass: Class<E>): RequeryEntityMetadata<E> {
+class DefaultRequeryEntityMetadata<E: Any>(val domainClass: Class<E>): RequeryEntityMetadata<E> {
 
     companion object {
         private val log = KotlinLogging.logger { }
@@ -17,7 +17,7 @@ class DefaultRequeryEntityMetadata<E>(val domainClass: Class<E>): RequeryEntityM
         private const val DEFAULT_MODEL_NAME = "default"
 
         @JvmStatic
-        fun <E> of(domainClass: Class<E>): DefaultRequeryEntityMetadata<E> =
+        fun <E: Any> of(domainClass: Class<E>): DefaultRequeryEntityMetadata<E> =
             DefaultRequeryEntityMetadata(domainClass)
     }
 

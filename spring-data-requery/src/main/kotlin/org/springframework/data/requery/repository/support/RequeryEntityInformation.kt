@@ -9,16 +9,16 @@ import org.springframework.data.requery.repository.query.RequeryEntityMetadata
  *
  * @author debop@coupang.com
  */
-interface RequeryEntityInformation<E, ID>: EntityInformation<E, ID>, RequeryEntityMetadata<E> {
+interface RequeryEntityInformation<E: Any, ID: Any>: EntityInformation<E, ID>, RequeryEntityMetadata<E> {
 
     /**
      * Returns the key attriute of the entity
      */
     // TODO: rename to getKeyAttribute()
-    fun getIdAttribute(): Attribute<out E, *>?
+    fun getIdAttribute(): Attribute<out E, out Any>?
 
     @JvmDefault
-    fun getRequiredIdAttribute(): Attribute<out E, *> {
+    fun getRequiredIdAttribute(): Attribute<out E, out Any> {
         return getIdAttribute()
                ?: throw IllegalArgumentException("Cound not obtain required identifier attribute for type [$entityName]")
     }

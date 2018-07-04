@@ -14,9 +14,9 @@ import org.springframework.data.requery.core.RequeryOperations
  * @author debop
  */
 @NoRepositoryBean
-interface RequeryRepository<E: Any, ID>: PagingAndSortingRepository<E, ID>,
-                                         QueryByExampleExecutor<E>,
-                                         RequeryConditionExecutor<E> {
+interface RequeryRepository<E: Any, ID: Any>: PagingAndSortingRepository<E, ID>,
+                                              QueryByExampleExecutor<E>,
+                                              RequeryConditionExecutor<E> {
 
     val operations: RequeryOperations
 

@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mapping.context.MappingContext
 import org.springframework.data.repository.Repository
-import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport
 import org.springframework.data.requery.core.RequeryOperations
 
@@ -17,7 +16,9 @@ import org.springframework.data.requery.core.RequeryOperations
 class RequeryRepositoryFactoryBean<T: Repository<E, ID>, E, ID>(repositoryInterface: Class<out T>)
     : TransactionalRepositoryFactoryBeanSupport<T, E, ID>(repositoryInterface) {
 
-    private val log = KotlinLogging.logger { }
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
 
     private var operations: RequeryOperations? = null
         get() = field
@@ -29,11 +30,12 @@ class RequeryRepositoryFactoryBean<T: Repository<E, ID>, E, ID>(repositoryInterf
         super.setMappingContext(mappingContext)
     }
 
-    override fun doCreateRepositoryFactory(): RepositoryFactorySupport {
-        TODO("not implemented")
+    override fun doCreateRepositoryFactory(): RequeryRepositoryFactory {
+        require(operations != null) { "RequeryOperations must not be null!" }
+        return createRepositoryFactory(operations!!)
     }
 
-    protected fun createRepositoryFactory(operations: RequeryOperations): RequeryRepositoryFactory {
+    private fun createRepositoryFactory(operations: RequeryOperations): RequeryRepositoryFactory {
         return RequeryRepositoryFactory(operations)
     }
 
