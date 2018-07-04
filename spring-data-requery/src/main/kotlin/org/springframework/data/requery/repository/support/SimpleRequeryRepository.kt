@@ -5,15 +5,11 @@ import io.requery.query.Condition
 import io.requery.query.Result
 import io.requery.query.Return
 import io.requery.query.element.QueryElement
+import io.requery.query.function.Count
 import mu.KotlinLogging
-import org.springframework.data.domain.Example
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
-import org.springframework.data.requery.applySort
+import org.springframework.data.domain.*
+import org.springframework.data.requery.*
 import org.springframework.data.requery.core.RequeryOperations
-import org.springframework.data.requery.getAsResult
-import org.springframework.data.requery.unwrap
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -46,22 +42,40 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
 
     override fun findAll(sort: Sort): List<E> {
         return operations
-            .select(domainClass).unwrap()
+            .select(domainClass)
+            .unwrap()
             .applySort(domainClass, sort)
-            .getAsResult()
-            .toList() as List<E>
+            .get()
+            .toList()
     }
 
     override fun <S: E> findAll(example: Example<S>): List<S> {
-        TODO("not implemented")
+        return example.buildQueryElement(operations, domainClass as Class<S>).get().toList()
     }
 
     override fun <S: E> findAll(example: Example<S>, sort: Sort): List<S> {
-        TODO("not implemented")
+        return example
+            .buildQueryElement(operations, domainClass as Class<S>)
+            .applySort(domainClass as Class<S>, sort)
+            .getAsResultEntity<S>()
+            .toList()
     }
 
     override fun findAll(pageable: Pageable): Page<E> {
-        TODO("not implemented")
+        log.trace { "Fild all $domainClassName with paging. pageable=$pageable" }
+
+        return when {
+            pageable.isPaged -> {
+                val content = operations.select(domainClass).unwrap().applyPageable(domainClass, pageable).getAsResultEntity<E>().toList()
+                val totals = operations.count(domainClass).get().value().toLong()
+
+                PageImpl(content, pageable, totals)
+            }
+            else -> {
+                val content = operations.select(domainClass).get().toList()
+                PageImpl(content)
+            }
+        }
     }
 
     override fun <S: E> findAll(example: Example<S>, pageable: Pageable): Page<S> {
@@ -89,16 +103,23 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
     }
 
     override fun findAllById(ids: Iterable<ID>): List<E> {
-        TODO("not implemented")
+
+        log.trace { "Find all by id. ids=$ids" }
+
+        val keyExpr = domainClass.getKeyExpression<ID>()
+
+        return operations
+            .select(domainClass)
+            .where(keyExpr.`in`(ids.toSet()))
+            .get()
+            .toList()
     }
 
     override fun <S: E> saveAll(entities: Iterable<S>): List<S> {
-        TODO("not implemented")
+        return operations.upsertAll(entities)
     }
 
-    override fun insert(entity: E): E {
-        TODO("not implemented")
-    }
+    override fun insert(entity: E): E = operations.insert(entity)
 
     override fun <K> insert(entity: E, keyClass: Class<K>): K {
         return operations.insert(entity, keyClass).also {
@@ -117,55 +138,66 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
     }
 
     override fun upsert(entity: E): E {
-        TODO("not implemented")
+        return operations.upsert(entity)
     }
 
     override fun upsertAll(entities: Iterable<E>): List<E> {
-        TODO("not implemented")
+        return operations.upsertAll(entities)
     }
 
     override fun refresh(entity: E): E {
-        TODO("not implemented")
+        return operations.refresh(entity)
     }
 
-    override fun refreshEntireProperty(entity: E): E {
-        TODO("not implemented")
+    override fun refreshAllProperties(entity: E): E {
+        return operations.refreshAllProperties(entity)
     }
 
     override fun refreshAll(entities: Iterable<E>, vararg attributes: Attribute<E, *>): List<E> {
-        TODO("not implemented")
+        return operations.refreshAll(entities, *attributes)
     }
 
-    override fun refreshAllEntireProperty(entities: Iterable<E>, vararg attributes: Attribute<E, *>): List<E> {
-        TODO("not implemented")
+    override fun refreshAllEntities(entities: Iterable<E>, vararg attributes: Attribute<E, *>): List<E> {
+        return operations.refreshAllEntities(entities, *attributes)
     }
 
     override fun deleteInBatch(entities: Iterable<E>) {
-        TODO("not implemented")
+        operations.deleteAll(entities)
     }
 
     override fun deleteAllInBatch(): Int {
-        TODO("not implemented")
+        return operations.deleteAll(domainClass)
     }
 
     override fun getOne(id: ID): E? {
-        TODO("not implemented")
+        return operations.findById(domainClass, id)
     }
 
     override fun <S: E> save(entity: S): S {
-        TODO("not implemented")
+        return operations.upsert(entity)
     }
 
     override fun deleteById(id: ID) {
-        TODO("not implemented")
+        log.trace { "Delete $domainClassName by id [$id]" }
+
+        val keyExpr = domainClass.getKeyExpression<ID>()
+
+        val deletedCount = operations
+            .delete(domainClass)
+            .where(keyExpr.eq(id))
+            .get()
+            .value()
+
+        log.trace { "Delete $domainClassName by id [$id]. deleted count=$deletedCount" }
     }
 
     override fun deleteAll(entities: MutableIterable<E>) {
-        TODO("not implemented")
+        operations.deleteAll(entities)
     }
 
     override fun deleteAll() {
-        TODO("not implemented")
+        log.debug { "Delete all entities ... domainClass=$domainClassName" }
+        operations.deleteAll(domainClass)
     }
 
     override fun count(): Long {
@@ -181,11 +213,19 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
     }
 
     override fun existsById(id: ID): Boolean {
-        TODO("not implemented")
+        val keyExpr = domainClass.getKeyExpression<ID>()
+
+        val tuple = operations
+            .select(Count.count(domainClass))
+            .where(keyExpr.eq(id))
+            .get()
+            .firstOrNull()
+
+        return tuple.get<Int>(0) > 0
     }
 
     override fun findById(id: ID): Optional<E> {
-        TODO("not implemented")
+        return Optional.ofNullable(operations.findById(domainClass, id))
     }
 
     override fun delete(entity: E) {

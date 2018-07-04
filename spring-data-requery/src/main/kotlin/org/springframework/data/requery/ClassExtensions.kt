@@ -1,5 +1,6 @@
 package org.springframework.data.requery
 
+import io.requery.query.NamedExpression
 import mu.KLogging
 import org.springframework.util.LinkedMultiValueMap
 import java.lang.reflect.Field
@@ -98,3 +99,18 @@ fun Field.isAssociationField(): Boolean =
     isAnnotationPresent(io.requery.OneToMany::class.java) ||
     isAnnotationPresent(io.requery.ManyToOne::class.java) ||
     isAnnotationPresent(io.requery.ManyToMany::class.java)
+
+
+private val classKeys = ConcurrentHashMap<Class<*>, NamedExpression<*>>()
+var UNKNOWN_KEY_EXPRESSION: NamedExpression<*> = NamedExpression.of("Unknown", Any::class.java)
+
+@Suppress("UNCHECKED_CAST")
+fun <V: Any> Class<*>.getKeyExpression(): NamedExpression<V> {
+
+    return classKeys.computeIfAbsent(this) { domainClass ->
+        val field = domainClass.findFirstField { it.getAnnotation(io.requery.Key::class.java) != null }
+
+        field?.let { namedExpresesionOf(field.name, field.type) }
+        ?: UNKNOWN_KEY_EXPRESSION
+    } as NamedExpression<V>
+}

@@ -71,9 +71,7 @@ open class PartTreeRequeryQuery(queryMethod: RequeryQueryMethod,
 
     protected fun prepareQuery(accessor: RequeryParameterAccessor): QueryElement<out Any> {
 
-        var query = operations.select(domainClass).unwrap()
-
-        query = buildWhereClause(query, accessor)
+        val query = buildWhereClause(operations.select(domainClass).unwrap(), accessor)
 
         return when {
 

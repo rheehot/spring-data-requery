@@ -23,7 +23,7 @@ import java.lang.reflect.Field
  * @author debop
  */
 @Suppress("UNCHECKED_CAST")
-fun <E> QueryElement<out Result<E>>.applyExample(example: Example<E>): QueryElement<out Result<E>> {
+fun <E: Any> QueryElement<out Any>.applyExample(example: Example<E>): QueryElement<out Any> {
 
     val matcher = example.matcher
     val conditions = QueryByExampleBuilder.buildConditions(example, ExampleMatcherAccessor(matcher))
@@ -35,7 +35,7 @@ fun <E> QueryElement<out Result<E>>.applyExample(example: Example<E>): QueryElem
     }
 
     return condition?.let {
-        this.where(it).unwrap() as QueryElement<out Result<E>>
+        this.where(it).unwrap() // as QueryElement<out Result<E>>
     } ?: this
 }
 
@@ -47,7 +47,7 @@ object QueryByExampleBuilder {
 
     // TODO : rename to applyExample
     @Suppress("UNCHECKED_CAST")
-    fun <E> getWhereAndOr(base: QueryElement<out Result<E>>, example: Example<E>): QueryElement<out Result<E>> {
+    fun <E: Any> getWhereAndOr(base: QueryElement<out Result<E>>, example: Example<E>): QueryElement<out Result<E>> {
 
         val matcher = example.matcher
         val conditions = buildConditions(example, ExampleMatcherAccessor(matcher))
@@ -64,8 +64,8 @@ object QueryByExampleBuilder {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <E> buildConditions(example: Example<E>,
-                            accessor: ExampleMatcherAccessor): List<Condition<E, *>> {
+    fun <E: Any> buildConditions(example: Example<E>,
+                                 accessor: ExampleMatcherAccessor): List<Condition<E, *>> {
 
         val conditions = arrayListOf<Condition<E, *>>()
 
@@ -108,10 +108,10 @@ object QueryByExampleBuilder {
     }
 
     @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_ANY")
-    fun <E> buildStringCondition(accessor: ExampleMatcherAccessor,
-                                 expression: NamedExpression<String>,
-                                 fieldName: String,
-                                 fieldValue: String): Condition<E, *> {
+    fun <E: Any> buildStringCondition(accessor: ExampleMatcherAccessor,
+                                      expression: NamedExpression<String>,
+                                      fieldName: String,
+                                      fieldValue: String): Condition<E, *> {
 
         val ignoreCase = accessor.isIgnoreCaseForPath(fieldName)
         log.trace { "Matching with ignoreCase? $ignoreCase" }

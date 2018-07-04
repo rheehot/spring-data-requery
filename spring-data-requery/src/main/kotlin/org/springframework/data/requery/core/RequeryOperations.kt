@@ -51,7 +51,7 @@ interface RequeryOperations {
     fun select(vararg expressions: Expression<*>): Selection<out Result<Tuple>> = dataStore.select(*expressions)
 
     @JvmDefault
-    fun <E, K> findById(entityType: Class<E>, id: K): E = dataStore.findByKey(entityType, id)
+    fun <E, K> findById(entityType: Class<E>, id: K): E? = dataStore.findByKey(entityType, id)
 
     @JvmDefault
     fun <E: Any> findAll(entityType: Class<E>): List<E> = dataStore.select(entityType).get().toList()
@@ -64,11 +64,15 @@ interface RequeryOperations {
         dataStore.refresh(entity, *attributes)
 
     @JvmDefault
-    fun <E: Any> refresh(entities: Iterable<E>, vararg attributes: Attribute<*, *>): List<E> =
+    fun <E: Any> refreshAll(entities: Iterable<E>, vararg attributes: Attribute<*, *>): List<E> =
         dataStore.refresh<E>(entities, *attributes).toList()
 
     @JvmDefault
-    fun <E: Any> refreshAll(entity: E): E = dataStore.refreshAll(entity)
+    fun <E: Any> refreshAllProperties(entity: E): E = dataStore.refreshAll(entity)
+
+    @JvmDefault
+    fun <E: Any> refreshAllEntities(entities: Iterable<E>, vararg attributes: Attribute<E, *>): List<E> =
+        entities.map { refreshAllProperties(it) }
 
     @JvmDefault
     fun <E: Any> upsert(entity: E): E = dataStore.upsert(entity)

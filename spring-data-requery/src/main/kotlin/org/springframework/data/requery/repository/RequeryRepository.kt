@@ -46,11 +46,11 @@ interface RequeryRepository<E: Any, ID: Any>: PagingAndSortingRepository<E, ID>,
 
     fun refresh(entity: E): E
 
-    fun refreshEntireProperty(entity: E): E
+    fun refreshAllProperties(entity: E): E
 
     fun refreshAll(entities: Iterable<E>, vararg attributes: Attribute<E, *>): List<E>
 
-    fun refreshAllEntireProperty(entities: Iterable<E>, vararg attributes: Attribute<E, *>): List<E>
+    fun refreshAllEntities(entities: Iterable<E>, vararg attributes: Attribute<E, *>): List<E>
 
     fun deleteInBatch(entities: Iterable<E>)
 

@@ -16,23 +16,24 @@ private object QEX {
 fun <V: Any> namedExpresesionOf(name: String, type: Class<V>): NamedExpression<V> =
     NamedExpression.of(name, type)
 
-fun Return<out Any>.unwrap(): QueryElement<out Any> {
+@Suppress("UNCHECKED_CAST")
+fun <T: Any> Return<T>.unwrap(): QueryElement<T> {
     return if(this is QueryWrapper<*>) {
-        this.unwrapQuery()
+        this.unwrapQuery() as QueryElement<T>
     } else {
-        this as QueryElement<*>
+        this as QueryElement<T>
     }
 }
 
-fun QueryElement<out Any>.applyPageable(domainClass: Class<out Any>, pageable: Pageable): QueryElement<out Any> {
+fun <T: Any> Return<T>.applyPageable(domainClass: Class<out Any>, pageable: Pageable): QueryElement<T> {
+
+    var query = this.unwrap()
 
     if(pageable.isUnpaged) {
-        return this
+        return query
     }
 
     QEX.log.trace { "Apply paging .. domainClass=${domainClass.simpleName}, pageable=$pageable" }
-
-    var query: QueryElement<out Any> = this
 
     if(pageable.sort.isSorted) {
         query = query.applySort(domainClass, pageable.sort)
@@ -47,15 +48,15 @@ fun QueryElement<out Any>.applyPageable(domainClass: Class<out Any>, pageable: P
     return query
 }
 
-fun QueryElement<out Any>.applySort(domainClass: Class<out Any>, sort: Sort): QueryElement<out Any> {
+fun <T: Any> Return<T>.applySort(domainClass: Class<out Any>, sort: Sort): QueryElement<T> {
 
     QEX.log.trace { "Apply sort, domainClass=${domainClass.simpleName}, sort=$sort" }
 
-    if(sort.isUnsorted) {
-        return this
-    }
+    var query = this.unwrap()
 
-    var query: QueryElement<out Any> = this
+    if(sort.isUnsorted) {
+        return query
+    }
 
     sort.forEach { order ->
 
@@ -76,19 +77,20 @@ fun QueryElement<out Any>.applySort(domainClass: Class<out Any>, sort: Sort): Qu
     return query
 }
 
-fun Selection<out Any>.applyWhereConditions(conditionElements: Set<WhereConditionElement<out Any>>): QueryElement<out Any> =
-    this.unwrap().applyWhereConditions(conditionElements)
 
-fun QueryElement<out Any>.applyWhereConditions(conditionElements: Set<WhereConditionElement<out Any>>): QueryElement<out Any> {
+fun <T: Any> Return<T>.applyWhereConditions(conditionElements: Set<WhereConditionElement<out Any>>): QueryElement<T> {
+
+    val query = this.unwrap()
+
     if(conditionElements.isEmpty()) {
-        return this
+        return query
     }
 
     if(conditionElements.size == 1) {
-        return this.where(conditionElements.first().condition).unwrap()
+        return query.where(conditionElements.first().condition).unwrap()
     }
 
-    var whereElement: WhereAndOr<*> = this.where(conditionElements.first().condition)
+    var whereElement = query.where(conditionElements.first().condition)
 
     conditionElements
         .drop(1)
@@ -99,13 +101,10 @@ fun QueryElement<out Any>.applyWhereConditions(conditionElements: Set<WhereCondi
             QEX.log.trace { "Apply where condition=$condition, operator=$operator" }
 
             operator?.let {
-                when(operator) {
-                    LogicalOperator.AND ->
-                        whereElement = whereElement.and(condition)
-                    LogicalOperator.OR ->
-                        whereElement = whereElement.or(condition)
-                    LogicalOperator.NOT ->
-                        whereElement = whereElement.and(condition).not()
+                whereElement = when(it) {
+                    LogicalOperator.AND -> whereElement.and(condition)
+                    LogicalOperator.OR -> whereElement.or(condition)
+                    LogicalOperator.NOT -> whereElement.and(condition).not()
                 }
             }
         }
@@ -117,7 +116,7 @@ fun QueryElement<out Any>.applyWhereConditions(conditionElements: Set<WhereCondi
 fun Return<out Any>.getAsResult(): Result<out Any> = this.get() as Result<out Any>
 
 @Suppress("UNCHECKED_CAST")
-fun <E> Return<out Any>.getAsResultEntity(): Result<E> = this.get() as Result<E>
+fun <E: Any> Return<out Any>.getAsResultEntity(): Result<E> = this.get() as Result<E>
 
 @Suppress("UNCHECKED_CAST")
 fun Return<out Any>.getAsScalarInt(): Scalar<Int> = this.get() as Scalar<Int>
@@ -144,7 +143,7 @@ fun Class<out Any>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<
     }.toTypedArray()
 }
 
-fun <E> Iterable<Condition<E, *>>.foldConditions(): LogicalCondition<E, *>? {
+fun <E: Any> Iterable<Condition<E, *>>.foldConditions(): LogicalCondition<E, *>? {
 
     var result: LogicalCondition<E, *>? = null
 
@@ -157,7 +156,7 @@ fun <E> Iterable<Condition<E, *>>.foldConditions(): LogicalCondition<E, *>? {
     return result
 }
 
-fun <E> Iterable<Condition<E, *>>.foldConditions(operator: LogicalOperator): LogicalCondition<E, *>? {
+fun <E: Any> Iterable<Condition<E, *>>.foldConditions(operator: LogicalOperator): LogicalCondition<E, *>? {
 
     var result: LogicalCondition<E, *>? = null
 
