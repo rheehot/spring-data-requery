@@ -36,10 +36,10 @@ class RequeryQueryMethod(val method: Method,
 
     init {
         log.debug {
-            "Create RequeryQueryMethod. repository=${metadata.repositoryInterface}, method name=${method.name}, method=$method"
+            "Create RequeryQueryMethod. repository=${metadata.repositoryInterface}, queryMethod name=${method.name}, queryMethod=$method"
         }
         check(!isModifyingQuery || !parameters.hasSpecialParameter()) {
-            "Modifying query method must not contains ${Parameters.TYPES}"
+            "Modifying query queryMethod must not contains ${Parameters.TYPES}"
         }
 
         assertParameterNamesInAnnotatedQuery()
@@ -62,7 +62,7 @@ class RequeryQueryMethod(val method: Method,
                                               !query.contains("#$paramName")
 
                 if(query.isNullOrBlank() || notExistsNamedParameter) {
-                    error("Using named parameters for query method [$method] but parameter '${it.name}' not found in annotated query '$query'!")
+                    error("Using named parameters for query queryMethod [$method] but parameter '${it.name}' not found in annotated query '$query'!")
                 }
             }
     }
@@ -87,6 +87,9 @@ class RequeryQueryMethod(val method: Method,
                 else -> query
             }
         }
+
+    val entityClass: Class<*>
+        get() = entityInformation.javaType
 
 
     private fun getAnnotationValue(attribute: String, type: Class<String>): String? {

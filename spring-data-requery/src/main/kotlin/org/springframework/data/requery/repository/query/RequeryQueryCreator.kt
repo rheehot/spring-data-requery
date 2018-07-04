@@ -23,10 +23,10 @@ import org.springframework.data.requery.unwrap
  *
  * @author debop@coupang.com
  */
-class RequeryQueryCreator(val operations: RequeryOperations,
-                          val provider: ParameterMetadataProvider,
-                          val returnedType: ReturnedType,
-                          val tree: PartTree): AbstractQueryCreator<QueryElement<*>, LogicalCondition<*, *>>(tree) {
+open class RequeryQueryCreator(val operations: RequeryOperations,
+                               val provider: ParameterMetadataProvider,
+                               val returnedType: ReturnedType,
+                               val tree: PartTree): AbstractQueryCreator<QueryElement<out Any>, LogicalCondition<out Any, *>>(tree) {
 
     companion object {
         private val log = KotlinLogging.logger { }
@@ -36,14 +36,14 @@ class RequeryQueryCreator(val operations: RequeryOperations,
     private val domainClass = returnedType.domainType
     private val domainClassName = domainClass.simpleName
 
-    private val root: QueryElement<*> = createQueryElement(returnedType)
+    @Suppress("LeakingThis")
+    private val root: QueryElement<out Any> = createQueryElement(returnedType)
 
-    // 사용되지 않는다.
-    //    val parameterExpressions: List<ParameterMetaData<*>>
-    //        get() = provider.getExpressions()
+    val parameterExpressions: List<ParameterMetadata<out Any>>
+        get() = provider.getExpressions()
 
 
-    protected fun createQueryElement(type: ReturnedType): QueryElement<*> {
+    protected open fun createQueryElement(type: ReturnedType): QueryElement<out Any> {
 
         val typeToRead = type.typeToRead
         log.debug { "Create QueryElement instance. returnedType=$type, typeToRead=$typeToRead" }
@@ -56,13 +56,13 @@ class RequeryQueryCreator(val operations: RequeryOperations,
         }
     }
 
-    override fun create(part: Part, iterator: MutableIterator<Any>): LogicalCondition<*, *> {
+    open override fun create(part: Part, iterator: MutableIterator<Any>): LogicalCondition<out Any, *> {
 
         log.trace { "Build new condition ..." }
         return buildWhereCondition(part)
     }
 
-    override fun and(part: Part, base: LogicalCondition<*, *>, iterator: MutableIterator<Any>): LogicalCondition<*, *> {
+    override fun and(part: Part, base: LogicalCondition<out Any, *>, iterator: MutableIterator<Any>): LogicalCondition<out Any, *> {
 
         log.trace { "add AND operator" }
 
@@ -70,18 +70,18 @@ class RequeryQueryCreator(val operations: RequeryOperations,
         return base.and(condition)
     }
 
-    override fun or(base: LogicalCondition<*, *>, criteria: LogicalCondition<*, *>): LogicalCondition<*, *> {
+    override fun or(base: LogicalCondition<out Any, *>, criteria: LogicalCondition<out Any, *>): LogicalCondition<out Any, *> {
 
         log.trace { "add OR operator" }
         return base.or(criteria)
     }
 
-    override fun complete(criteria: LogicalCondition<*, *>?, sort: Sort): QueryElement<*> {
+    override fun complete(criteria: LogicalCondition<out Any, *>?, sort: Sort): QueryElement<out Any> {
 
         return complete(criteria, sort, root)
     }
 
-    fun complete(criteria: LogicalCondition<*, *>?, sort: Sort, base: QueryElement<*>): QueryElement<*> {
+    open fun complete(criteria: LogicalCondition<out Any, *>?, sort: Sort, base: QueryElement<out Any>): QueryElement<out Any> {
 
         log.trace { "Complete build query ..." }
 
@@ -92,7 +92,7 @@ class RequeryQueryCreator(val operations: RequeryOperations,
         return query.applySort(domainClass, sort)
     }
 
-    private fun buildWhereCondition(part: Part): LogicalCondition<*, *> {
+    private fun buildWhereCondition(part: Part): LogicalCondition<out Any, *> {
         return QueryElementBuilder(part).build()
     }
 
@@ -100,7 +100,7 @@ class RequeryQueryCreator(val operations: RequeryOperations,
     private inner class QueryElementBuilder(val part: Part) {
 
         @Suppress("UNCHECKED_CAST")
-        fun build(): LogicalCondition<*, *> {
+        fun build(): LogicalCondition<out Any, *> {
 
             val property = part.property
             val type = part.type

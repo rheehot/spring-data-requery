@@ -76,7 +76,7 @@ object RequeryQueryLookupStrategy {
                                   namedQueries: NamedQueries): RepositoryQuery {
             log.debug { "Create PartTreeRequeryQuery for queryMethod [$method]" }
 
-            return PartTreeRequeryQuery(method, operations)
+            return PartTreeRequeryQuery(method, operations, persistenceProvider)
         }
     }
 
@@ -92,13 +92,13 @@ object RequeryQueryLookupStrategy {
 
             // @Query annotation이 있다면 그 값으로 한다
             if(method.isAnnotatedQuery) {
-                log.debug { "Create DeclaredRequeryQuery for @Query annotated method. queryMethod [${method.name}" }
+                log.debug { "Create DeclaredRequeryQuery for @Query annotated queryMethod. queryMethod [${method.name}" }
                 return DeclaredRequeryQuery(method, operations)
             }
 
             // TODO: spring-data-jpa 처럼 NamedQuery 를 만들어서 제공해야 한다. (spring-data-jdbc 를 활용하자)
-            // NOTE: NamedQuery 가 하는 일이 Custom implemented method 에 대한 수행을 담당한다. ㅠ.ㅠ
-            error("Cannot find a annotated query for method [$method]")
+            // NOTE: NamedQuery 가 하는 일이 Custom implemented queryMethod 에 대한 수행을 담당한다. ㅠ.ㅠ
+            error("Cannot find a annotated query for queryMethod [$method]")
         }
     }
 

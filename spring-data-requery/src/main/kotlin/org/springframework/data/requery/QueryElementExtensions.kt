@@ -13,10 +13,10 @@ private object QEX {
     val log = KotlinLogging.logger { }
 }
 
-fun <V> namedExpresesionOf(name: String, type: Class<V>): NamedExpression<V> =
+fun <V: Any> namedExpresesionOf(name: String, type: Class<V>): NamedExpression<V> =
     NamedExpression.of(name, type)
 
-fun Return<*>.unwrap(): QueryElement<*> {
+fun Return<out Any>.unwrap(): QueryElement<out Any> {
     return if(this is QueryWrapper<*>) {
         this.unwrapQuery()
     } else {
@@ -24,7 +24,7 @@ fun Return<*>.unwrap(): QueryElement<*> {
     }
 }
 
-fun QueryElement<*>.applyPageable(domainClass: Class<*>, pageable: Pageable): QueryElement<*> {
+fun QueryElement<out Any>.applyPageable(domainClass: Class<out Any>, pageable: Pageable): QueryElement<out Any> {
 
     if(pageable.isUnpaged) {
         return this
@@ -32,7 +32,7 @@ fun QueryElement<*>.applyPageable(domainClass: Class<*>, pageable: Pageable): Qu
 
     QEX.log.trace { "Apply paging .. domainClass=${domainClass.simpleName}, pageable=$pageable" }
 
-    var query: QueryElement<*> = this
+    var query: QueryElement<out Any> = this
 
     if(pageable.sort.isSorted) {
         query = query.applySort(domainClass, pageable.sort)
@@ -47,7 +47,7 @@ fun QueryElement<*>.applyPageable(domainClass: Class<*>, pageable: Pageable): Qu
     return query
 }
 
-fun QueryElement<*>.applySort(domainClass: Class<*>, sort: Sort): QueryElement<*> {
+fun QueryElement<out Any>.applySort(domainClass: Class<out Any>, sort: Sort): QueryElement<out Any> {
 
     QEX.log.trace { "Apply sort, domainClass=${domainClass.simpleName}, sort=$sort" }
 
@@ -55,7 +55,7 @@ fun QueryElement<*>.applySort(domainClass: Class<*>, sort: Sort): QueryElement<*
         return this
     }
 
-    var query: QueryElement<*> = this
+    var query: QueryElement<out Any> = this
 
     sort.forEach { order ->
 
@@ -76,10 +76,10 @@ fun QueryElement<*>.applySort(domainClass: Class<*>, sort: Sort): QueryElement<*
     return query
 }
 
-fun Selection<*>.applyWhereConditions(conditionElements: Set<WhereConditionElement<*>>): QueryElement<*> =
+fun Selection<out Any>.applyWhereConditions(conditionElements: Set<WhereConditionElement<out Any>>): QueryElement<out Any> =
     this.unwrap().applyWhereConditions(conditionElements)
 
-fun QueryElement<*>.applyWhereConditions(conditionElements: Set<WhereConditionElement<*>>): QueryElement<*> {
+fun QueryElement<out Any>.applyWhereConditions(conditionElements: Set<WhereConditionElement<out Any>>): QueryElement<out Any> {
     if(conditionElements.isEmpty()) {
         return this
     }
@@ -113,9 +113,9 @@ fun QueryElement<*>.applyWhereConditions(conditionElements: Set<WhereConditionEl
     return whereElement.unwrap()
 }
 
-fun Return<*>.getAsResult(): Result<*> = this.get() as Result<*>
+fun Return<out Any>.getAsResult(): Result<out Any> = this.get() as Result<out Any>
 
-fun Class<*>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<*>> {
+fun Class<out Any>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<out Any>> {
 
     if(sort.isUnsorted) {
         return emptyArray()

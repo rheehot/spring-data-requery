@@ -22,12 +22,12 @@ abstract class AbstractValueObject: ValueObject {
     override fun hashCode(): Int = System.identityHashCode(this)
 
     /**
-     * Don't override toString method, override buildStringHelper instead
+     * Don't override toString queryMethod, override buildStringHelper instead
      */
     override fun toString(): String = buildStringHelper().toString()
 
     /**
-     * Don't override toString method, override buildStringHelper instead
+     * Don't override toString queryMethod, override buildStringHelper instead
      */
     open fun toString(limit: Int): String = buildStringHelper().toString(limit)
 

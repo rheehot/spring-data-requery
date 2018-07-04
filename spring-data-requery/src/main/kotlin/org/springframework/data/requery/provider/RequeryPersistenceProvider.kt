@@ -8,6 +8,7 @@ import org.springframework.data.requery.core.RequeryOperations
  *
  * @author debop
  */
+@Deprecated("사용할 필요가 없는 듯 ...")
 class RequeryPersistenceProvider(val operations: RequeryOperations): ProxyIdAccessor {
 
     companion object {
@@ -16,7 +17,6 @@ class RequeryPersistenceProvider(val operations: RequeryOperations): ProxyIdAcce
         @JvmStatic
         fun of(operations: RequeryOperations): RequeryPersistenceProvider = RequeryPersistenceProvider(operations)
     }
-
 
     override fun shouldUseAccessorFor(entity: Any?): Boolean = false
 

@@ -2,6 +2,7 @@ package org.springframework.data.requery.repository.query
 
 import io.requery.query.Expression
 import io.requery.query.FieldExpression
+import io.requery.query.NamedExpression
 import mu.KotlinLogging
 import org.springframework.data.repository.query.Parameter
 import org.springframework.data.repository.query.Parameters
@@ -18,25 +19,25 @@ import java.util.*
  *
  * @author debop@coupang.com
  */
-class ParameterMetadataProvider @JvmOverloads constructor(val bindableParameterValues: Iterator<Any?>? = null,
+class ParameterMetadataProvider @JvmOverloads constructor(val provider: RequeryPersistenceProvider,
                                                           parameters: Parameters<*, *>,
-                                                          val provider: RequeryPersistenceProvider) {
+                                                          val bindableParameterValues: Iterator<Any?>? = null) {
 
-    constructor(accessor: ParametersParameterAccessor, provider: RequeryPersistenceProvider)
-        : this(accessor.iterator() as Iterator<Any?>, accessor.parameters, provider)
+    constructor(provider: RequeryPersistenceProvider, accessor: ParametersParameterAccessor)
+        : this(provider, accessor.parameters, accessor.iterator())
 
     companion object {
         private val log = KotlinLogging.logger { }
     }
 
-    private val expressions: MutableList<ParameterMetadata<*>> = arrayListOf()
+    private val expressions: MutableList<ParameterMetadata<out Any>> = arrayListOf()
     private val parameters: Iterator<Parameter> = parameters.getBindableParameters().iterator()
 
 
-    fun getExpressions(): List<ParameterMetadata<*>> = expressions.toList()
+    fun getExpressions(): List<ParameterMetadata<out Any>> = expressions.toList()
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> next(part: Part): ParameterMetadata<T> {
+    fun <T: Any> next(part: Part): ParameterMetadata<T> {
 
         require(parameters.hasNext()) { "No parameter available for part. part=$part" }
 
@@ -45,7 +46,7 @@ class ParameterMetadataProvider @JvmOverloads constructor(val bindableParameterV
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> next(part: Part, type: Class<T>): ParameterMetadata<T> {
+    fun <T: Any> next(part: Part, type: Class<T>): ParameterMetadata<T> {
 
         val parameter = parameters.next()
         val typeToUse: Class<*> = if(ClassUtils.isAssignable(type, parameter.type)) parameter.type else type
@@ -53,7 +54,7 @@ class ParameterMetadataProvider @JvmOverloads constructor(val bindableParameterV
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T> next(part: Part, type: Class<T>, parameter: Parameter): ParameterMetadata<T> {
+    private fun <T: Any> next(part: Part, type: Class<T>, parameter: Parameter): ParameterMetadata<T> {
 
         log.debug { "Get next parameter ... part=$part, type=$type, parameter=$parameter" }
 
@@ -61,7 +62,7 @@ class ParameterMetadataProvider @JvmOverloads constructor(val bindableParameterV
 
         val nameGetter = { parameter.name.orElseThrow { IllegalArgumentException("Parameter needs to be named") } }
 
-        val expression = when {
+        val expression: NamedExpression<T> = when {
             parameter.isExplicitlyNamed -> namedExpresesionOf(nameGetter.invoke(), reifiedType)
             else -> namedExpresesionOf(parameter.index.toString(), reifiedType)
         }
@@ -71,76 +72,76 @@ class ParameterMetadataProvider @JvmOverloads constructor(val bindableParameterV
             else -> bindableParameterValues.next()
         }
 
-        val metadata = ParameterMetadata(expression, part.type, value, provider)
+        val metadata = ParameterMetadata<T>(expression, part.type, value, provider)
         expressions.add(metadata)
         return metadata
     }
+}
 
-    class ParameterMetadata<T>(val expression: FieldExpression<T>,
-                               type: Part.Type,
-                               val value: Any?,
-                               val provider: RequeryPersistenceProvider) {
+class ParameterMetadata<T: Any>(val expression: FieldExpression<T>,
+                                type: Part.Type,
+                                val value: Any?,
+                                val provider: RequeryPersistenceProvider) {
 
-        companion object {
-            private val log = KotlinLogging.logger { }
+    companion object {
+        private val log = KotlinLogging.logger { }
 
-            @JvmField val PLACEHOLDER = Any()
+        @JvmField val PLACEHOLDER = Any()
+    }
+
+    private val type = when {
+        value == null && Part.Type.SIMPLE_PROPERTY == type -> Part.Type.IS_NULL
+        else -> type
+    }
+
+    /**
+     * Returns whether the parameter shall be considered an {@literal IS NULL} parameter.
+     */
+    val isNullParameter: Boolean = Part.Type.IS_NULL == this.type
+
+    /**
+     * Prepares the object before it's actually bound to the {@link javax.persistence.Query;}.
+     */
+    fun prepare(value: Any): Any? {
+
+        val expressionType = expression.classType
+        log.trace { "Prepare value... type=$type, value=$value, expressionType=$expressionType" }
+
+        if(expressionType == String::class.java) {
+
+            return when(type) {
+                Part.Type.STARTING_WITH -> "$value%"
+
+                Part.Type.ENDING_WITH -> "%$value"
+
+                Part.Type.CONTAINING,
+                Part.Type.NOT_CONTAINING -> "%$value%"
+
+                else -> value
+            }
         }
 
-        private val type = when {
-            value == null && Part.Type.SIMPLE_PROPERTY == type -> Part.Type.IS_NULL
-            else -> type
+        if(Collection::class.java.isAssignableFrom(expressionType)) {
+            return provider.potentiallyConvertEmptyCollection(value.toCollection())
         }
 
-        /**
-         * Returns whether the parameter shall be considered an {@literal IS NULL} parameter.
-         */
-        val isNullParameter: Boolean = Part.Type.IS_NULL == this.type
+        return value
+    }
 
-        /**
-         * Prepares the object before it's actually bound to the {@link javax.persistence.Query;}.
-         */
-        fun prepare(value: Any): Any? {
 
-            val expressionType = expression.classType
-            log.trace { "Prepare value... type=$type, value=$value, expressionType=$expressionType" }
+    fun Any?.toCollection(): Collection<*>? {
 
-            if(expressionType == String::class.java) {
+        if(this == null)
+            return null
 
-                return when(type) {
-                    Part.Type.STARTING_WITH -> "$value%"
-
-                    Part.Type.ENDING_WITH -> "%$value"
-
-                    Part.Type.CONTAINING,
-                    Part.Type.NOT_CONTAINING -> "%$value%"
-
-                    else -> value
-                }
-            }
-
-            if(Collection::class.java.isAssignableFrom(expressionType)) {
-                return provider.potentiallyConvertEmptyCollection(value.toCollection())
-            }
-
+        if(value is Collection<*>) {
             return value
         }
 
-
-        fun Any?.toCollection(): Collection<*>? {
-
-            if(this == null)
-                return null
-
-            if(value is Collection<*>) {
-                return value
-            }
-
-            if(ObjectUtils.isArray(value)) {
-                return ObjectUtils.toObjectArray(value).toList()
-            }
-
-            return Collections.singleton(value)
+        if(ObjectUtils.isArray(value)) {
+            return ObjectUtils.toObjectArray(value).toList()
         }
+
+        return Collections.singleton(value)
     }
 }

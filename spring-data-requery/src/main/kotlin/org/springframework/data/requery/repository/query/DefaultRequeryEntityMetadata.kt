@@ -5,7 +5,7 @@ import mu.KotlinLogging
 import org.springframework.core.annotation.AnnotatedElementUtils
 
 /**
- * DefaultRequeryEntityMetadata
+ * Default implementation for [RequeryEntityMetadata].
  *
  * @author debop@coupang.com
  */
