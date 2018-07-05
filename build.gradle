@@ -19,10 +19,13 @@ plugins {
     id "com.jfrog.bintray" version "1.7.3"
 }
 
-group = 'com.coupang'
-version = '0.0.1-SNAPSHOT'
-
 allprojects {
+
+    ext.baseVersion = "0.0.1"
+    ext.snapshotVersion = true
+
+    group = "com.coupang"
+    version = "$baseVersion" + (snapshotVersion ? "-SNAPSHOT" : "")
 
     repositories {
         maven {
@@ -251,23 +254,19 @@ subprojects {
 
     publishing {
         publications {
-            bintrayJava(MavenPublication) {
-                from components.java
-                artifact sourcesJar
-//            artifact dokkaJar
+            nebula(MavenPublication) {
+            }
+        }
 
-                groupId "${project.group}"
-                artifactId "${project.name}"
-                version "${project.version}"
-
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode('description', "Kotlin extension functions for Java 8 Time and joda-time")
-                    root.appendNode('name', "${project.name}")
-                    root.appendNode("url", "https://github.com/debop/koda-time")
-                    root.children().last() + pomConfig
+        repositories {
+            maven {
+                url "http://$nexusHost/content/repositories/${project.version.toString().endsWith('-SNAPSHOT') ? 'snapshot' : 'releases'}"
+                credentials {
+                    username "$nexusDeployUser"
+                    password "$nexusDeployPassword"
                 }
             }
+            mavenLocal()
         }
     }
 }
