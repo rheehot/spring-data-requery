@@ -4,7 +4,6 @@ package org.springframework.data.requery
 
 import io.requery.query.NamedExpression
 import mu.KotlinLogging
-import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.util.LinkedMultiValueMap
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -59,7 +58,7 @@ fun Class<*>.findFields(predicate: (Field) -> Boolean): List<Field> {
 
 fun Class<*>.findFirstField(predicate: (Field) -> Boolean): Field? {
 
-    var targetClass: Class<*>? = this
+    var targetClass: Class<*>? = if(isRequeryEntity) this else superclass
 
     while(targetClass != null && targetClass.isRequeryEntity) {
         log.trace { "Find first field... targetClass=${targetClass?.name}" }
@@ -113,7 +112,7 @@ fun Class<*>.findMethods(predicate: (Method) -> Boolean): List<Method> {
 
 fun Class<*>.findFirstMethod(predicate: (Method) -> Boolean): Method? {
 
-    var targetClass: Class<*>? = this
+    var targetClass: Class<*>? = if(isRequeryEntity) this else superclass
 
     while(targetClass != null && targetClass.isRequeryEntity) {
         log.trace { "Find first method... targetClass=${targetClass?.name}" }
@@ -133,7 +132,7 @@ fun Class<*>.findFirstMethod(predicate: (Method) -> Boolean): Method? {
 }
 
 val Class<*>.isRequeryEntity: Boolean
-    get() = AnnotationUtils.findAnnotation(this, io.requery.Entity::class.java) != null
+    get() = declaredAnnotations.find { it.annotationClass == io.requery.Entity::class } != null
 
 fun Class<*>.findEntityFields(): List<Field> {
 

@@ -9,10 +9,10 @@ class ClassExtensionsTest: AbstractRequeryTest() {
     @Test
     fun `is requery entity class`() {
 
-        assertThat(User::class.java.isRequeryEntity).isTrue()
+        assertThat(User::class.java.isRequeryEntity).isFalse()
         assertThat(AbstractUser::class.java.isRequeryEntity).isTrue()
 
-        assertThat(Role::class.java.isRequeryEntity).isTrue()
+        assertThat(Role::class.java.isRequeryEntity).isFalse()
         assertThat(AbstractRole::class.java.isRequeryEntity).isTrue()
     }
 
