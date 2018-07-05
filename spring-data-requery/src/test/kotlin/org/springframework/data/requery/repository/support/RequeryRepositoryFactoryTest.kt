@@ -15,6 +15,7 @@ import org.springframework.data.repository.core.EntityInformation
 import org.springframework.data.repository.core.support.RepositoryComposition
 import org.springframework.data.repository.query.QueryLookupStrategy
 import org.springframework.data.requery.core.RequeryOperations
+import org.springframework.data.requery.domain.sample.User
 import org.springframework.data.requery.repository.RequeryRepository
 import org.springframework.transaction.annotation.Transactional
 import java.io.IOException
@@ -87,6 +88,7 @@ class RequeryRepositoryFactoryTest {
         repository.throwingRuntimeException()
     }
 
+    @Ignore("Kotlin not null 때문에 mocking을 모두 해야 한다.")
     @Test(expected = IOException::class)
     fun `handle checked exception`() {
 

@@ -2,22 +2,46 @@ package org.springframework.data.requery
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.springframework.data.requery.domain.sample.AbstractUser
+import org.springframework.data.requery.domain.sample.*
 
-/**
- * ClassExtensionsTest
- *
- * @author debop@coupang.com
- */
 class ClassExtensionsTest: AbstractRequeryTest() {
 
     @Test
-    fun `retrieve key property from entity`() {
+    fun `is requery entity class`() {
 
-        val keyExpr = AbstractUser::class.java.getKeyExpression<Int>()
+        assertThat(User::class.java.isRequeryEntity).isTrue()
+        assertThat(AbstractUser::class.java.isRequeryEntity).isTrue()
+
+        assertThat(Role::class.java.isRequeryEntity).isTrue()
+        assertThat(AbstractRole::class.java.isRequeryEntity).isTrue()
+    }
+
+    @Test
+    fun `retrieve key property from User entity`() {
+
+        val keyExpr = User::class.java.getKeyExpression<Int>()
 
         assertThat(keyExpr).isNotNull
-        assertThat(keyExpr.name).isEqualToIgnoringCase("id")
+        assertThat(keyExpr.name).isEqualTo("id")
         assertThat(keyExpr.classType).isEqualTo(Integer::class.java)
+
+        val keyExpr2 = User::class.java.getKeyExpression<Int>()
+        assertThat(keyExpr2).isEqualTo(keyExpr)
+    }
+
+    @Test
+    fun `retrieve key property from Role entity`() {
+
+        val keyExpr = Role::class.java.getKeyExpression<Int>()
+
+        assertThat(keyExpr).isNotNull
+        assertThat(keyExpr.name).isEqualTo("id")
+        assertThat(keyExpr.classType).isEqualTo(Integer::class.java)
+
+        val keyExpr2 = Role::class.java.getKeyExpression<Int>()
+        assertThat(keyExpr2).isEqualTo(keyExpr)
+
+        val accountsKeyExpr = Accounts::class.java.getKeyExpression<Long>()
+        assertThat(accountsKeyExpr).isNotEqualTo(keyExpr)
     }
 }

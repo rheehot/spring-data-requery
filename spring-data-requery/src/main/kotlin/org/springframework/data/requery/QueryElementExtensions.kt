@@ -1,3 +1,5 @@
+@file:JvmName("QueryElementExtensions")
+
 package org.springframework.data.requery
 
 import io.requery.query.*
@@ -9,9 +11,7 @@ import mu.KotlinLogging
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 
-private object QEX {
-    val log = KotlinLogging.logger { }
-}
+private val log = KotlinLogging.logger { }
 
 fun <V: Any> namedExpressionOf(name: String, type: Class<V>): NamedExpression<V> =
     NamedExpression.of(name, type)
@@ -35,13 +35,13 @@ fun <T: Any> Return<T>.unwrapAny(): QueryElement<out Any> {
 
 fun <T: Any> Return<T>.applyPageable(domainClass: Class<out Any>, pageable: Pageable): QueryElement<T> {
 
+    log.trace { "Apply paging .. domainClass=${domainClass.simpleName}, pageable=$pageable" }
+
     var query = this.unwrap()
 
     if(pageable.isUnpaged) {
         return query
     }
-
-    QEX.log.trace { "Apply paging .. domainClass=${domainClass.simpleName}, pageable=$pageable" }
 
     if(pageable.sort.isSorted) {
         query = query.applySort(domainClass, pageable.sort)
@@ -58,7 +58,7 @@ fun <T: Any> Return<T>.applyPageable(domainClass: Class<out Any>, pageable: Page
 
 fun <T: Any> Return<T>.applySort(domainClass: Class<out Any>, sort: Sort): QueryElement<T> {
 
-    QEX.log.trace { "Apply sort, domainClass=${domainClass.simpleName}, sort=$sort" }
+    log.trace { "Apply sort, domainClass=${domainClass.simpleName}, sort=$sort" }
 
     var query = this.unwrap()
 
@@ -106,7 +106,7 @@ fun <T: Any> Return<T>.applyWhereConditions(conditionElements: Set<WhereConditio
             val condition = conditionElement.condition
             val operator = conditionElement.operator
 
-            QEX.log.trace { "Apply where condition=$condition, operator=$operator" }
+            log.trace { "Apply where condition=$condition, operator=$operator" }
 
             operator?.let {
                 whereElement = when(it) {

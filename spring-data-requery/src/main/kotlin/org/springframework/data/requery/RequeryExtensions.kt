@@ -1,3 +1,5 @@
+@file:JvmName("RequeryExtensions")
+
 package org.springframework.data.requery
 
 import io.requery.meta.Attribute
@@ -5,8 +7,10 @@ import io.requery.meta.EntityModel
 import io.requery.meta.Type
 import io.requery.sql.EntityContext
 import io.requery.sql.EntityDataStore
+import mu.KotlinLogging
 import org.springframework.util.ReflectionUtils
 
+private val log = KotlinLogging.logger { }
 
 @Suppress("UNCHECKED_CAST")
 fun <E> EntityDataStore<E>.getEntityContext(): EntityContext<E> {

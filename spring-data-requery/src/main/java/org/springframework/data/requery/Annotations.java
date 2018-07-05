@@ -17,6 +17,11 @@ public final class Annotations {
     private Annotations() {}
 
     @Nullable
+    public static <A extends Annotation> A findAnnotation(@NotNull Class<?> clazz, @NotNull Class<A> annotationType) {
+        return AnnotationUtils.findAnnotation(clazz, annotationType);
+    }
+
+    @Nullable
     public static <A extends Annotation> A findAnnotation(@NotNull Method method, @NotNull Class<A> annotationType) {
         return AnnotationUtils.findAnnotation(method, annotationType);
     }

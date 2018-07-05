@@ -21,7 +21,7 @@ class RequeryCountQueryCreator(operations: RequeryOperations,
 
     override fun createQueryElement(type: ReturnedType): QueryElement<out Any> {
         return operations
-            .select(Count.count(domainClass))
+            .select(Count.count(type.domainType))
             .unwrap()
     }
 
