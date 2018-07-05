@@ -7,6 +7,7 @@ import io.requery.query.Return
 import io.requery.query.element.QueryElement
 import io.requery.query.function.Count
 import mu.KotlinLogging
+import org.springframework.dao.IncorrectResultSizeDataAccessException
 import org.springframework.data.domain.*
 import org.springframework.data.requery.*
 import org.springframework.data.requery.core.RequeryOperations
@@ -38,6 +39,8 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
         this.crudMethodMetadata = crudMethodMetadata
     }
 
+    fun select(): QueryElement<out Result<E>> = operations.select(domainClass).unwrap()
+
     override fun findAll(): List<E> = operations.findAll(domainClass)
 
     override fun findAll(sort: Sort): List<E> {
@@ -55,8 +58,8 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
 
     override fun <S: E> findAll(example: Example<S>, sort: Sort): List<S> {
         return example
-            .buildQueryElement(operations, domainClass as Class<S>)
-            .applySort(domainClass as Class<S>, sort)
+            .buildQueryElement(operations, domainClass)
+            .applySort(domainClass, sort)
             .getAsResultEntity<S>()
             .toList()
     }
@@ -66,40 +69,83 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
 
         return when {
             pageable.isPaged -> {
-                val content = operations.select(domainClass).unwrap().applyPageable(domainClass, pageable).getAsResultEntity<E>().toList()
+                val content = select().applyPageable(domainClass, pageable).getAsResultEntity<E>().toList()
                 val totals = operations.count(domainClass).get().value().toLong()
 
                 PageImpl(content, pageable, totals)
             }
             else -> {
-                val content = operations.select(domainClass).get().toList()
+                val content = select().get().toList()
                 PageImpl(content)
             }
         }
     }
 
     override fun <S: E> findAll(example: Example<S>, pageable: Pageable): Page<S> {
-        TODO("not implemented")
+
+        log.trace { "Find all [$domainClass] with paging. pageable=$pageable" }
+
+        val queryElement = example.buildQueryElement(operations, domainClass).unwrap()
+
+        return when {
+            pageable.isPaged -> {
+                val totals = count(example)
+                val contents = queryElement.applyPageable(domainClass, pageable).get().toList()
+
+                PageImpl<S>(contents, pageable, totals)
+            }
+            else -> {
+                val contents = queryElement.get().toList()
+                PageImpl<S>(contents)
+            }
+        }
     }
 
     override fun findAll(condition: Return<out Result<E>>): List<E> {
-        TODO("not implemented")
+        return condition.get().toList()
     }
 
     override fun findAll(condition: QueryElement<out Result<E>>, pageable: Pageable): Page<E> {
-        TODO("not implemented")
+        return when {
+            pageable.isPaged -> {
+                val totals = count(condition)
+                val contents = condition.applyPageable(domainClass, pageable).get().toList()
+                PageImpl<E>(contents, pageable, totals)
+            }
+            else -> PageImpl<E>(findAll(condition))
+        }
     }
 
     override fun findAll(conditions: Iterable<Condition<E, *>>): List<E> {
-        TODO("not implemented")
+        val whereClause = conditions.foldConditions()
+
+        return whereClause?.let {
+            select().where(it).get().toList()
+        } ?: emptyList()
     }
 
     override fun findAll(conditions: Iterable<Condition<E, *>>, pageable: Pageable): Page<E> {
-        TODO("not implemented")
+        return when {
+            pageable.isPaged -> {
+                val whereClause = conditions.foldConditions()
+                val baseQuery = whereClause?.let {
+                    select().where(it).unwrap()
+                } ?: select()
+
+                val contents = baseQuery.unwrap().applyPageable(domainClass, pageable).get().toList()
+                PageImpl<E>(contents, pageable, count(baseQuery))
+            }
+            else ->
+                PageImpl<E>(findAll(conditions))
+        }
     }
 
     override fun findAll(conditions: Iterable<Condition<E, *>>, sort: Sort): List<E> {
-        TODO("not implemented")
+        return select()
+            .where(conditions.foldConditions())
+            .applySort(domainClass, sort)
+            .get()
+            .toList()
     }
 
     override fun findAllById(ids: Iterable<ID>): List<E> {
@@ -201,15 +247,16 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
     }
 
     override fun count(): Long {
-        TODO("not implemented")
+        return operations.count(domainClass).get().value().toLong()
     }
 
     override fun <S: E> count(example: Example<S>): Long {
-        TODO("not implemented")
+
+        return count(example.buildQueryElement(operations, domainClass as Class<S>) as QueryElement<out Result<E>>)
     }
 
-    override fun count(conditionElement: QueryElement<out Result<E>>): Int {
-        TODO("not implemented")
+    override fun count(conditionElement: QueryElement<out Result<E>>): Long {
+        return operations.count(domainClass, conditionElement).toLong()
     }
 
     override fun existsById(id: ID): Boolean {
@@ -229,23 +276,37 @@ class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: Requ
     }
 
     override fun delete(entity: E) {
-        TODO("not implemented")
+        log.trace { "Delete entity. entity=$entity" }
+        operations.delete(entity)
     }
 
     override fun <S: E> findOne(example: Example<S>): Optional<S> {
-        TODO("not implemented")
+        val entity = example.buildQueryElement(operations, domainClass)
+            .limit(1)
+            .get()
+            .firstOrNull()
+
+        return Optional.ofNullable(entity)
     }
 
     override fun findOne(condition: Return<out Result<E>>): Optional<E> {
-        TODO("not implemented")
+        val count = count(condition.unwrap()).toInt()
+        if(count > 1) {
+            throw IncorrectResultSizeDataAccessException(1, count)
+        }
+        return Optional.ofNullable(condition.get().firstOrNull())
     }
 
     override fun <S: E> exists(example: Example<S>): Boolean {
-        TODO("not implemented")
+        return example
+            .buildQueryElement(operations, domainClass)
+            .limit(1)
+            .get()
+            .firstOrNull() != null
     }
 
     override fun exists(conditionElement: QueryElement<out Result<E>>): Boolean {
-        TODO("not implemented")
+        return operations.exists(domainClass, conditionElement)
     }
 
 }

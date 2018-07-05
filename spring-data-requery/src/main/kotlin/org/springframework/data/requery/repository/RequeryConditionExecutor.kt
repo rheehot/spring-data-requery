@@ -31,7 +31,7 @@ interface RequeryConditionExecutor<E: Any> {
     fun findAll(conditions: Iterable<Condition<E, *>>, sort: Sort): List<E>
 
 
-    fun count(conditionElement: QueryElement<out Result<E>>): Int
+    fun count(conditionElement: QueryElement<out Result<E>>): Long
 
     fun exists(conditionElement: QueryElement<out Result<E>>): Boolean
 }

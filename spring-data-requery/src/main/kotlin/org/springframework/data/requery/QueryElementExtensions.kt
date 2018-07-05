@@ -25,6 +25,14 @@ fun <T: Any> Return<T>.unwrap(): QueryElement<T> {
     }
 }
 
+fun <T: Any> Return<T>.unwrapAny(): QueryElement<out Any> {
+    return if(this is QueryWrapper<*>) {
+        this.unwrapQuery() as QueryElement<out Any>
+    } else {
+        this as QueryElement<out Any>
+    }
+}
+
 fun <T: Any> Return<T>.applyPageable(domainClass: Class<out Any>, pageable: Pageable): QueryElement<T> {
 
     var query = this.unwrap()

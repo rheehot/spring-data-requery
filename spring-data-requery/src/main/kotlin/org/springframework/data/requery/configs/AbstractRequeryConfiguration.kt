@@ -6,7 +6,7 @@ import io.requery.sql.ConfigurationBuilder
 import io.requery.sql.EntityDataStore
 import io.requery.sql.SchemaModifier
 import io.requery.sql.TableCreationMode
-import mu.KLogging
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -27,7 +27,9 @@ import javax.sql.DataSource
 @Configuration
 abstract class AbstractRequeryConfiguration {
 
-    companion object: KLogging()
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
 
     @Autowired lateinit var applicationContext: ApplicationContext
 
@@ -53,13 +55,13 @@ abstract class AbstractRequeryConfiguration {
     @Bean(destroyMethod = "close")
     fun entityDataStore(): EntityDataStore<Any> {
         return EntityDataStore<Any>(requeryConfiguration()).apply {
-            logger.info { "Create Requery EntityDataStore instance." }
+            log.info { "Create Requery EntityDataStore instance." }
         }
     }
 
     @Bean
     fun requeryOperations(): RequeryOperations {
-        logger.info { "Create RequeryOperations instance." }
+        log.info { "Create RequeryOperations instance." }
         return RequeryTemplate(applicationContext, entityDataStore(), requeryMappingContext())
     }
 
@@ -75,14 +77,14 @@ abstract class AbstractRequeryConfiguration {
      */
     @PostConstruct
     protected fun buildSchema() {
-        logger.info { "Create Database Schema..." }
+        log.info { "Create Database Schema..." }
         val schema = SchemaModifier(requeryConfiguration())
         try {
-            logger.debug { schema.createTablesString(getTableCreationMode()) }
+            log.debug { schema.createTablesString(getTableCreationMode()) }
             schema.createTables(getTableCreationMode())
-            logger.info { "Success to create database schema" }
+            log.info { "Success to create database schema" }
         } catch(ignored: Exception) {
-            logger.error(ignored) { "Fail to creation database schema." }
+            log.error(ignored) { "Fail to creation database schema." }
         }
     }
 }
