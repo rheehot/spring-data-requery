@@ -18,7 +18,7 @@ import java.util.*
  *
  * @author debop
  */
-class RequeryRepositoryFactory(val operations: RequeryOperations): RepositoryFactorySupport() {
+open class RequeryRepositoryFactory(val operations: RequeryOperations): RepositoryFactorySupport() {
 
     companion object {
         private val log = KotlinLogging.logger { }

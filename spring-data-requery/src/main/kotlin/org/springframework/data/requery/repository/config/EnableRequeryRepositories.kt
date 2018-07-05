@@ -13,7 +13,6 @@ import kotlin.reflect.KClass
  *
  * @author debop
  */
-
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
@@ -34,7 +33,7 @@ annotation class EnableRequeryRepositories(
     val repositoryImplementationPostfix: String = "Impl",
 
     // Not supported 
-    //    val namedQueriesLocation: String = "",
+    val namedQueriesLocation: String = "",
 
     val queryLookupStrategy: QueryLookupStrategy.Key = QueryLookupStrategy.Key.CREATE_IF_NOT_FOUND,
 

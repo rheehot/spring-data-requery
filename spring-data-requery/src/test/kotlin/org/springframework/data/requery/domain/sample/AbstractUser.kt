@@ -21,4 +21,6 @@ abstract class AbstractUser: AbstractPersistable<Int>() {
 
     abstract var firstName: String
     abstract var lastname: String
+
+    abstract var email: String
 }

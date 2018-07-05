@@ -17,7 +17,6 @@ import org.springframework.data.requery.core.RequeryOperations
 interface RequeryRepository<E: Any, ID: Any>: PagingAndSortingRepository<E, ID>,
                                               QueryByExampleExecutor<E>,
                                               RequeryConditionExecutor<E> {
-
     val operations: RequeryOperations
 
     override fun findAll(): List<E>

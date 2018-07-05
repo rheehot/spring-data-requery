@@ -7,6 +7,7 @@ import io.requery.query.Return
 import io.requery.query.element.QueryElement
 import io.requery.query.function.Count
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.IncorrectResultSizeDataAccessException
 import org.springframework.data.domain.*
 import org.springframework.data.requery.*
@@ -23,8 +24,10 @@ import java.util.*
 @Suppress("UNCHECKED_CAST")
 @Repository
 @Transactional(readOnly = true)
-class SimpleRequeryRepository<E: Any, ID: Any>(final val entityInformation: RequeryEntityInformation<E, ID>,
-                                               override val operations: RequeryOperations): RequeryRepositoryImplementation<E, ID> {
+class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
+    final val entityInformation: RequeryEntityInformation<E, ID>,
+    override val operations: RequeryOperations
+): RequeryRepositoryImplementation<E, ID> {
 
     companion object {
         private val log = KotlinLogging.logger { }

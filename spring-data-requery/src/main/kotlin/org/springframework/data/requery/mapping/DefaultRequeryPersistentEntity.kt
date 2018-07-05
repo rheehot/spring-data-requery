@@ -60,7 +60,7 @@ class DefaultRequeryPersistentEntity<E>(information: TypeInformation<E>)
     override fun <A: Annotation> findAnnotation(annotationType: Class<A>): A? {
         return annotationCache.computeIfAbsent(annotationType) {
             AnnotatedElementUtils.findMergedAnnotation<A>(type, annotationType)
-        } as A
+        } as? A
     }
 
     @Suppress("UNCHECKED_CAST")

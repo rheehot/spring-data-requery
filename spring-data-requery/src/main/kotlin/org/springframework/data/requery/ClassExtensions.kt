@@ -30,7 +30,7 @@ fun Class<*>.findField(fieldName: String): Field? {
                 // Nothing to do.
             }
             targetClass = targetClass?.superclass
-        } while(targetClass != null && targetClass != Object::class.java && targetClass != Any::class.java)
+        } while(targetClass != null && targetClass != Any::class.java)
 
         null
     }
@@ -49,7 +49,7 @@ fun Class<*>.findFields(predicate: (Field) -> Boolean): List<Field> {
                 foundFields.add(it)
             }
         targetClass = targetClass?.superclass
-    } while(targetClass != null && targetClass != Object::class.java && targetClass != Any::class.java)
+    } while(targetClass != null && targetClass != Any::class.java)
 
     return foundFields
 }
@@ -65,7 +65,7 @@ fun Class<*>.findFirstField(predicate: (Field) -> Boolean): Field? {
             return field
 
         targetClass = targetClass?.superclass
-    } while(targetClass != null && targetClass != Object::class.java && targetClass != Any::class.java)
+    } while(targetClass != null && targetClass != Any::class.java)
 
     return null
 }
