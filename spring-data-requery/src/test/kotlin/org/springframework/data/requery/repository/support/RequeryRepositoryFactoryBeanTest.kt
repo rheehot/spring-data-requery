@@ -20,6 +20,7 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.requery.core.RequeryOperations
 import org.springframework.data.requery.domain.sample.User
 import org.springframework.data.requery.repository.RequeryRepository
+import org.springframework.data.requery.uninitialized
 
 @Ignore("무한루프 버그 수정 필요")
 @RunWith(MockitoJUnitRunner.Silent::class)
@@ -85,10 +86,10 @@ class RequeryRepositoryFactoryBeanTest {
             return repository as T
         }
 
-        override fun <T, ID> getEntityInformation(domainClass: Class<T>): EntityInformation<T, ID> = null as EntityInformation<T, ID>
+        override fun <T, ID> getEntityInformation(domainClass: Class<T>): EntityInformation<T, ID> = uninitialized()
 
-        override fun getTargetRepository(metadata: RepositoryInformation): Any = null as Any
+        override fun getTargetRepository(metadata: RepositoryInformation): Any = uninitialized()
 
-        override fun getRepositoryBaseClass(metadata: RepositoryMetadata): Class<*> = null as Class<*>
+        override fun getRepositoryBaseClass(metadata: RepositoryMetadata): Class<*> = uninitialized()
     }
 }

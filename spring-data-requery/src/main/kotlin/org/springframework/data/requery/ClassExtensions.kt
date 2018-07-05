@@ -8,9 +8,29 @@ import org.springframework.util.LinkedMultiValueMap
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 private val log = KotlinLogging.logger {}
+
+
+/**
+ * var 로 선언된 필드 중 non null 수형에 대해 초기화 값을 지정하고자 할 때 사용합니다.
+ * 특히 ```@Autowired```, ```@Inject``` val 수형에 사용하기 좋다.
+ *
+ * <pre>
+ *   <code>
+ *      @Inject val x: Repository = uninitialized()
+ *   </code>
+ * </pre>
+ * @see lateinit
+ * @see Delegates.nonNull
+ */
+@Suppress("UNCHECKED_CAST")
+fun <T> uninitialized(): T = null as T
+
+fun <T> T?.asOptional(): Optional<T> = Optional.ofNullable(this)
+
 
 private val classFieldCache = ConcurrentHashMap<String, Field?>()
 private val classMethodCache = ConcurrentHashMap<String, Method?>()
@@ -27,15 +47,15 @@ fun Class<*>.findField(fieldName: String): Field? {
 
         var targetClass: Class<*>? = this@findField
 
-        while(targetClass != null && targetClass.isRequeryEntity) {
+        while(targetClass != null && !targetClass.isAnyClass) {
             try {
-                val foundField = targetClass?.getDeclaredField(fieldName)
+                val foundField = targetClass.getDeclaredField(fieldName)
                 if(foundField != null)
                     return@computeIfAbsent foundField
             } catch(e: Exception) {
                 // Nothing to do.
             }
-            targetClass = targetClass?.superclass
+            targetClass = targetClass.superclass
         }
         null
     }
@@ -46,11 +66,11 @@ fun Class<*>.findFields(predicate: (Field) -> Boolean): List<Field> {
     val foundFields = mutableListOf<Field>()
     var targetClass: Class<*>? = this
 
-    while(targetClass != null && targetClass.isRequeryEntity) {
-        val fields = targetClass?.declaredFields?.filter { predicate(it) }?.toList()
-        fields?.let { foundFields.addAll(it) }
+    while(targetClass != null && !targetClass.isAnyClass) {
+        val fields = targetClass.declaredFields.filter { predicate(it) }.toList()
+        fields.let { foundFields.addAll(it) }
 
-        targetClass = targetClass?.superclass
+        targetClass = targetClass.superclass
     }
 
     return foundFields
@@ -58,16 +78,10 @@ fun Class<*>.findFields(predicate: (Field) -> Boolean): List<Field> {
 
 fun Class<*>.findFirstField(predicate: (Field) -> Boolean): Field? {
 
-    var targetClass: Class<*>? = if(isRequeryEntity) this else superclass
+    var targetClass: Class<*>? = findRequeryEntity()
 
     while(targetClass != null && targetClass.isRequeryEntity) {
-        log.trace { "Find first field... targetClass=${targetClass?.name}" }
-
-        val field = targetClass?.declaredFields?.find {
-            predicate(it)
-        }
-
-        log.trace { "found field=$field" }
+        val field = targetClass.declaredFields.find { predicate(it) }
         if(field != null)
             return field
 
@@ -83,12 +97,12 @@ fun Class<*>.findMethod(methodName: String, vararg paramTypes: Class<*>): Method
     return classMethodCache.computeIfAbsent(cacheKey) {
         var targetClass: Class<*>? = this@findMethod
 
-        while(targetClass != null && targetClass.isRequeryEntity) {
-            val foundMethod = targetClass?.getDeclaredMethod(name, *paramTypes)
+        while(targetClass != null && !targetClass.isAnyClass) {
+            val foundMethod = targetClass.getDeclaredMethod(name, *paramTypes)
             if(foundMethod != null)
                 return@computeIfAbsent foundMethod
 
-            targetClass = targetClass?.superclass
+            targetClass = targetClass.superclass
         }
         null
     }
@@ -99,7 +113,7 @@ fun Class<*>.findMethods(predicate: (Method) -> Boolean): List<Method> {
     val foundMethods = mutableListOf<Method>()
     var targetClass: Class<*>? = this
 
-    while(targetClass != null && targetClass.isRequeryEntity) {
+    while(targetClass != null && !targetClass.isAnyClass) {
         val methods = targetClass.declaredMethods?.filter { predicate(it) }?.toList()
         methods?.let { foundMethods.addAll(it) }
 
@@ -112,16 +126,10 @@ fun Class<*>.findMethods(predicate: (Method) -> Boolean): List<Method> {
 
 fun Class<*>.findFirstMethod(predicate: (Method) -> Boolean): Method? {
 
-    var targetClass: Class<*>? = if(isRequeryEntity) this else superclass
+    var targetClass: Class<*>? = findRequeryEntity()
 
     while(targetClass != null && targetClass.isRequeryEntity) {
-        log.trace { "Find first method... targetClass=${targetClass?.name}" }
-
-        val method = targetClass?.declaredMethods?.find {
-            predicate(it)
-        }
-
-        log.trace { "found method=$method" }
+        val method = targetClass.declaredMethods.find { predicate(it) }
         if(method != null)
             return method
 
@@ -131,8 +139,22 @@ fun Class<*>.findFirstMethod(predicate: (Method) -> Boolean): Method? {
     return null
 }
 
+val Class<*>.isAnyClass: Boolean
+    get() = this == Any::class.java
+
 val Class<*>.isRequeryEntity: Boolean
     get() = declaredAnnotations.find { it.annotationClass == io.requery.Entity::class } != null
+
+fun Class<*>.findRequeryEntity(): Class<*>? {
+    var current: Class<*>? = this
+    while(current != null) {
+        if(current.isRequeryEntity)
+            return current
+
+        current = current.superclass
+    }
+    return null
+}
 
 fun Class<*>.findEntityFields(): List<Field> {
 
