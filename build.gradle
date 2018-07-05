@@ -10,6 +10,7 @@ buildscript {
         classpath "io.spring.gradle:propdeps-plugin:0.0.9.RELEASE"
         classpath "org.springframework.boot:spring-boot-gradle-plugin:$spring_boot_version"
         classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
+        classpath "com.netflix.nebula:nebula-publishing-plugin:7.0.4"
 
 
     }
@@ -21,7 +22,7 @@ plugins {
 
 allprojects {
 
-    ext.baseVersion = "0.0.1"
+    ext.baseVersion = "0.0.2"
     ext.snapshotVersion = true
 
     group = "com.coupang"
@@ -30,8 +31,8 @@ allprojects {
     repositories {
         maven {
             credentials {
-                username "$nexusUser"
-                password "$nexusPassword"
+                username = "divedeep"
+                password = "apfmzk&^%"
             }
             url "http://nexus.coupang.net/content/groups/public"
         }
@@ -59,6 +60,9 @@ subprojects {
     apply plugin: 'propdeps-maven'
     apply plugin: 'propdeps-idea'
     apply plugin: "io.spring.dependency-management"
+    apply plugin: 'nebula.maven-publish'
+    apply plugin: 'nebula.source-jar'
+    apply plugin: 'nebula.javadoc-jar'
 
 // apply plugin: 'org.junit.platform.gradle.plugin'
 
