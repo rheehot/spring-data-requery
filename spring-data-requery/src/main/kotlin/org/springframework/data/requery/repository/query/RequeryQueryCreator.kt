@@ -33,8 +33,15 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
     }
 
     protected val context = operations.mappingContext
-    protected val domainClass = returnedType.domainType
-    protected val domainClassName = domainClass.simpleName
+    protected val domainClass: Class<out Any>
+    protected val domainClassName: String
+
+    init {
+        log.debug { "Create RequeryQueryCreator provider=$provider, returnedType=$returnedType, domainClass=${returnedType.domainType} tree=$tree" }
+
+        domainClass = returnedType.domainType
+        domainClassName = domainClass.simpleName
+    }
 
     @Suppress("LeakingThis")
     private val root: QueryElement<out Any> = createQueryElement(returnedType)

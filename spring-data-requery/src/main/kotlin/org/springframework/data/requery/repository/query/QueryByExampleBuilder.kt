@@ -85,7 +85,7 @@ object QueryByExampleBuilder {
 
                 log.trace { "Get condition from Example. field name=$fieldName, value=$fieldValue" }
 
-                val expr: NamedExpression<Any> = namedExpresesionOf(fieldName, fieldType)
+                val expr: NamedExpression<Any> = namedExpressionOf(fieldName, fieldType)
 
                 when {
                     fieldValue == null ->

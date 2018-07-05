@@ -1,17 +1,20 @@
 package org.springframework.data.requery
 
 import io.requery.query.NamedExpression
-import mu.KLogging
+import mu.KotlinLogging
 import org.springframework.util.LinkedMultiValueMap
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.util.concurrent.ConcurrentHashMap
 
-object CEX: KLogging()
-
+object CEX {
+    val log = KotlinLogging.logger { }
+}
 
 private val classFieldCache = ConcurrentHashMap<String, Field?>()
 private val entityFields = LinkedMultiValueMap<Class<*>, Field>()
+
 
 fun Class<*>.findField(fieldName: String): Field? {
 
@@ -59,10 +62,40 @@ fun Class<*>.findFirstField(predicate: (Field) -> Boolean): Field? {
     var targetClass: Class<*>? = this
 
     do {
-        val field = targetClass?.declaredFields?.find { predicate(it) }
+        CEX.log.trace { "Find first field... targetClass=$targetClass" }
 
+
+        val field = targetClass?.declaredFields?.find {
+            CEX.log.trace { "Test field. field=$it" }
+            predicate(it)
+        }
+
+        CEX.log.trace { "found field=$field" }
         if(field != null)
             return field
+
+        targetClass = targetClass?.superclass
+    } while(targetClass != null && targetClass != Any::class.java)
+
+    return null
+}
+
+fun Class<*>.findFirstMethod(predicate: (Method) -> Boolean): Method? {
+
+    var targetClass: Class<*>? = this
+
+    do {
+        CEX.log.trace { "Find first method... targetClass=$targetClass" }
+
+
+        val method = targetClass?.declaredMethods?.find {
+            CEX.log.trace { "Test method. method=$it" }
+            predicate(it)
+        }
+
+        CEX.log.trace { "found method=$method" }
+        if(method != null)
+            return method
 
         targetClass = targetClass?.superclass
     } while(targetClass != null && targetClass != Any::class.java)
@@ -108,9 +141,20 @@ var UNKNOWN_KEY_EXPRESSION: NamedExpression<*> = NamedExpression.of("Unknown", A
 fun <V: Any> Class<*>.getKeyExpression(): NamedExpression<V> {
 
     return classKeys.computeIfAbsent(this) { domainClass ->
+
+        // NOTE: Java entity 는 Field로 등록된 id 값을 반환한다.
+        // NOTE: Kotlin의 경우는 getId() 메소드로부터 반환한다.
         val field = domainClass.findFirstField { it.getAnnotation(io.requery.Key::class.java) != null }
 
-        field?.let { namedExpresesionOf(field.name, field.type) }
-        ?: UNKNOWN_KEY_EXPRESSION
+        when(field) {
+            null -> {
+                val method = domainClass.findFirstMethod { it.getAnnotation(io.requery.Key::class.java) != null }
+                when(method) {
+                    null -> UNKNOWN_KEY_EXPRESSION
+                    else -> namedExpressionOf(method.name.removePrefix("get"), method.returnType)
+                }
+            }
+            else -> namedExpressionOf(field.name, field.type)
+        }
     } as NamedExpression<V>
 }

@@ -13,7 +13,7 @@ private object QEX {
     val log = KotlinLogging.logger { }
 }
 
-fun <V: Any> namedExpresesionOf(name: String, type: Class<V>): NamedExpression<V> =
+fun <V: Any> namedExpressionOf(name: String, type: Class<V>): NamedExpression<V> =
     NamedExpression.of(name, type)
 
 @Suppress("UNCHECKED_CAST")
@@ -141,7 +141,7 @@ fun Class<out Any>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<
         this@getOrderingExpressions
             .findField(propertyName)
             ?.let { field ->
-                val expr = namedExpresesionOf(propertyName, field.type)
+                val expr = namedExpressionOf(propertyName, field.type)
 
                 when(order.direction) {
                     Sort.Direction.ASC -> expr.asc()

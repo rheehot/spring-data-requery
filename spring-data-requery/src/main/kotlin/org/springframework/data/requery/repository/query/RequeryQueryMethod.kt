@@ -49,19 +49,23 @@ class RequeryQueryMethod(val method: Method,
 
         val query = annotatedQuery
 
+        log.trace { "annotated query=$query" }
+
         parameters
             .filter { it.isNamedParameter }
             .forEach {
 
                 val paramName = it.name.orElse("")
+                log.trace { "check named parameter. paramName=$paramName" }
 
                 // Named Parameter 인데 Query에 ':paramName', '#paramName' 구문이 없다면 예외를 발생시킨다.
-                val notExistsNamedParameter = query != null &&
-                                              paramName.isNotBlank() &&
-                                              !query.contains(":$paramName") &&
-                                              !query.contains("#$paramName")
+                // NOTE: kotlin 함수의 일반 인자를 named parameter 로 인식하는 어처구니 없는 일이 벌어졌다.
 
-                if(query.isNullOrBlank() || notExistsNamedParameter) {
+                val notFoundParam = paramName.isNotBlank() &&
+                                    query != null &&
+                                    !query.contains(":$paramName") &&
+                                    !query.contains("#$paramName")
+                if(notFoundParam) {
                     error("Using named parameters for query queryMethod [$method] but parameter '${it.name}' not found in annotated query '$query'!")
                 }
             }

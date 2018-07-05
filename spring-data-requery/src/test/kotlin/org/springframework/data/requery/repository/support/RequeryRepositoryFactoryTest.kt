@@ -3,16 +3,18 @@ package org.springframework.data.requery.repository.support
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import io.requery.meta.EntityModel
 import io.requery.sql.EntityDataStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.data.repository.core.EntityInformation
+import org.springframework.data.repository.core.support.RepositoryComposition
 import org.springframework.data.repository.query.QueryLookupStrategy
 import org.springframework.data.requery.core.RequeryOperations
-import org.springframework.data.requery.domain.sample.User
 import org.springframework.data.requery.repository.RequeryRepository
 import org.springframework.transaction.annotation.Transactional
 import java.io.IOException
@@ -29,12 +31,14 @@ class RequeryRepositoryFactoryTest {
     lateinit var factory: RequeryRepositoryFactory
 
     val operations = mock<RequeryOperations>()
+    val entityModel = mock<EntityModel>()
     val dataStore = mock<EntityDataStore<Any>>()
-    val entityInformation = mock<RequeryEntityInformation<out Any, out Any>>()
+    val entityInformation = mock<RequeryEntityInformation<User, Int>>()
 
     @Before
     fun setup() {
         whenever(operations.dataStore).doReturn(dataStore)
+        whenever(operations.entityModel).doReturn(entityModel)
 
         whenever(entityInformation.javaType).doReturn(User::class.java)
 
@@ -51,6 +55,45 @@ class RequeryRepositoryFactoryTest {
     @Test
     fun `sutup basic instance correctly`() {
         assertThat(factory.getRepository(SimpleSampleRepository::class.java)).isNotNull
+    }
+
+    @Test
+    fun `allow calling of object methods`() {
+
+        val repository = factory.getRepository(SimpleSampleRepository::class.java)
+
+        assertThat(repository).isNotNull
+        assertThat(repository.hashCode()).isNotEqualTo(0)
+        assertThat(repository.toString()).isNotEmpty()
+        assertThat(Objects.equals(repository, repository)).isTrue()
+    }
+
+    @Ignore("Named parameter는 지원하지 않습니다.")
+    @Test
+    fun `captures missing custom implementation and provides interface name`() {
+        try {
+            factory.getRepository(SampleRepository::class.java)
+        } catch(e: IllegalArgumentException) {
+            assertThat(e.message).contains(SampleRepository::class.java.name)
+        }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `handle runtime exception`() {
+
+        val fragments = RepositoryComposition.RepositoryFragments.just(SampleCustomRepositoryImpl())
+        val repository = factory.getRepository(SampleRepository::class.java, fragments)
+
+        repository.throwingRuntimeException()
+    }
+
+    @Test(expected = IOException::class)
+    fun `handle checked exception`() {
+
+        val fragments = RepositoryComposition.RepositoryFragments.just(SampleCustomRepositoryImpl())
+        val repository = factory.getRepository(SampleRepository::class.java, fragments)
+
+        repository.throwingCheckedException()
     }
 
 
@@ -82,9 +125,9 @@ class RequeryRepositoryFactoryTest {
 
     private interface SampleRepository: RequeryRepository<User, Int>, SampleCustomRepository {
 
-        fun findByEmail(email: String): User = User().also { it.email = email }
+        fun findByEmail(email: String): User? = User().also { it.email = email }
 
-        fun customMethod(id: Long?): User = User()
+        fun customMethod(id: Long?): User? = User()
     }
 
     class CustomRequeryRepository<T: Any, ID: Any>(

@@ -1,27 +1,27 @@
-buildscript {
-
-    repositories {
-        jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-
-    dependencies {
-        // for Java apt
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
-    }
-}
-
-// lombok을 gradle 에서 사용하기 위한 plugin
-plugins {
-    id 'io.franzbecker.gradle-lombok' version '1.14'
-}
-
-// for Java apt
-apply plugin: "net.ltgt.apt"
+//buildscript {
+//
+//    repositories {
+//        jcenter()
+//        maven { url "https://plugins.gradle.org/m2/" }
+//    }
+//
+//    dependencies {
+//        // for Java apt
+//        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
+//    }
+//}
+//
+//// lombok을 gradle 에서 사용하기 위한 plugin
+//plugins {
+//    id 'io.franzbecker.gradle-lombok' version '1.14'
+//}
+//
+//// for Java apt
+//apply plugin: "net.ltgt.apt"
 
 idea {
     module {
-//        sourceDirs += file("${buildDir}/generated/source/apt/main/")
+        sourceDirs += file("${buildDir}/generated/source/apt/main/")
         testSourceDirs += file("${buildDir}/generated/source/apt/test/")
         generatedSourceDirs += file("${buildDir}/generated/source/apt/main/")
     }
@@ -38,11 +38,11 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok"
 
     // For Java classes
-    annotationProcessor "io.requery:requery-processor"
-    testAnnotationProcessor "io.requery:requery-processor"
+//    annotationProcessor "io.requery:requery-processor"
+//    testAnnotationProcessor "io.requery:requery-processor"
 
     // For Kotlin classes
-    kapt "io.requery:requery-processor"
+    // kapt "io.requery:requery-processor"
     kaptTest "io.requery:requery-processor"
 
     // spring framework

@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Parameter
 import org.springframework.data.repository.query.Parameters
 import org.springframework.data.repository.query.ParametersParameterAccessor
 import org.springframework.data.repository.query.parser.Part
-import org.springframework.data.requery.namedExpresesionOf
+import org.springframework.data.requery.namedExpressionOf
 import org.springframework.data.requery.provider.RequeryPersistenceProvider
 import org.springframework.util.ClassUtils
 import org.springframework.util.ObjectUtils
@@ -63,8 +63,8 @@ class ParameterMetadataProvider @JvmOverloads constructor(val provider: RequeryP
         val nameGetter = { parameter.name.orElseThrow { IllegalArgumentException("Parameter needs to be named") } }
 
         val expression: NamedExpression<T> = when {
-            parameter.isExplicitlyNamed -> namedExpresesionOf(nameGetter.invoke(), reifiedType)
-            else -> namedExpresesionOf(parameter.index.toString(), reifiedType)
+            parameter.isExplicitlyNamed -> namedExpressionOf(nameGetter.invoke(), reifiedType)
+            else -> namedExpressionOf(parameter.index.toString(), reifiedType)
         }
 
         val value = when(bindableParameterValues) {
