@@ -1,8 +1,8 @@
 package com.coupang.springframework.data.requery.starter.domain.model;
 
-import com.coupang.kotlinx.objectx.ToStringBuilder;
-import com.coupang.springframework.data.requery.domain.AbstractPersistable;
-import com.coupang.springframework.data.requery.starter.dto.PersonDto;
+import org.kotlinx.objectx.ToStringBuilder;
+import org.springframework.data.requery.domain.AbstractPersistable;
+import org.springframework.data.requery.starter.dto.PersonDto;
 import io.requery.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;

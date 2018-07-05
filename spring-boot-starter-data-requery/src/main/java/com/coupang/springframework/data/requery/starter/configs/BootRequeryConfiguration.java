@@ -1,8 +1,8 @@
 package com.coupang.springframework.data.requery.starter.configs;
 
-import com.coupang.springframework.data.requery.configs.AbstractRequeryConfiguration;
-import com.coupang.springframework.data.requery.repository.config.EnableRequeryRepositories;
-import com.coupang.springframework.data.requery.starter.domain.model.Models;
+import org.springframework.data.requery.configs.AbstractRequeryConfiguration;
+import org.springframework.data.requery.repository.config.EnableRequeryRepositories;
+import org.springframework.data.requery.starter.domain.model.Models;
 import io.requery.meta.EntityModel;
 import io.requery.sql.TableCreationMode;
 import org.springframework.context.annotation.Configuration;

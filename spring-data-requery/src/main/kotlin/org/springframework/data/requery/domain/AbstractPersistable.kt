@@ -21,13 +21,15 @@ abstract class AbstractPersistable<ID>: AbstractValueObject(), Persistable, Seri
             if(isNew && other.isNew) hashCode() == other.hashCode()
             else id == other.id
         }
-        else                      -> false
+        else -> false
     }
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: System.identityHashCode(this)
     }
 
+    // NOTE: buildStringHelder 도 메소드이므로 @Transient 를 꼭 지정해줘야 한다.
+    @io.requery.Transient
     override fun buildStringHelper(): ToStringBuilder {
         return super.buildStringHelper()
             .add("id", id)

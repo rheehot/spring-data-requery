@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.starter.api;
 
-import com.coupang.springframework.data.requery.starter.dto.PersonDto;
-import com.coupang.springframework.data.requery.starter.service.PersonService;
+import org.springframework.data.requery.starter.dto.PersonDto;
+import org.springframework.data.requery.starter.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

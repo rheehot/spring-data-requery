@@ -1,9 +1,9 @@
 package com.coupang.springframework.data.requery.starter.service;
 
-import com.coupang.springframework.data.requery.starter.domain.model.AbstractPerson;
-import com.coupang.springframework.data.requery.starter.domain.model.Person;
-import com.coupang.springframework.data.requery.starter.domain.repository.PersonRepository;
-import com.coupang.springframework.data.requery.starter.dto.PersonDto;
+import org.springframework.data.requery.starter.domain.model.AbstractPerson;
+import org.springframework.data.requery.starter.domain.model.Person;
+import org.springframework.data.requery.starter.domain.repository.PersonRepository;
+import org.springframework.data.requery.starter.dto.PersonDto;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

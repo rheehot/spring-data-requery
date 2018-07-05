@@ -1,7 +1,7 @@
 package com.coupang.springframework.data.requery.starter.dto;
 
-import com.coupang.kotlinx.objectx.AbstractValueObject;
-import com.coupang.kotlinx.objectx.ToStringBuilder;
+import org.kotlinx.objectx.AbstractValueObject;
+import org.kotlinx.objectx.ToStringBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;

@@ -1,7 +1,10 @@
 rootProject.name = 'spring-data-requery-parent'
 
 include 'spring-data-requery'
+include 'spring-data-requery-test-java'
 //include 'spring-boot-starter-data-requery'
 
 //include 'spring-data-requery-java'
 //include 'spring-data-requery-kotlin'
+include 'spring-data-requery-test-kotlin'
+
