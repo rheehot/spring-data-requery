@@ -36,7 +36,7 @@ open class RequeryRepositoryFactoryBean<T: Repository<E, ID>, E, ID>(repositoryI
         return createRepositoryFactory(operations!!)
     }
 
-    private fun createRepositoryFactory(operations: RequeryOperations): RequeryRepositoryFactory {
+    protected open fun createRepositoryFactory(operations: RequeryOperations): RequeryRepositoryFactory {
         return RequeryRepositoryFactory(operations)
     }
 

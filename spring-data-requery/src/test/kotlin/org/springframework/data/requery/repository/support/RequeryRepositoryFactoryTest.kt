@@ -127,7 +127,7 @@ class RequeryRepositoryFactoryTest {
 
     private interface SampleRepository: RequeryRepository<User, Int>, SampleCustomRepository {
 
-        fun findByEmail(email: String): User? = User().also { it.email = email }
+        fun findByEmail(email: String): User? = User().also { it.emailAddress = email }
 
         fun customMethod(id: Long?): User? = User()
     }

@@ -13,8 +13,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.requery.core.RequeryOperations
 import org.springframework.data.requery.core.RequeryTemplate
+import org.springframework.data.requery.core.RequeryTransactionManager
 import org.springframework.data.requery.listeners.LogbackListener
 import org.springframework.data.requery.mapping.RequeryMappingContext
+import org.springframework.transaction.PlatformTransactionManager
 import javax.annotation.PostConstruct
 import javax.sql.DataSource
 
@@ -71,6 +73,10 @@ abstract class AbstractRequeryConfiguration {
         }
     }
 
+    @Bean
+    fun transactionManager(): PlatformTransactionManager {
+        return RequeryTransactionManager(entityDataStore(), dataSource)
+    }
 
     /**
      * DB Schema 생성이 필요할 경우, Application 시작 시, 존재하지 않는 TABLE을 생성하도록 해줍니다.

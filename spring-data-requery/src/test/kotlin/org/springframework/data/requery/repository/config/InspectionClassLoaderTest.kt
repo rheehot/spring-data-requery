@@ -3,11 +3,6 @@ package org.springframework.data.requery.repository.config
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-/**
- * InspectionClassLoaderTest
- *
- * @author debop@coupang.com
- */
 class InspectionClassLoaderTest {
 
     @Test

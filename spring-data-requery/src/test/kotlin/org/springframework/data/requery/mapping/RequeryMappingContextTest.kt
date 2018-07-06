@@ -5,11 +5,6 @@ import io.requery.Version
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-/**
- * RequeryMappingContextTest
- *
- * @author debop@coupang.com
- */
 class RequeryMappingContextTest {
 
     @Test
@@ -27,7 +22,8 @@ class RequeryMappingContextTest {
         assertThat(entity.getRequiredPersistentProperty("springVersion").isVersionProperty).isFalse()
     }
 
-    class Sample {
+    private class Sample {
+        
         @get:Key
         val id: Long? = 0
 

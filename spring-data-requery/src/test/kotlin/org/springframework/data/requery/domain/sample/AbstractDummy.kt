@@ -10,7 +10,7 @@ import java.util.*
 
 @Entity
 @Table(name = "SD_Roles")
-abstract class AbstractRole: AbstractPersistable<Int>() {
+abstract class AbstractDummy: AbstractPersistable<Int>() {
 
     @get:Key
     @get:Generated

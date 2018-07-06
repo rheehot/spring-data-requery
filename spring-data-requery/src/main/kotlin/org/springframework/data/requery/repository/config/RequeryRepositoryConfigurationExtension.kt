@@ -31,27 +31,31 @@ class RequeryRepositoryConfigurationExtension: RepositoryConfigurationExtensionS
     override fun getModulePrefix(): String = moduleName.toLowerCase(Locale.US)
 
     override fun getIdentifyingAnnotations(): MutableCollection<Class<out Annotation>> =
-        arrayListOf(io.requery.Entity::class.java,
-                    io.requery.Superclass::class.java)
+        mutableListOf(io.requery.Entity::class.java,
+                      io.requery.Superclass::class.java)
 
     override fun getIdentifyingTypes(): MutableCollection<Class<*>> =
-        arrayListOf(RequeryRepository::class.java)
+        mutableListOf(RequeryRepository::class.java)
 
 
     override fun postProcess(builder: BeanDefinitionBuilder, source: RepositoryConfigurationSource) {
 
         val transactionManagerRef = source.getAttribute("transactionManagerRef")
+
         builder.addPropertyValue(DEFAULT_TRANSACTION_MANAGER_BEAN_NAME,
                                  transactionManagerRef.orElse(DEFAULT_TRANSACTION_MANAGER_BEAN_NAME))
     }
 
     override fun postProcess(builder: BeanDefinitionBuilder, config: AnnotationRepositoryConfigurationSource) {
 
+        val attributes = config.attributes
+
         builder.addPropertyValue(ENABLE_DEFAULT_TRANSACTIONS_ATTRIBUTE,
-                                 config.attributes.getBoolean(ENABLE_DEFAULT_TRANSACTIONS_ATTRIBUTE))
+                                 attributes.getBoolean(ENABLE_DEFAULT_TRANSACTIONS_ATTRIBUTE))
     }
 
     override fun postProcess(builder: BeanDefinitionBuilder, config: XmlRepositoryConfigurationSource) {
+
         val enableDefaultTransactions = config.getAttribute(ENABLE_DEFAULT_TRANSACTIONS_ATTRIBUTE)
 
         if(enableDefaultTransactions.isPresent && enableDefaultTransactions.get().isNotBlank()) {
@@ -62,9 +66,13 @@ class RequeryRepositoryConfigurationExtension: RepositoryConfigurationExtensionS
 
     override fun getConfigurationInspectionClassLoader(loader: ResourceLoader): ClassLoader? {
 
-        return if(loader.classLoader != null && LazyJvmAgent.isActive(loader.classLoader))
-            InspectionClassLoader(loader.classLoader!!)
-        else loader.classLoader
+        //        return if(loader.classLoader != null && LazyJvmAgent.isActive(loader.classLoader))
+        //            InspectionClassLoader(loader.classLoader!!)
+        //        else loader.classLoader
+
+        return loader.classLoader?.let {
+            InspectionClassLoader(it)
+        } ?: loader.classLoader
     }
 
 

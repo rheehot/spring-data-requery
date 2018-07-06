@@ -9,11 +9,12 @@ import io.requery.sql.EntityContext
 import io.requery.sql.EntityDataStore
 import mu.KotlinLogging
 import org.springframework.util.ReflectionUtils
+import kotlin.reflect.KClass
 
 private val log = KotlinLogging.logger { }
 
 @Suppress("UNCHECKED_CAST")
-fun <E> EntityDataStore<E>.getEntityContext(): EntityContext<E> {
+fun <E: Any> EntityDataStore<E>.getEntityContext(): EntityContext<E> {
     try {
         val field = ReflectionUtils.findField(this.javaClass, "context")!!
         field.isAccessible = true
@@ -24,7 +25,7 @@ fun <E> EntityDataStore<E>.getEntityContext(): EntityContext<E> {
     }
 }
 
-fun <T> EntityDataStore<T>.getEntityModel(): EntityModel {
+fun <E: Any> EntityDataStore<E>.getEntityModel(): EntityModel {
     try {
         val field = ReflectionUtils.findField(this.javaClass, "entityModel")!!
         field.isAccessible = true
@@ -35,25 +36,29 @@ fun <T> EntityDataStore<T>.getEntityModel(): EntityModel {
     }
 }
 
-fun <T> EntityDataStore<T>.getEntityTypes(): Set<Type<*>> {
+fun <E: Any> EntityDataStore<E>.getEntityTypes(): Set<Type<*>> {
     return this.getEntityModel().types
 }
 
-fun <T> EntityDataStore<T>.getEntityClasses(): List<Class<*>> {
+fun <E: Any> EntityDataStore<E>.getEntityClasses(): List<Class<*>> {
     return getEntityTypes().map { it.classType }
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <E> EntityDataStore<*>.getType(entityClass: Class<E>): Type<E>? {
-    return getEntityTypes()
-        .find { it -> entityClass.equals(it.classType) } as? Type<E>
+fun <E: Any> EntityDataStore<*>.getType(entityClass: Class<E>): Type<E>? {
+    return getEntityTypes().find { entityClass == it.classType } as? Type<E>
 }
 
-fun <E> EntityDataStore<*>.getKeyAttributes(entityClass: Class<E>): Set<Attribute<E, *>> {
+@Suppress("UNCHECKED_CAST")
+fun <E: Any> EntityDataStore<*>.getType(entityClass: KClass<E>): Type<E>? {
+    return getEntityTypes().find { entityClass.java == it.classType } as? Type<E>
+}
+
+fun <E: Any> EntityDataStore<*>.getKeyAttributes(entityClass: Class<E>): Set<Attribute<E, *>> {
     return getType(entityClass)?.keyAttributes ?: emptySet()
 }
 
-fun <E> EntityDataStore<*>.getSingleKeyAttribute(entityClass: Class<E>): Attribute<E, *> {
+fun <E: Any> EntityDataStore<*>.getSingleKeyAttribute(entityClass: Class<E>): Attribute<E, *> {
     return getType(entityClass)?.singleKeyAttribute!!
 }
 

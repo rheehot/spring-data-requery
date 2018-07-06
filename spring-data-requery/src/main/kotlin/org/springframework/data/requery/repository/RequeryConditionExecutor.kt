@@ -18,11 +18,11 @@ import java.util.*
 @NoRepositoryBean
 interface RequeryConditionExecutor<E: Any> {
 
-    fun findOne(condition: Return<out Result<E>>): Optional<E>
+    fun findOne(filter: Return<out Result<E>>): Optional<E>
 
-    fun findAll(condition: Return<out Result<E>>): List<E>
+    fun findAll(filter: Return<out Result<E>>): List<E>
 
-    fun findAll(condition: QueryElement<out Result<E>>, pageable: Pageable): Page<E>
+    fun findAll(filter: QueryElement<out Result<E>>, pageable: Pageable): Page<E>
 
     fun findAll(conditions: Iterable<Condition<E, *>>): List<E>
 
@@ -31,7 +31,7 @@ interface RequeryConditionExecutor<E: Any> {
     fun findAll(conditions: Iterable<Condition<E, *>>, sort: Sort): List<E>
 
 
-    fun count(conditionElement: QueryElement<out Result<E>>): Long
+    fun count(queryElement: QueryElement<out Result<E>>): Long
 
-    fun exists(conditionElement: QueryElement<out Result<E>>): Boolean
+    fun exists(queryElement: QueryElement<out Result<E>>): Boolean
 }

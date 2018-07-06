@@ -38,7 +38,6 @@ private val classMethodCache = ConcurrentHashMap<String, Method?>()
 private val entityFields = LinkedMultiValueMap<Class<*>, Field>()
 private val entityMethods = LinkedMultiValueMap<Class<*>, Method>()
 
-
 fun Class<*>.findField(fieldName: String): Field? {
 
     val cacheKey = "$name.$fieldName"
@@ -213,6 +212,30 @@ fun <V: Any> Class<*>.getKeyExpression(): NamedExpression<V> {
             else -> namedExpressionOf(field.name, field.type)
         }
     } as NamedExpression<V>
+}
+
+private val classPropertyExpressions = ConcurrentHashMap<String, NamedExpression<*>?>()
+
+@Suppress("UNCHECKED_CAST")
+fun Class<*>.getExpression(propertyName: String): NamedExpression<*>? {
+
+    val key = this.name + "." + propertyName
+    return classPropertyExpressions.computeIfAbsent(key) { domainClass ->
+
+        // NOTE: Java entity 는 Field로 등록된 id 값을 반환한다.
+        // NOTE: Kotlin의 경우는 getId() 메소드로부터 반환한다.
+        val field = this.findFirstField { it.name == propertyName }
+        when(field) {
+            null -> {
+                val method = this.findFirstMethod { it.extractFieldname() == propertyName }
+                when(method) {
+                    null -> null
+                    else -> NamedExpression.of(method.extractFieldname(), method.returnType)
+                }
+            }
+            else -> NamedExpression.of(field.name, field.type)
+        }
+    }
 }
 
 /**

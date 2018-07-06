@@ -18,7 +18,7 @@ import javax.sql.DataSource
  */
 @Configuration
 @EnableTransactionManagement
-class RequeryTestConfiguration: AbstractRequeryConfiguration() {
+open class RequeryTestConfiguration: AbstractRequeryConfiguration() {
 
     companion object {
         private val log = KotlinLogging.logger { }

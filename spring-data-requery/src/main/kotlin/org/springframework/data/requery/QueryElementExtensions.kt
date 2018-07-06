@@ -74,9 +74,8 @@ fun <T: Any> Return<T>.applySort(domainClass: Class<out Any>, sort: Sort): Query
         // 이미 있을 수 있다
         val orderExpr = query.orderByExpressions?.find { it.name == propertyName }
 
-        orderExpr?.let {
-            domainClass.findField(propertyName)?.let { field ->
-                val expr = NamedExpression.of(propertyName, field.type)
+        if(orderExpr == null) {
+            domainClass.getExpression(propertyName)?.let { expr ->
                 query = query.orderBy(if(direction.isAscending) expr.asc() else expr.desc()).unwrap()
             }
         }
@@ -138,16 +137,12 @@ fun Class<out Any>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<
     return sort.mapNotNull { order ->
         val propertyName = order.property
 
-        this@getOrderingExpressions
-            .findField(propertyName)
-            ?.let { field ->
-                val expr = namedExpressionOf(propertyName, field.type)
-
-                when(order.direction) {
-                    Sort.Direction.ASC -> expr.asc()
-                    else -> expr.desc()
-                }
+        this.getExpression(propertyName)?.let { expr ->
+            when(order.direction) {
+                Sort.Direction.ASC -> expr.asc()
+                else -> expr.desc()
             }
+        }
     }.toTypedArray()
 }
 

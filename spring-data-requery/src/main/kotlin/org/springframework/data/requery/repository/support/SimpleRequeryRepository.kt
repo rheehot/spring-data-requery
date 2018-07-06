@@ -47,9 +47,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
     override fun findAll(): List<E> = operations.findAll(domainClass)
 
     override fun findAll(sort: Sort): List<E> {
-        return operations
-            .select(domainClass)
-            .unwrap()
+        return select()
             .applySort(domainClass, sort)
             .get()
             .toList()
@@ -63,7 +61,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         return example
             .buildQueryElement(operations, domainClass)
             .applySort(domainClass, sort)
-            .getAsResultEntity<S>()
+            .get()
             .toList()
     }
 
@@ -104,18 +102,18 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         }
     }
 
-    override fun findAll(condition: Return<out Result<E>>): List<E> {
-        return condition.get().toList()
+    override fun findAll(filter: Return<out Result<E>>): List<E> {
+        return filter.get().toList()
     }
 
-    override fun findAll(condition: QueryElement<out Result<E>>, pageable: Pageable): Page<E> {
+    override fun findAll(filter: QueryElement<out Result<E>>, pageable: Pageable): Page<E> {
         return when {
             pageable.isPaged -> {
-                val totals = count(condition)
-                val contents = condition.applyPageable(domainClass, pageable).get().toList()
+                val totals = count(filter)
+                val contents = filter.applyPageable(domainClass, pageable).get().toList()
                 PageImpl<E>(contents, pageable, totals)
             }
-            else -> PageImpl<E>(findAll(condition))
+            else -> PageImpl<E>(findAll(filter))
         }
     }
 
@@ -258,8 +256,8 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         return count(example.buildQueryElement(operations, domainClass as Class<S>) as QueryElement<out Result<E>>)
     }
 
-    override fun count(conditionElement: QueryElement<out Result<E>>): Long {
-        return operations.count(domainClass, conditionElement).toLong()
+    override fun count(queryElement: QueryElement<out Result<E>>): Long {
+        return operations.count(domainClass, queryElement).toLong()
     }
 
     override fun existsById(id: ID): Boolean {
@@ -292,12 +290,12 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         return Optional.ofNullable(entity)
     }
 
-    override fun findOne(condition: Return<out Result<E>>): Optional<E> {
-        val count = count(condition.unwrap()).toInt()
+    override fun findOne(filter: Return<out Result<E>>): Optional<E> {
+        val count = count(filter.unwrap()).toInt()
         if(count > 1) {
             throw IncorrectResultSizeDataAccessException(1, count)
         }
-        return Optional.ofNullable(condition.get().firstOrNull())
+        return Optional.ofNullable(filter.get().firstOrNull())
     }
 
     override fun <S: E> exists(example: Example<S>): Boolean {
@@ -308,8 +306,8 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
             .firstOrNull() != null
     }
 
-    override fun exists(conditionElement: QueryElement<out Result<E>>): Boolean {
-        return operations.exists(domainClass, conditionElement)
+    override fun exists(queryElement: QueryElement<out Result<E>>): Boolean {
+        return operations.exists(domainClass, queryElement)
     }
 
 }

@@ -8,6 +8,7 @@ import org.springframework.data.requery.repository.RequeryRepository
  *
  * @author debop@coupang.com
  */
+@SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
 interface UserRepository: RequeryRepository<User, Int> {
 
     @JvmDefault
