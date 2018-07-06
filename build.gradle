@@ -134,8 +134,6 @@ subprojects {
 
     dependencies {
 
-
-
         compileOnly "org.projectlombok:lombok"
 
         compile "io.github.microutils:kotlin-logging"
