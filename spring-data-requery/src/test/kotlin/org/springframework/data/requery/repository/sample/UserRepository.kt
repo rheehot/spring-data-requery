@@ -9,7 +9,7 @@ import org.springframework.data.requery.repository.RequeryRepository
  * @author debop@coupang.com
  */
 @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-interface UserRepository: RequeryRepository<User, Int> {
+interface UserRepository: RequeryRepository<User, Int>, UserRepositoryCustom {
 
     @JvmDefault
     fun findByLastname(lastname: String): List<User>
