@@ -49,7 +49,7 @@ class RequeryRepositoryFactoryBeanTest {
 
         // Setup standard factory configuration
         factoryBean = DummyRequeryRepositoryFactoryBean(SimpleSampleRepository::class.java)
-        factoryBean.operations = operations
+        factoryBean.setOperations(operations)
     }
 
     @Test

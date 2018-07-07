@@ -97,9 +97,13 @@ fun Class<*>.findMethod(methodName: String, vararg paramTypes: Class<*>): Method
         var targetClass: Class<*>? = this@findMethod
 
         while(targetClass != null && !targetClass.isAnyClass) {
-            val foundMethod = targetClass.getDeclaredMethod(name, *paramTypes)
-            if(foundMethod != null)
-                return@computeIfAbsent foundMethod
+            try {
+                val foundMethod = targetClass.getMethod(methodName, *paramTypes)
+                if(foundMethod != null)
+                    return@computeIfAbsent foundMethod
+            } catch(e: NoSuchMethodException) {
+                // Nothing to do.
+            }
 
             targetClass = targetClass.superclass
         }
@@ -139,7 +143,7 @@ fun Class<*>.findFirstMethod(predicate: (Method) -> Boolean): Method? {
 }
 
 val Class<*>.isAnyClass: Boolean
-    get() = this == Any::class.java
+    get() = this == Any::class.java || this == Object::class.java
 
 val Class<*>.isRequeryEntity: Boolean
     get() = declaredAnnotations.find { it.annotationClass == io.requery.Entity::class } != null

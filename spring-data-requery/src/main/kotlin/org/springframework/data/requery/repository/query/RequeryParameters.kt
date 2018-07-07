@@ -32,13 +32,16 @@ class RequeryParameters: Parameters<RequeryParameters, RequeryParameter> {
 
 class RequeryParameter(val parameter: MethodParameter): Parameter(parameter) {
 
-    private val log = KotlinLogging.logger { }
+    companion object {
+        private val log = KotlinLogging.logger { }
+    }
 
     init {
         log.debug { "Create RequeryParameter. parameter=$parameter" }
     }
 
-    val isDateParameter: Boolean get() = type == Date::class.java
+    val isDateParameter: Boolean
+        get() = Objects.equals(type, Date::class.java)
 
     override fun toString(): String = parameter.parameter.toString()
 }
