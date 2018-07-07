@@ -10,5 +10,4 @@ import io.requery.Table
  */
 @Entity
 @Table(name = "SpecialUser")
-abstract class AbstractSpecialUser: User() {
-}
+abstract class AbstractSpecialUser: User() 

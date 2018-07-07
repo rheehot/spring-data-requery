@@ -31,7 +31,15 @@ class DefaultRequeryEntityMetadata<E: Any>(val domainClass: Class<E>): RequeryEn
         val entity = this.entity
         when {
             entity != null && entity.name.isNotBlank() -> entity.name
-            else -> domainClass.simpleName
+            else -> getEntityName(domainClass.simpleName)
+        }
+    }
+
+    private fun getEntityName(simpleName: String): String {
+        return when {
+            simpleName.startsWith("Abstract") -> simpleName.removePrefix("Abstract")
+            simpleName.endsWith("Entity") -> simpleName.removeSuffix("Entity")
+            else -> simpleName
         }
     }
 

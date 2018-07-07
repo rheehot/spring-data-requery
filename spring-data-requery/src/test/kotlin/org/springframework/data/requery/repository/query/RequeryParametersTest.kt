@@ -9,11 +9,6 @@ import org.springframework.data.requery.findMethod
 import java.time.LocalDateTime
 import java.util.*
 
-/**
- * org.springframework.data.requery.repository.query.RequeryParametersTest
- *
- * @author debop
- */
 class RequeryParametersTest {
 
     companion object {

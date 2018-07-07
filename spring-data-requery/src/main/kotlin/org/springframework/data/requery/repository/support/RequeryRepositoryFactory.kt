@@ -28,11 +28,13 @@ open class RequeryRepositoryFactory(val operations: RequeryOperations): Reposito
     private val crudMethodMetadataPostProcessor = CrudMethodMetadataPostProcessor()
 
     override fun setBeanClassLoader(classLoader: ClassLoader) {
+        log.trace { "set bean class loader. classLoader=$classLoader" }
+
         super.setBeanClassLoader(classLoader)
         this.crudMethodMetadataPostProcessor.setBeanClassLoader(classLoader)
     }
 
-    override fun getTargetRepository(metadata: RepositoryInformation): SimpleRequeryRepository<out Any, *> {
+    override fun getTargetRepository(metadata: RepositoryInformation): SimpleRequeryRepository<out Any, out Any> {
         val repository = getTargetRepository(metadata, operations)
         repository.setRepositoryMethodMetadata(crudMethodMetadataPostProcessor.getCrudMethodMetadata())
         return repository
@@ -40,12 +42,16 @@ open class RequeryRepositoryFactory(val operations: RequeryOperations): Reposito
 
     @Suppress("UNCHECKED_CAST")
     protected fun getTargetRepository(information: RepositoryInformation,
-                                      operations: RequeryOperations): SimpleRequeryRepository<out Any, *> {
+                                      operations: RequeryOperations): SimpleRequeryRepository<out Any, out Any> {
         log.debug { "Get target repository. information=$information" }
 
         val entityInformation = getEntityInformation<Any, Any>(information.domainType as Class<Any>)
 
-        return getTargetRepositoryViaReflection(information, entityInformation, operations)
+        val repository = getTargetRepositoryViaReflection(information, entityInformation, operations) as? SimpleRequeryRepository<out Any, out Any>
+
+        log.debug { "find target repository. repository=$repository" }
+
+        return repository!!
     }
 
     override fun getRepositoryBaseClass(metadata: RepositoryMetadata): Class<*> = SimpleRequeryRepository::class.java
@@ -60,8 +66,7 @@ open class RequeryRepositoryFactory(val operations: RequeryOperations): Reposito
     @Suppress("UNCHECKED_CAST")
     override fun <E: Any, ID: Any> getEntityInformation(domainClass: Class<E>): EntityInformation<E, ID> {
 
-        return RequeryEntityInformationSupport.getEntityInformation(domainClass as Class<Persistable<ID>>,
-                                                                    operations)
+        return RequeryEntityInformationSupport.getEntityInformation(domainClass as Class<Persistable<ID>>, operations)
             as RequeryEntityInformationSupport<E, ID>
     }
 

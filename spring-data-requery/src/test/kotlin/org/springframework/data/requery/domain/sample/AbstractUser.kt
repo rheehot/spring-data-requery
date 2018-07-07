@@ -11,7 +11,7 @@ import java.util.*
  *
  * @author debop@coupang.com
  */
-@Entity
+@Entity(name = "User", copyable = true, stateless = true)
 @Table(name = "SD_USER")
 abstract class AbstractUser: AbstractPersistable<Int>() {
 
@@ -27,23 +27,27 @@ abstract class AbstractUser: AbstractPersistable<Int>() {
     @get:Column(nullable = false, unique = true)
     abstract var emailAddress: String
 
-    @get:JunctionTable // (columns = [Column("id"), Column("friendId")])
-    @get:ManyToMany
-    abstract val colleagues: Set<AbstractUser>
+    // Self reference
+    //    @get:JunctionTable(name = "User_Colleagues")
+    //    @get:ManyToMany
+    //    abstract val colleagues: Set<AbstractUser>
 
-    @get:JunctionTable
-    @get:ManyToMany
-    abstract val roles: Set<AbstractRole>
+    //    @get:JunctionTable
+    //    @get:ManyToMany
+    //    abstract val roles: Set<AbstractRole>
 
-    @get:ManyToOne
-    abstract var manager: AbstractUser?
+    //    @get:ManyToOne
+    //    abstract var manager: AbstractUser?
 
-    @get:Embedded
-    var address: Address? = Address()
+    //    // NOTE: Embedded 에 해당하는 놈은 abstract 를 빼야 한다.
+    //    @get:Embedded
+    //    var address: AbstractAddress = uninitialized()
 
+    @get:Column
     @get:Convert(ByteArrayToBlobConverter::class)
     abstract var binaryData: ByteArray?
 
+    @get:Column
     abstract var dateOfBirth: Date?
 
 

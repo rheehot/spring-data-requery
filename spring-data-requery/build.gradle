@@ -4,6 +4,15 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 apply plugin: 'kotlin-noarg'
 
+// NOTE: requery 사용 시에는 allOpen, noArg 를 꼭 지정해줘야 합니다.
+allOpen {
+    annotation("io.requery.Entity")
+}
+noArg {
+    annotation("io.requery.Entity")
+    invokeInitializers = true
+}
+
 idea {
     module {
         sourceDirs += file("${buildDir}/generated/source/apt/main/")

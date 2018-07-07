@@ -26,18 +26,19 @@ open class RequeryEntityModelEntityInformation<E: Any, ID: Any>(domainClass: Cla
 
             log.debug { "Find version attribute. domainType=$domainType, entityModel=${entityModel.name}" }
 
-            var currentType = domainType
+            val attr = domainType.attributes.find { it.isVersion }
+            if(attr != null) {
+                return attr
+            }
+
+            val baseClass = domainType.baseType
             try {
-                do {
-                    val versionAttr = currentType.attributes.find { it.isVersion }
-                    if(versionAttr != null) {
-                        return versionAttr
-                    }
-                    currentType = entityModel.typeOf(currentType.baseType) as Type<E>
-                } while(currentType.classType != Any::class.java)
-                return null
-            } catch(e: Exception) {
-                log.warn(e) { "Fail to find version attribute. domainType=$domainType, entityModel=${entityModel.name}" }
+                val baseType = entityModel.typeOf(baseClass)
+                if(baseType.keyAttributes.isNotEmpty()) {
+                    return null
+                }
+                return findVersionAttribute(baseType as Type<E>, entityModel)
+            } catch(e: IllegalArgumentException) {
                 return null
             }
         }

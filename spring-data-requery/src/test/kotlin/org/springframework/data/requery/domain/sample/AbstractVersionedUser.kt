@@ -26,9 +26,10 @@ abstract class AbstractVersionedUser: AbstractPersistable<Long>() {
     @get:Column(name = "user_birthday")
     abstract var birthday: Date
 
+    //NOTE: @Version 을 지정하기 위해서는 @JvmField를 지정하고, final로 지정해야 합니다.
     @Version
     @JvmField
-    var version: Long = 0
+    final var version: Long = 0
 
     override fun hashCode(): Int = Objects.hash(name, email, birthday)
 

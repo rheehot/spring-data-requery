@@ -1,13 +1,11 @@
 package org.springframework.data.requery.domain.sample
 
-import io.requery.Entity
-import io.requery.ForeignKey
-import io.requery.Key
-import io.requery.ManyToOne
+import io.requery.*
 import org.springframework.data.requery.domain.AbstractPersistable
 import java.util.*
 
 @Entity
+@Table(name = "ORDERS")
 abstract class AbstractOrder: AbstractPersistable<Long>() {
 
     @get:Key
