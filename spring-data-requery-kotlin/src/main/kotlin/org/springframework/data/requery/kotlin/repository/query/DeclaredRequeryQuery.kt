@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.query.Result
 import io.requery.query.element.QueryElement
@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.SliceImpl
 import org.springframework.data.repository.query.ReturnedType
+import org.springframework.data.requery.kotlin.NotSupportedException
 import org.springframework.data.requery.kotlin.core.RequeryOperations
 
 /**

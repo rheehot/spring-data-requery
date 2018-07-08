@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

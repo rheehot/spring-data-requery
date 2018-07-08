@@ -14,5 +14,8 @@ import io.requery.Table;
 @Table(name = "SpectialUser")
 public abstract class AbstractSpecialUser extends User {
 
+
+    protected String specialAttribute;
+
     private static final long serialVersionUID = -7890331277430318674L;
 }

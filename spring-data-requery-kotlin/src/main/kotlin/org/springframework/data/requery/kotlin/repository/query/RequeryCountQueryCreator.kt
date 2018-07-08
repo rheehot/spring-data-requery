@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.query.LogicalCondition
 import io.requery.query.element.QueryElement
@@ -7,9 +7,10 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.repository.query.ReturnedType
 import org.springframework.data.repository.query.parser.PartTree
 import org.springframework.data.requery.kotlin.core.RequeryOperations
+import org.springframework.data.requery.kotlin.unwrap
 
 /**
- * org.springframework.data.requery.repository.query.RequeryCountQueryCreator
+ * org.springframework.data.requery.kotlin.repository.query.RequeryCountQueryCreator
  *
  * @author debop
  */

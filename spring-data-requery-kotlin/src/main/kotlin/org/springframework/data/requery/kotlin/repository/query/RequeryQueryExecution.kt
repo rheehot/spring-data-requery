@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.PersistenceException
 import io.requery.query.element.QueryElement
@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.SliceImpl
 import org.springframework.data.repository.query.ParametersParameterAccessor
+import org.springframework.data.requery.kotlin.*
 import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.util.ClassUtils
 

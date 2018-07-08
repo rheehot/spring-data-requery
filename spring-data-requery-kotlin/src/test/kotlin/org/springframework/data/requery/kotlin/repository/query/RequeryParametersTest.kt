@@ -1,10 +1,11 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.query.Tuple
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.springframework.data.repository.query.Param
+import org.springframework.data.requery.kotlin.findMethod
 import java.time.LocalDateTime
 import java.util.*
 

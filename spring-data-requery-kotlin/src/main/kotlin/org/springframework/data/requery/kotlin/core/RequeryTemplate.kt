@@ -3,6 +3,7 @@ package org.springframework.data.requery.kotlin.core
 import io.requery.sql.EntityDataStore
 import mu.KLogging
 import org.springframework.context.ApplicationContext
+import org.springframework.data.requery.kotlin.mapping.RequeryMappingContext
 
 /**
  * Java용 RequeryTemplate

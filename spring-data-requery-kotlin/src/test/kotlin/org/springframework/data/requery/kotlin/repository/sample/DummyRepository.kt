@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.sample
+package org.springframework.data.requery.kotlin.repository.sample
 
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.requery.kotlin.domain.sample.Dummy

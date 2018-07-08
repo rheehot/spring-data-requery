@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import mu.KotlinLogging
 import org.springframework.data.projection.ProjectionFactory
@@ -8,7 +8,9 @@ import org.springframework.data.repository.query.EvaluationContextProvider
 import org.springframework.data.repository.query.QueryLookupStrategy
 import org.springframework.data.repository.query.QueryLookupStrategy.Key.*
 import org.springframework.data.repository.query.RepositoryQuery
+import org.springframework.data.requery.kotlin.annotation.Query
 import org.springframework.data.requery.kotlin.core.RequeryOperations
+import org.springframework.data.requery.kotlin.provider.RequeryPersistenceProvider
 import java.lang.reflect.Method
 
 /**
@@ -60,7 +62,7 @@ object RequeryQueryLookupStrategy {
 
         abstract fun resolveQuery(method: RequeryQueryMethod,
                                   operations: RequeryOperations,
-                                  namedQueries: NamedQueries): RepositoryQuery;
+                                  namedQueries: NamedQueries): RepositoryQuery
     }
 
     /**
@@ -102,7 +104,7 @@ object RequeryQueryLookupStrategy {
     }
 
     /**
-     * [QueryLookupStrategy] to try to detect a declared query first ([Query], Requery named query).
+     * [QueryLookupStrategy] to try to detect a declared query first ([org.springframework.data.requery.kotlin.annotation.Query], Requery named query).
      * In case none is found we fall back on query creation.
      */
     class CreateIfNotFoundQueryLookupStrategy(operations: RequeryOperations,

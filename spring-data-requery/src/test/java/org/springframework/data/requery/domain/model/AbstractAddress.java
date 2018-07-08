@@ -1,6 +1,8 @@
 package org.springframework.data.requery.domain.model;
 
 import io.requery.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * com.coupang.springframework.data.requery.domain.model.AbstractBasicLocation
@@ -8,8 +10,10 @@ import io.requery.*;
  * @author debop
  * @since 18. 6. 4
  */
+@Getter
+@Setter
 @Entity(copyable = true)
-public class AbstractAddress extends Coordinate {
+public abstract class AbstractAddress extends Coordinate {
 
     @Key
     @Generated

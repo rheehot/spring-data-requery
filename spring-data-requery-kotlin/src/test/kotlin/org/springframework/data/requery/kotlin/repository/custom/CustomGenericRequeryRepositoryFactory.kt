@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.custom
+package org.springframework.data.requery.kotlin.repository.custom
 
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
@@ -6,9 +6,9 @@ import com.nhaarman.mockito_kotlin.whenever
 import org.springframework.data.repository.core.RepositoryInformation
 import org.springframework.data.repository.core.RepositoryMetadata
 import org.springframework.data.requery.kotlin.core.RequeryOperations
-import org.springframework.data.requery.repository.support.RequeryEntityInformation
-import org.springframework.data.requery.repository.support.RequeryRepositoryFactory
-import org.springframework.data.requery.repository.support.SimpleRequeryRepository
+import org.springframework.data.requery.kotlin.repository.support.RequeryEntityInformation
+import org.springframework.data.requery.kotlin.repository.support.RequeryRepositoryFactory
+import org.springframework.data.requery.kotlin.repository.support.SimpleRequeryRepository
 
 /**
  * org.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactory

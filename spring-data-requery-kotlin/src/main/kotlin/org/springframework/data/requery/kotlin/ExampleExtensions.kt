@@ -7,7 +7,7 @@ import io.requery.query.element.QueryElement
 import mu.KotlinLogging
 import org.springframework.data.domain.Example
 import org.springframework.data.requery.kotlin.core.RequeryOperations
-import org.springframework.data.requery.repository.query.applyExample
+import org.springframework.data.requery.kotlin.repository.query.applyExample
 
 private val log = KotlinLogging.logger { }
 

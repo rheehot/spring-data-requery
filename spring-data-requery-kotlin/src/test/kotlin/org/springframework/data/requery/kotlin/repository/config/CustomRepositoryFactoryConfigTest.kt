@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -7,9 +7,9 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.requery.kotlin.configs.RequeryTestConfiguration
-import org.springframework.data.requery.repository.custom.CustomGenericRepository
-import org.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactoryBean
-import org.springframework.data.requery.repository.custom.UserCustomExtendedRepository
+import org.springframework.data.requery.kotlin.repository.custom.CustomGenericRepository
+import org.springframework.data.requery.kotlin.repository.custom.CustomGenericRequeryRepositoryFactoryBean
+import org.springframework.data.requery.kotlin.repository.custom.UserCustomExtendedRepository
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.PlatformTransactionManager

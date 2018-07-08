@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 /**
  * Helper class to manage bean definition names in a single place.

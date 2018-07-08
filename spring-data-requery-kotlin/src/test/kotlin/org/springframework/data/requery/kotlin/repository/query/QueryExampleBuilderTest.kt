@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.query.Result
 import io.requery.query.element.QueryElement
@@ -10,6 +10,7 @@ import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.st
 import org.springframework.data.domain.ExampleMatcher.matching
 import org.springframework.data.requery.kotlin.domain.AbstractDomainTest
 import org.springframework.data.requery.kotlin.domain.sample.User
+import org.springframework.data.requery.kotlin.unwrap
 
 class QueryExampleBuilderTest: AbstractDomainTest() {
 

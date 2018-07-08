@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 18. 6. 24
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = { QueryLookupStrategyTest.TestConfiguration.class })
+@ContextConfiguration
 public class QueryLookupStrategyTest {
 
     @Configuration

@@ -10,6 +10,10 @@ import io.requery.query.function.Count
 import io.requery.sql.EntityContext
 import io.requery.sql.EntityDataStore
 import org.springframework.context.ApplicationContext
+import org.springframework.data.requery.kotlin.applyWhereConditions
+import org.springframework.data.requery.kotlin.getEntityContext
+import org.springframework.data.requery.kotlin.getEntityModel
+import org.springframework.data.requery.kotlin.mapping.RequeryMappingContext
 
 /**
  *  Java용 RequeryOperations

@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import mu.KotlinLogging
 import org.springframework.core.annotation.AnnotatedElementUtils

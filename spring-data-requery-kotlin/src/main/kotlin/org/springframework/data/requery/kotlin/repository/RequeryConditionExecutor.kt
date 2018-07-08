@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository
+package org.springframework.data.requery.kotlin.repository
 
 import io.requery.query.Condition
 import io.requery.query.Result
@@ -11,7 +11,7 @@ import org.springframework.data.repository.NoRepositoryBean
 import java.util.*
 
 /**
- * org.springframework.data.requery.repository.RequeryConditionExecutor
+ * org.springframework.data.requery.kotlin.repository.RequeryConditionExecutor
  *
  * @author debop
  */

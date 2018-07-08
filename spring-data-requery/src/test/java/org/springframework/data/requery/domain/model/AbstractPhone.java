@@ -20,7 +20,7 @@ import java.util.Objects;
 @Getter
 @Entity
 @NoArgsConstructor
-public class AbstractPhone extends AbstractPersistable<Integer> {
+public abstract class AbstractPhone extends AbstractPersistable<Integer> {
 
     private static final long serialVersionUID = -3682340011300104110L;
 

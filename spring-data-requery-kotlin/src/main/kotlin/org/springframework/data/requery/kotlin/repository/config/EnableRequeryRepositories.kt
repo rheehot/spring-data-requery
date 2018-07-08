@@ -1,10 +1,10 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.data.repository.config.DefaultRepositoryBaseClass
 import org.springframework.data.repository.query.QueryLookupStrategy
-import org.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean
+import org.springframework.data.requery.kotlin.repository.support.RequeryRepositoryFactoryBean
 import java.lang.annotation.Inherited
 import kotlin.reflect.KClass
 

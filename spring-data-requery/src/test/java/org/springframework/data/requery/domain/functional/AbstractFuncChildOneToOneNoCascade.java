@@ -5,11 +5,13 @@ import io.requery.Entity;
 import io.requery.Key;
 import io.requery.Persistable;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Diego on 2018. 6. 14..
  */
 @Getter
+@Setter
 @Entity(cacheable = false)
 public abstract class AbstractFuncChildOneToOneNoCascade implements Persistable {
 

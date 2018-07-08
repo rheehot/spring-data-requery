@@ -1,9 +1,9 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import org.springframework.data.repository.query.ParameterAccessor
 
 /**
- * org.springframework.data.requery.repository.query.RequeryParameterAccessor
+ * org.springframework.data.requery.kotlin.repository.query.RequeryParameterAccessor
  *
  * @author debop
  */

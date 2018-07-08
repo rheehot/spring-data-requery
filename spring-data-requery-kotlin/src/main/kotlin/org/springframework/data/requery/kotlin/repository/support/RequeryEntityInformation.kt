@@ -1,8 +1,8 @@
-package org.springframework.data.requery.repository.support
+package org.springframework.data.requery.kotlin.repository.support
 
 import io.requery.meta.Attribute
 import org.springframework.data.repository.core.EntityInformation
-import org.springframework.data.requery.repository.query.RequeryEntityMetadata
+import org.springframework.data.requery.kotlin.repository.query.RequeryEntityMetadata
 
 /**
  * RequeryEntityInformation

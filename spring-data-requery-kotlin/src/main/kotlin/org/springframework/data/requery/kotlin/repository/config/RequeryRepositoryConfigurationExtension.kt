@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.core.io.ResourceLoader
@@ -6,8 +6,8 @@ import org.springframework.data.repository.config.AnnotationRepositoryConfigurat
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport
 import org.springframework.data.repository.config.RepositoryConfigurationSource
 import org.springframework.data.repository.config.XmlRepositoryConfigurationSource
-import org.springframework.data.requery.repository.RequeryRepository
-import org.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean
+import org.springframework.data.requery.kotlin.repository.RequeryRepository
+import org.springframework.data.requery.kotlin.repository.support.RequeryRepositoryFactoryBean
 import org.springframework.util.ClassUtils
 import java.util.*
 

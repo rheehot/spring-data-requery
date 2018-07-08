@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.query.FieldExpression
 import io.requery.query.LogicalCondition
@@ -12,7 +12,10 @@ import org.springframework.data.repository.query.parser.AbstractQueryCreator
 import org.springframework.data.repository.query.parser.Part
 import org.springframework.data.repository.query.parser.Part.Type.*
 import org.springframework.data.repository.query.parser.PartTree
+import org.springframework.data.requery.kotlin.NotSupportedException
+import org.springframework.data.requery.kotlin.applySort
 import org.springframework.data.requery.kotlin.core.RequeryOperations
+import org.springframework.data.requery.kotlin.unwrap
 import org.springframework.data.requery.query.Expressions
 
 /**

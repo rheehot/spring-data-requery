@@ -1,5 +1,6 @@
 package org.springframework.data.requery.domain.sample;
 
+import io.requery.Column;
 import io.requery.Entity;
 import io.requery.Key;
 import io.requery.Transient;
@@ -20,9 +21,11 @@ import java.util.Objects;
 public abstract class AbstractSimpleEntity extends AbstractValueObject implements Serializable {
 
     @Key
+    @Column(name = "first_key", nullable = false)
     protected String first;
 
     @Key
+    @Column(name = "second_key", nullable = false)
     protected String second;
 
     public AbstractSimpleEntity() {}

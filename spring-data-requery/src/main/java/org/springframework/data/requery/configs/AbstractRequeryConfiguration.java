@@ -56,13 +56,14 @@ public abstract class AbstractRequeryConfiguration {
     @Bean
     public io.requery.sql.Configuration requeryConfiguration() {
         Assert.notNull(dataSource, "dataSource must not be null");
+        Assert.notNull(getEntityModel(), "enittymodel must not be null");
 
         return new ConfigurationBuilder(dataSource, getEntityModel())
             // .useDefaultLogging()
             .setEntityCache(new EmptyEntityCache())
             .setStatementCacheSize(1024)
             .setBatchUpdateSize(100)
-            .addStatementListener(new LogbackListener())
+            .addStatementListener(new LogbackListener<>())
             .build();
     }
 
@@ -96,12 +97,12 @@ public abstract class AbstractRequeryConfiguration {
      */
     @PostConstruct
     protected void setupSchema() {
-        log.info("Setup Requery Database Schema...");
+        log.info("Setup Requery Database Schema... mode={}", getTableCreationMode());
 
         try {
-            SchemaModifier schemaModifier = new SchemaModifier(requeryConfiguration());
-            log.debug(schemaModifier.createTablesString(getTableCreationMode()));
-            schemaModifier.createTables(getTableCreationMode());
+            SchemaModifier schema = new SchemaModifier(requeryConfiguration());
+            log.debug(schema.createTablesString(getTableCreationMode()));
+            schema.createTables(getTableCreationMode());
             log.info("Success to setup database schema!!!");
         } catch (Exception e) {
             log.error("Fail to setup database schema!!!", e);

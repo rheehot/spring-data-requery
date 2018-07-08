@@ -3,6 +3,7 @@ package org.springframework.data.requery.domain.sample;
 import io.requery.Entity;
 import io.requery.Generated;
 import io.requery.Key;
+import io.requery.Transient;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.requery.domain.AbstractPersistable;
 import org.springframework.data.requery.domain.ToStringBuilder;
@@ -22,7 +23,7 @@ public abstract class AbstractSite extends AbstractPersistable<Integer> {
 
     protected String name;
 
-
+    @Transient
     @Override
     protected @NotNull ToStringBuilder buildStringHelper() {
         return super.buildStringHelper()

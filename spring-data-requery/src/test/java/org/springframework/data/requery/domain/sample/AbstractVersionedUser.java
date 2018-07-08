@@ -1,9 +1,6 @@
 package org.springframework.data.requery.domain.sample;
 
-import io.requery.Entity;
-import io.requery.Generated;
-import io.requery.Key;
-import io.requery.Version;
+import io.requery.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.requery.domain.AbstractPersistable;
 import org.springframework.data.requery.domain.ToStringBuilder;
@@ -47,6 +44,7 @@ public abstract class AbstractVersionedUser extends AbstractPersistable<Long> {
         return Objects.hash(name, email, birthday);
     }
 
+    @Transient
     @Override
     protected @NotNull ToStringBuilder buildStringHelper() {
         return super.buildStringHelper()

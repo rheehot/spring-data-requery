@@ -1,12 +1,13 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.requery.repository.sample.AccountRepository
-import org.springframework.data.requery.repository.sample.RoleRepository
-import org.springframework.data.requery.repository.sample.UserRepository
+import org.springframework.data.requery.kotlin.mapping.RequeryMappingContext
+import org.springframework.data.requery.kotlin.repository.sample.AccountRepository
+import org.springframework.data.requery.kotlin.repository.sample.RoleRepository
+import org.springframework.data.requery.kotlin.repository.sample.UserRepository
 import org.springframework.test.context.junit4.SpringRunner
 
 /**

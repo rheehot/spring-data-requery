@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.sample
+package org.springframework.data.requery.kotlin.repository.sample
 
 import mu.KotlinLogging
 import org.springframework.data.requery.kotlin.domain.sample.User

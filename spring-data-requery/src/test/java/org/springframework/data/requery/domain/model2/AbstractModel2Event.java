@@ -3,6 +3,7 @@ package org.springframework.data.requery.domain.model2;
 import io.requery.Entity;
 import io.requery.Key;
 import io.requery.Table;
+import io.requery.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -49,6 +50,7 @@ public class AbstractModel2Event extends AbstractPersistable<UUID> {
         return Objects.hash(name);
     }
 
+    @Transient
     @Override
     protected @NotNull ToStringBuilder buildStringHelper() {
         return super.buildStringHelper()

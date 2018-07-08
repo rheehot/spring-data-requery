@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.query.Expression
 import io.requery.query.FieldExpression
@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Parameter
 import org.springframework.data.repository.query.Parameters
 import org.springframework.data.repository.query.ParametersParameterAccessor
 import org.springframework.data.repository.query.parser.Part
+import org.springframework.data.requery.kotlin.namedExpressionOf
+import org.springframework.data.requery.kotlin.provider.RequeryPersistenceProvider
 import org.springframework.util.ClassUtils
 import org.springframework.util.ObjectUtils
 import java.util.*

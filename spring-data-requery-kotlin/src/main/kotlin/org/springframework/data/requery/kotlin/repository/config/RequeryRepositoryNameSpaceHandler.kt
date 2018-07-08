@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import mu.KotlinLogging.logger
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport

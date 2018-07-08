@@ -25,7 +25,7 @@ public class LocalTimeToLongConverter implements Converter<LocalTime, Long> {
     @Nullable
     @Override
     public Integer getPersistedSize() {
-        return Long.SIZE;
+        return null;
     }
 
     @Override

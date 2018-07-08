@@ -7,17 +7,25 @@ apply plugin: 'kotlin-noarg'
 // NOTE: requery 사용 시에는 allOpen, noArg 를 꼭 지정해줘야 합니다.
 allOpen {
     annotation("io.requery.Entity")
+    annotation("io.requery.Superclass")
 }
 noArg {
     annotation("io.requery.Entity")
+    annotation("io.requery.Superclass")
     invokeInitializers = true
+}
+
+sourceSets {
+    generated {
+        "${buildDir}/generated/source/kapt/main/"
+    }
 }
 
 idea {
     module {
-        sourceDirs += file("${buildDir}/generated/source/apt/main/")
-        testSourceDirs += file("${buildDir}/generated/source/apt/test/")
-        generatedSourceDirs += file("${buildDir}/generated/source/apt/main/")
+        sourceDirs += file("${buildDir}/generated/source/kapt/main/")
+        testSourceDirs += file("${buildDir}/generated/source/kapt/test/")
+        generatedSourceDirs += file("${buildDir}/generated/source/kapt/main/")
     }
 }
 

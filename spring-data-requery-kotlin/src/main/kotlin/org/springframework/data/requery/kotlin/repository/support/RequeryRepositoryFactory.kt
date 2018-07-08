@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.support
+package org.springframework.data.requery.kotlin.repository.support
 
 import mu.KotlinLogging
 import org.springframework.data.domain.Persistable
@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.EvaluationContextProvider
 import org.springframework.data.repository.query.QueryLookupStrategy
 import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.data.requery.kotlin.provider.RequeryPersistenceProvider
-import org.springframework.data.requery.repository.query.RequeryQueryLookupStrategy
+import org.springframework.data.requery.kotlin.repository.query.RequeryQueryLookupStrategy
 import java.util.*
 
 /**

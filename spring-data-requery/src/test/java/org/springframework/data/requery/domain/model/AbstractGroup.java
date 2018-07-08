@@ -74,6 +74,7 @@ public class AbstractGroup extends AbstractPersistable<Long> {
         return Objects.hash(name, type);
     }
 
+    @Transient
     @Override
     protected @NotNull ToStringBuilder buildStringHelper() {
         return super.buildStringHelper()

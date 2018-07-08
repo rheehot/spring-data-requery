@@ -15,7 +15,7 @@ import org.springframework.data.requery.domain.AbstractPersistable;
 @Getter
 @Entity
 @Table(name = "basic_group")
-public class AbstractBasicGroup extends AbstractPersistable<Integer> {
+public abstract class AbstractBasicGroup extends AbstractPersistable<Integer> {
 
     private static final long serialVersionUID = 6213359648179473134L;
 

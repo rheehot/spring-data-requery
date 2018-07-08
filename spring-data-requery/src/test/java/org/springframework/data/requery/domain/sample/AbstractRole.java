@@ -1,9 +1,6 @@
 package org.springframework.data.requery.domain.sample;
 
-import io.requery.Entity;
-import io.requery.Generated;
-import io.requery.Key;
-import io.requery.Table;
+import io.requery.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +41,7 @@ public abstract class AbstractRole extends AbstractPersistable<Integer> {
         return Objects.hashCode(name);
     }
 
+    @Transient
     @Override
     protected @NotNull ToStringBuilder buildStringHelper() {
         return super.buildStringHelper()

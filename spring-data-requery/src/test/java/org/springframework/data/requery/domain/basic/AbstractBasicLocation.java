@@ -13,7 +13,7 @@ import org.springframework.data.requery.domain.AbstractPersistable;
 @Getter
 @Entity
 @Table(name = "basic_address")
-public class AbstractBasicLocation extends AbstractPersistable<Long> {
+public abstract class AbstractBasicLocation extends AbstractPersistable<Long> {
 
     private static final long serialVersionUID = -4665641548712152873L;
 

@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.query.NamedExpression
 import io.requery.query.Result
@@ -6,7 +6,12 @@ import io.requery.query.element.QueryElement
 import mu.KotlinLogging
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.query.parser.PartTree
+import org.springframework.data.requery.kotlin.applyPageable
+import org.springframework.data.requery.kotlin.applySort
 import org.springframework.data.requery.kotlin.core.RequeryOperations
+import org.springframework.data.requery.kotlin.mapping.RequeryMappingContext
+import org.springframework.data.requery.kotlin.provider.RequeryPersistenceProvider
+import org.springframework.data.requery.kotlin.unwrap
 
 /**
  * [PartTree] 정보를 바탕으로 Requery [QueryElement]를 빌드합니다.

@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository
+package org.springframework.data.requery.kotlin.repository
 
 /**
  * UserRepositoryTest

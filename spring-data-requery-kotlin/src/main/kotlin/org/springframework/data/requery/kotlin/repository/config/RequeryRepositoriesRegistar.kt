@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import org.springframework.data.repository.config.RepositoryBeanDefinitionRegistrarSupport
 import org.springframework.data.repository.config.RepositoryConfigurationExtension

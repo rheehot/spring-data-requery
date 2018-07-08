@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.support
+package org.springframework.data.requery.kotlin.repository.support
 
 import com.nhaarman.mockito_kotlin.*
 import io.requery.meta.EntityModel
@@ -18,7 +18,8 @@ import org.springframework.data.repository.core.support.RepositoryComposition
 import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.data.requery.kotlin.domain.sample.User
-import org.springframework.data.requery.repository.RequeryRepository
+import org.springframework.data.requery.kotlin.repository.RequeryRepository
+import org.springframework.data.requery.kotlin.uninitialized
 
 @RunWith(MockitoJUnitRunner.Silent::class)
 class RequeryRepositoryFactoryBeanTest {

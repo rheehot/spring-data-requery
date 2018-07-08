@@ -16,7 +16,7 @@ import org.springframework.data.requery.domain.AbstractPersistable;
 @Getter
 @Entity
 @Table(name = "basic_keyword")
-public class AbstractKeywords extends AbstractPersistable<Integer> {
+public abstract class AbstractKeywords extends AbstractPersistable<Integer> {
 
     private static final long serialVersionUID = -5401099992210202481L;
 

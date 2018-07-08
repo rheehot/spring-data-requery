@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import io.requery.meta.EntityModel
 import io.requery.sql.TableCreationMode

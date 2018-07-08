@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import mu.KotlinLogging
 import org.springframework.transaction.PlatformTransactionManager

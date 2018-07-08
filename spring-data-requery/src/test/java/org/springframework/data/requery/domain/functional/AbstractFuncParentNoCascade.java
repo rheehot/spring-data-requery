@@ -2,6 +2,7 @@ package org.springframework.data.requery.domain.functional;
 
 import io.requery.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * @author Diego on 2018. 6. 14..
  */
 @Getter
+@Setter
 @Entity(cacheable = false)
 public abstract class AbstractFuncParentNoCascade implements Persistable {
 

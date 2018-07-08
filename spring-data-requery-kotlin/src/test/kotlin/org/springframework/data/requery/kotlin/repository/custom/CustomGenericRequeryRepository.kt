@@ -1,8 +1,8 @@
-package org.springframework.data.requery.repository.custom
+package org.springframework.data.requery.kotlin.repository.custom
 
 import org.springframework.data.requery.kotlin.core.RequeryOperations
-import org.springframework.data.requery.repository.support.RequeryEntityInformation
-import org.springframework.data.requery.repository.support.SimpleRequeryRepository
+import org.springframework.data.requery.kotlin.repository.support.RequeryEntityInformation
+import org.springframework.data.requery.kotlin.repository.support.SimpleRequeryRepository
 
 /**
  * org.springframework.data.requery.repository.custom.CustomGenericRequeryRepository

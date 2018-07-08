@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.query
+package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.query.Condition
 import io.requery.query.NamedExpression
@@ -9,6 +9,7 @@ import mu.KotlinLogging
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher
 import org.springframework.data.domain.ExampleMatcher.StringMatcher.*
+import org.springframework.data.requery.kotlin.*
 import org.springframework.data.support.ExampleMatcherAccessor
 import org.springframework.data.util.DirectFieldAccessFallbackBeanWrapper
 import org.springframework.util.LinkedMultiValueMap

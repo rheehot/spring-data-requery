@@ -38,6 +38,7 @@ public abstract class AbstractUpsertEvent extends AbstractPersistable<UUID> {
         return name != null ? name.hashCode() : System.identityHashCode(this);
     }
 
+    @Transient
     @Override
     protected @NotNull ToStringBuilder buildStringHelper() {
         return super.buildStringHelper()

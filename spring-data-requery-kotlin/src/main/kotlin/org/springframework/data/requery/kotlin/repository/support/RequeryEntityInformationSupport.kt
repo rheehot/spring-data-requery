@@ -1,10 +1,10 @@
-package org.springframework.data.requery.repository.support
+package org.springframework.data.requery.kotlin.repository.support
 
 import mu.KotlinLogging
 import org.springframework.data.domain.Persistable
 import org.springframework.data.repository.core.support.AbstractEntityInformation
 import org.springframework.data.requery.kotlin.core.RequeryOperations
-import org.springframework.data.requery.repository.query.DefaultRequeryEntityMetadata
+import org.springframework.data.requery.kotlin.repository.query.DefaultRequeryEntityMetadata
 
 /**
  * org.springframework.data.requery.repository.support.RequeryEntityInformationSupport

@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.support
+package org.springframework.data.requery.kotlin.repository.support
 
 import io.requery.meta.Attribute
 import io.requery.meta.EntityModel

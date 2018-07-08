@@ -4,6 +4,7 @@ import io.requery.query.NamedExpression
 import io.requery.query.Result
 import io.requery.query.element.QueryElement
 import org.springframework.data.requery.kotlin.core.RequeryOperations
+import org.springframework.data.requery.kotlin.unwrap
 
 /**
  * org.springframework.data.requery.kotlin.domain.sample.UserQueryElements

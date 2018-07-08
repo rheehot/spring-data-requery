@@ -1,4 +1,3 @@
-
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
 apply plugin: 'kotlin-kapt'
@@ -47,7 +46,6 @@ dependencies {
     optional "org.threeten:threetenbp"
     optional "joda-time:joda-time"
 
-    optional "org.threeten:threetenbp"
     testImplementation "ch.qos.logback:logback-classic"
 
 }

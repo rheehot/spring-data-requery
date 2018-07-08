@@ -1,9 +1,9 @@
-package org.springframework.data.requery.repository.sample
+package org.springframework.data.requery.kotlin.repository.sample
 
 import io.requery.query.Result
 import io.requery.query.Return
 import org.springframework.data.requery.kotlin.domain.sample.Role
-import org.springframework.data.requery.repository.RequeryRepository
+import org.springframework.data.requery.kotlin.repository.RequeryRepository
 import java.util.*
 
 /**

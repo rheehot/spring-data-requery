@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.config
+package org.springframework.data.requery.kotlin.repository.config
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -9,8 +9,8 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.FilterType
 import org.springframework.data.repository.query.QueryLookupStrategy
-import org.springframework.data.requery.repository.sample.UserRepository
-import org.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean
+import org.springframework.data.requery.kotlin.repository.sample.UserRepository
+import org.springframework.data.requery.kotlin.repository.support.RequeryRepositoryFactoryBean
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.util.ReflectionTestUtils

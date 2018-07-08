@@ -1,6 +1,6 @@
-package org.springframework.data.requery.repository.support
+package org.springframework.data.requery.kotlin.repository.support
 
-import org.springframework.data.requery.repository.RequeryRepository
+import org.springframework.data.requery.kotlin.repository.RequeryRepository
 
 /**
  * RequeryRepositoryImplementation

@@ -1,9 +1,9 @@
-package org.springframework.data.requery.repository.custom
+package org.springframework.data.requery.kotlin.repository.custom
 
 import org.springframework.data.requery.kotlin.core.RequeryOperations
-import org.springframework.data.requery.repository.RequeryRepository
-import org.springframework.data.requery.repository.support.RequeryRepositoryFactory
-import org.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean
+import org.springframework.data.requery.kotlin.repository.RequeryRepository
+import org.springframework.data.requery.kotlin.repository.support.RequeryRepositoryFactory
+import org.springframework.data.requery.kotlin.repository.support.RequeryRepositoryFactoryBean
 
 /**
  * org.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactoryBean

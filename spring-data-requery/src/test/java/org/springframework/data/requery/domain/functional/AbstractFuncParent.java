@@ -2,12 +2,14 @@ package org.springframework.data.requery.domain.functional;
 
 import io.requery.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.requery.domain.AbstractPersistable;
 
 /**
  * @author Diego on 2018. 6. 14..
  */
 @Getter
+@Setter
 @Entity
 public abstract class AbstractFuncParent extends AbstractPersistable<Long> {
 

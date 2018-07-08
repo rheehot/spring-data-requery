@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository
+package org.springframework.data.requery.kotlin.repository
 
 import io.requery.meta.Attribute
 import org.springframework.data.domain.Example

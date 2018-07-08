@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.support
+package org.springframework.data.requery.kotlin.repository.support
 
 import io.requery.meta.Attribute
 import io.requery.query.Condition
@@ -10,6 +10,7 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.IncorrectResultSizeDataAccessException
 import org.springframework.data.domain.*
+import org.springframework.data.requery.kotlin.*
 import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional

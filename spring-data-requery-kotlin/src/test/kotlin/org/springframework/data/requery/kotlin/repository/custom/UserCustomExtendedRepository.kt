@@ -1,4 +1,4 @@
-package org.springframework.data.requery.repository.custom
+package org.springframework.data.requery.kotlin.repository.custom
 
 import org.springframework.data.requery.kotlin.domain.sample.User
 import org.springframework.transaction.annotation.Transactional

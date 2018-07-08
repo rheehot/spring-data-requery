@@ -3,6 +3,7 @@ package org.springframework.data.requery.domain.time;
 import io.requery.Entity;
 import io.requery.Key;
 import io.requery.Persistable;
+import io.requery.Transient;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.requery.domain.AbstractValueObject;
@@ -43,6 +44,7 @@ public abstract class AbstractElementCollectionUser extends AbstractValueObject 
         return Objects.hash(id, name);
     }
 
+    @Transient
     @NotNull
     @Override
     protected ToStringBuilder buildStringHelper() {
