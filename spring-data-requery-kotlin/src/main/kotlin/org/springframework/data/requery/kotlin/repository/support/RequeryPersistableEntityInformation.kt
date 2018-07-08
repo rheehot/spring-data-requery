@@ -3,22 +3,23 @@ package org.springframework.data.requery.kotlin.repository.support
 import io.requery.meta.EntityModel
 import mu.KotlinLogging
 import org.springframework.data.domain.Persistable
+import kotlin.reflect.KClass
 
 /**
  * org.springframework.data.requery.repository.support.RequeryPersistableEntityInformation
  *
  * @author debop
  */
-class RequeryPersistableEntityInformation<E: Persistable<ID>, ID: Any>(domainClass: Class<E>,
+class RequeryPersistableEntityInformation<E: Persistable<ID>, ID: Any>(kotlinType: KClass<E>,
                                                                        entityModel: EntityModel)
-    : RequeryEntityModelEntityInformation<E, ID>(domainClass, entityModel) {
+    : RequeryEntityModelEntityInformation<E, ID>(kotlinType, entityModel) {
 
     companion object {
         private val log = KotlinLogging.logger { }
     }
 
     init {
-        log.debug { "Create RequeryPersistableEntityInformation. domainClass=$domainClass, entityModel=${entityModel.name}" }
+        log.debug { "Create RequeryPersistableEntityInformation. kotlinType=$kotlinType, entityModel=${entityModel.name}" }
     }
 
     override fun isNew(entity: E): Boolean {

@@ -28,10 +28,9 @@ class RequeryCountQueryCreator(operations: RequeryOperations,
     override fun complete(criteria: LogicalCondition<out Any, *>?,
                           sort: Sort,
                           base: QueryElement<out Any>): QueryElement<out Any> {
-
-        return operations
-            .select(Count.count(domainClass))
-            .where(criteria)
-            .unwrap()
+        return when(criteria) {
+            null -> operations.select(Count.count(domainClass)).unwrap()
+            else -> operations.select(Count.count(domainClass)).where(criteria).unwrap()
+        }
     }
 }

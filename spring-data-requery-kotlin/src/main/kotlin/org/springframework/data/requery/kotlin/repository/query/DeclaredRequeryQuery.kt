@@ -22,15 +22,15 @@ class DeclaredRequeryQuery(queryMethod: RequeryQueryMethod, operations: RequeryO
         private val log = KotlinLogging.logger { }
     }
 
-    override fun doCreateQuery(values: Array<Any?>): QueryElement<out Any> {
+    override fun doCreateQuery(values: Array<Any>): QueryElement<out Any> {
         throw NotSupportedException("Unsupported operation in DeclaredRequeryQuery.")
     }
 
-    override fun doCreateCountQuery(values: Array<Any?>): QueryElement<out Result<Int>> {
+    override fun doCreateCountQuery(values: Array<Any>): QueryElement<out Result<Int>> {
         throw NotSupportedException("Unsupported operation in DeclaredRequeryQuery.")
     }
 
-    override fun execute(parameters: Array<Any?>): Any? {
+    override fun execute(parameters: Array<Any>): Any? {
 
         val query = getNativeQuery()
 
@@ -56,13 +56,13 @@ class DeclaredRequeryQuery(queryMethod: RequeryQueryMethod, operations: RequeryO
         }
     }
 
-    private fun runNativeQuery(query: String, parameters: Array<Any?>): Result<*> {
+    private fun runNativeQuery(query: String, parameters: Array<Any>): Result<*> {
         return when {
             queryMethod.isQueryForEntity -> {
                 log.trace { "Query for entity... entity=${queryMethod.entityClass}, query=$query, parameters=${parameters.joinToString()}" }
-                operations.dataStore.raw(queryMethod.entityClass, query, parameters)
+                operations.dataStore.raw(queryMethod.entityClass.kotlin, query, *parameters)
             }
-            else -> operations.dataStore.raw(query, parameters)
+            else -> operations.dataStore.raw(query, *parameters)
         }
     }
 
@@ -98,7 +98,7 @@ class DeclaredRequeryQuery(queryMethod: RequeryQueryMethod, operations: RequeryO
         return nativeQuery!!
     }
 
-    private fun getReturnedType(parameters: Array<Any?>): ReturnedType {
+    private fun getReturnedType(parameters: Array<Any>): ReturnedType {
         val accessor = RequeryParametersParameterAccessor(queryMethod, parameters)
         val processor = queryMethod.resultProcessor
 
@@ -109,14 +109,14 @@ class DeclaredRequeryQuery(queryMethod: RequeryQueryMethod, operations: RequeryO
     }
 
     // 인자 컬렉션의 Pageable 인스턴스의 index 를 찾아 parameters 에서 제거한다.
-    private fun removePageable(accessor: RequeryParametersParameterAccessor, parameters: Array<Any?>): Array<Any?> {
+    private fun removePageable(accessor: RequeryParametersParameterAccessor, parameters: Array<Any>): Array<Any> {
 
         val pageableIndex = accessor.parameters.pageableIndex
         if(pageableIndex < 0) {
             return parameters
         }
 
-        val values = Array<Any?>(parameters.size - 1) {}
+        val values = Array<Any>(parameters.size - 1) {}
         var j = 0
         parameters.forEachIndexed { index, param ->
             if(index != pageableIndex) {

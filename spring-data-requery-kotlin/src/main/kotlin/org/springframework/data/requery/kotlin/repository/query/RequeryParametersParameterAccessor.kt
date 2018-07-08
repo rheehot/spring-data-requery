@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.ParametersParameterAccessor
  * @author debop@coupang.com
  */
 class RequeryParametersParameterAccessor(override val parameters: RequeryParameters,
-                                         values: Array<Any?>)
+                                         values: Array<Any>)
     : ParametersParameterAccessor(parameters, values), RequeryParameterAccessor {
 
-    constructor(method: RequeryQueryMethod, values: Array<Any?>): this(method.parameters, values)
+    constructor(method: RequeryQueryMethod, values: Array<Any>): this(method.parameters, values)
 
 }

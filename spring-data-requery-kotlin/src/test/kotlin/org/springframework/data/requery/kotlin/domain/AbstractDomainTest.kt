@@ -1,6 +1,6 @@
 package org.springframework.data.requery.kotlin.domain
 
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +25,7 @@ abstract class AbstractDomainTest: AbstractRequeryTest() {
         private val rnd = Random(System.currentTimeMillis())
     }
 
-    @Autowired lateinit var dataStore: EntityDataStore<Any>
+    @Autowired lateinit var dataStore: KotlinEntityDataStore<Any>
     @Autowired lateinit var requeryTemplate: RequeryOperations
 
     @Test

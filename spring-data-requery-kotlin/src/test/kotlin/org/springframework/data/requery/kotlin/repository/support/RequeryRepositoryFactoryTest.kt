@@ -4,7 +4,7 @@ import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import io.requery.meta.EntityModel
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Ignore
@@ -33,7 +33,7 @@ class RequeryRepositoryFactoryTest {
 
     val operations = mock<RequeryOperations>()
     val entityModel = mock<EntityModel>()
-    val dataStore = mock<EntityDataStore<Any>>()
+    val dataStore = mock<KotlinEntityDataStore<Any>>()
     val entityInformation = mock<RequeryEntityInformation<User, Int>>()
 
     @Before

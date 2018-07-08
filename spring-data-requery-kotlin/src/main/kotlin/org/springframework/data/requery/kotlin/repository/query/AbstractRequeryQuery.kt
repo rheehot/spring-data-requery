@@ -23,13 +23,14 @@ abstract class AbstractRequeryQuery(val queryMethod: RequeryQueryMethod,
     }
 
     val metamodel = RequeryMetamodel(operations.entityModel)
+    val domainKlass = queryMethod.entityInformation.kotlinType
     val domainClass = queryMethod.entityInformation.javaType as Class<out Any>
 
     override fun getQueryMethod(): QueryMethod = queryMethod
 
-    override fun execute(parameters: Array<Any?>): Any? = doExecute(getExecution(), parameters)
+    override fun execute(parameters: Array<Any>): Any? = doExecute(getExecution(), parameters)
 
-    private fun doExecute(execution: RequeryQueryExecution, values: Array<Any?>): Any? {
+    private fun doExecute(execution: RequeryQueryExecution, values: Array<Any>): Any? {
 
         val result = execution.execute(this, values)
         // 필요없는데 ???
@@ -50,16 +51,16 @@ abstract class AbstractRequeryQuery(val queryMethod: RequeryQueryMethod,
         }
     }
 
-    protected abstract fun doCreateQuery(values: Array<Any?>): QueryElement<out Any>
+    protected abstract fun doCreateQuery(values: Array<Any>): QueryElement<out Any>
 
-    protected abstract fun doCreateCountQuery(values: Array<Any?>): QueryElement<out Result<Int>>
+    protected abstract fun doCreateCountQuery(values: Array<Any>): QueryElement<out Result<Int>>
 
-    internal fun createQueryElement(values: Array<Any?>): QueryElement<out Any> {
+    internal fun createQueryElement(values: Array<Any>): QueryElement<out Any> {
         log.debug { "Create QueryElement with domainClass=${domainClass.name}, values=$values" }
         return doCreateQuery(values)
     }
 
-    protected fun createCountQueryElement(values: Array<Any?>): QueryElement<out Result<Int>> {
+    protected fun createCountQueryElement(values: Array<Any>): QueryElement<out Result<Int>> {
         return doCreateCountQuery(values)
     }
 

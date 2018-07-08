@@ -1,7 +1,7 @@
 package org.springframework.data.requery.kotlin.core
 
 import io.requery.TransactionIsolation
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
 import mu.KotlinLogging
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.TransactionDefinition
@@ -15,7 +15,8 @@ import javax.sql.DataSource
  * @author debop@coupang.com
  * @since 18. 7. 2
  */
-class RequeryTransactionManager(val dataStore: EntityDataStore<Any>,
+// TODO: Spring의 Transaction Isolation 도 반영해야 한다. 
+class RequeryTransactionManager(val dataStore: KotlinEntityDataStore<Any>,
                                 dataSource: DataSource): DataSourceTransactionManager(dataSource) {
 
     private val log = KotlinLogging.logger { }
@@ -28,15 +29,15 @@ class RequeryTransactionManager(val dataStore: EntityDataStore<Any>,
         val isolation = transactionIsolationOf(definition.isolationLevel)
 
         isolation?.let {
-            dataStore.transaction().begin(isolation)
-        } ?: dataStore.transaction().begin()
+            dataStore.transaction.begin(isolation)
+        } ?: dataStore.transaction.begin()
     }
 
     override fun doCommit(status: DefaultTransactionStatus) {
-        if(dataStore.transaction().active()) {
+        if(dataStore.transaction.active()) {
             try {
                 log.debug { "Commit requery transaction..." }
-                dataStore.transaction().commit()
+                dataStore.transaction.commit()
             } catch(ignored: Throwable) {
                 log.trace(ignored) { "Fail to commit in requery transaction" }
             }
@@ -45,10 +46,10 @@ class RequeryTransactionManager(val dataStore: EntityDataStore<Any>,
     }
 
     override fun doRollback(status: DefaultTransactionStatus) {
-        if(dataStore.transaction().active()) {
+        if(dataStore.transaction.active()) {
             try {
                 log.debug { "Rollback requery transaction..." }
-                dataStore.transaction().rollback()
+                dataStore.transaction.rollback()
             } catch(ignored: Throwable) {
                 log.trace(ignored) { "Fail to rollback in requery transaction" }
             }

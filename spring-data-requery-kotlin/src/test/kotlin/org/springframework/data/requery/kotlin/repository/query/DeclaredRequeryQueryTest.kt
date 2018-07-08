@@ -4,7 +4,6 @@ import io.requery.query.Tuple
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,7 +42,7 @@ class DeclaredRequeryQueryTest {
         @Query("select * from SD_USER limit ?")
         fun findWithLimits(limit: Int): List<User>
 
-        @Query("select * from SD_USER u where u.firstname=? u.emailAddress=? limit ?")
+        @Query("select * from SD_USER u where u.firstname=? and u.emailAddress=? limit ?")
         fun findAllBy(firstname: String, emailAddress: String, limit: Int): List<User>
 
         @Query("select u.id, u.firstname from SD_USER u where u.emailAddress=?")
@@ -102,8 +101,6 @@ class DeclaredRequeryQueryTest {
         assertThat(savedUsers).hasSize(5)
     }
 
-    // BUG: Parameter 지정에 문제가 있다.
-    @Ignore("Kotlin 으로 만든 코드로 Java용 EntityDataStore를 사용할 때, multiple parameter를 해석하지 못하는 버그가 있다. ")
     @Test
     fun `multiple parameter query`() {
 

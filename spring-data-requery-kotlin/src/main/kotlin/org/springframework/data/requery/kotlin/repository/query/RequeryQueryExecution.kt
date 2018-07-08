@@ -58,7 +58,7 @@ abstract class RequeryQueryExecution {
         }
     }
 
-    fun execute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
+    fun execute(query: AbstractRequeryQuery, values: Array<Any>): Any? {
 
         return try {
             doExecute(query, values)
@@ -68,7 +68,7 @@ abstract class RequeryQueryExecution {
         }
     }
 
-    protected abstract fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any?
+    protected abstract fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): Any?
 
 
     /**
@@ -93,7 +93,7 @@ internal class CollectionExecution: RequeryQueryExecution() {
         private val log = KotlinLogging.logger { }
     }
 
-    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): List<*> {
+    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): List<*> {
         return query.createQueryElement(values).getAsResult().toList()
     }
 }
@@ -104,7 +104,7 @@ internal class SlicedExecution(val parameters: RequeryParameters): RequeryQueryE
         private val log = KotlinLogging.logger { }
     }
 
-    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
+    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): Any? {
         log.debug { "execute requery query, then return sliced list" }
         val accessor = ParametersParameterAccessor(parameters, values)
         val pageable = accessor.pageable
@@ -146,7 +146,7 @@ internal class PagedExecution(val parameters: RequeryParameters): RequeryQueryEx
         private val log = KotlinLogging.logger { }
     }
 
-    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Page<*>? {
+    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): Page<*>? {
         log.debug { "Run paged exection... query=$query, values=$values" }
 
         val accessor = ParametersParameterAccessor(parameters, values)
@@ -172,7 +172,7 @@ internal class PagedExecution(val parameters: RequeryParameters): RequeryQueryEx
         }
     }
 
-    private fun doExecuteTotals(query: AbstractRequeryQuery, values: Array<Any?>): Long {
+    private fun doExecuteTotals(query: AbstractRequeryQuery, values: Array<Any>): Long {
 
         val queryElement = query.createQueryElement(values).unwrap()
         val selection = query.operations.select(Count.count(query.domainClass))
@@ -188,7 +188,7 @@ internal class SingleEntityExecution: RequeryQueryExecution() {
         private val log = KotlinLogging.logger { }
     }
 
-    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
+    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): Any? {
         log.debug { "Get single entity. query=$query, values=$values" }
         val value = query.createQueryElement(values).getAsResult().firstOrNull()
         return RequeryResultConverter.convert(value)
@@ -203,7 +203,7 @@ internal class StreamExecution(val parameters: RequeryParameters): RequeryQueryE
         private val log = KotlinLogging.logger { }
     }
 
-    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
+    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): Any? {
         log.debug { "Get stream of entities. query=$query, values=$values" }
 
         val accessor = ParametersParameterAccessor(parameters, values)
@@ -229,13 +229,13 @@ internal class DeleteExecution(val operations: RequeryOperations): RequeryQueryE
         private val log = KotlinLogging.logger { }
     }
 
-    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
+    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): Any? {
         log.debug { "execute Delete query. query=$query, values=$values" }
 
         val deleteConditions = query.createQueryElement(values).whereElements
 
         val deleteQuery = operations
-            .delete(query.domainClass)
+            .delete(query.domainKlass)
             .unwrap()
             .applyWhereConditions(deleteConditions)
 
@@ -248,7 +248,7 @@ internal class ExistsExecution: RequeryQueryExecution() {
         private val log = KotlinLogging.logger { }
     }
 
-    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any?>): Any? {
+    override fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): Any? {
         // TODO: Entity를 Load하는 것과 Count를 세는 것의 성능 차이 비교가 필요하다.
         log.debug { "execute Exists query. query=$query, values=$values" }
         return query

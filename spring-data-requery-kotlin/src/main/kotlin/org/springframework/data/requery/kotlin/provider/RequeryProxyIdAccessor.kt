@@ -1,6 +1,6 @@
 package org.springframework.data.requery.kotlin.provider
 
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
 import mu.KotlinLogging
 import org.springframework.data.domain.Persistable
 import org.springframework.data.requery.kotlin.getEntityModel
@@ -11,7 +11,7 @@ import org.springframework.data.requery.kotlin.getEntityModel
  * @author debop
  */
 @Deprecated("사용할 필요 없다")
-class RequeryProxyIdAccessor(dataStore: EntityDataStore<Any>): ProxyIdAccessor {
+class RequeryProxyIdAccessor(dataStore: KotlinEntityDataStore<Any>): ProxyIdAccessor {
 
     private val entityModel = dataStore.getEntityModel()
     private val log = KotlinLogging.logger { }

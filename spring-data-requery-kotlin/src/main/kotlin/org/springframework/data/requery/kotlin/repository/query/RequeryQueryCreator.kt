@@ -26,7 +26,8 @@ import org.springframework.data.requery.query.Expressions
 open class RequeryQueryCreator(val operations: RequeryOperations,
                                val provider: ParameterMetadataProvider,
                                val returnedType: ReturnedType,
-                               val tree: PartTree): AbstractQueryCreator<QueryElement<out Any>, LogicalCondition<out Any, *>>(tree) {
+                               val tree: PartTree)
+    : AbstractQueryCreator<QueryElement<out Any>, LogicalCondition<out Any, *>>(tree) {
 
     companion object {
         private val log = KotlinLogging.logger { }
@@ -57,9 +58,9 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
 
         return when {
             tree.isCountProjection -> operations.select(Count.count(type.domainType)).unwrap()
-            tree.isExistsProjection -> operations.select(type.domainType).unwrap()
-            tree.isDelete -> operations.delete(type.domainType).unwrap()
-            else -> operations.select(type.domainType).unwrap()
+            tree.isExistsProjection -> operations.select(type.domainType.kotlin).unwrap()
+            tree.isDelete -> operations.delete(type.domainType.kotlin).unwrap()
+            else -> operations.select(type.domainType.kotlin).unwrap()
         }
     }
 
@@ -84,11 +85,12 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
     }
 
     override fun complete(criteria: LogicalCondition<out Any, *>?, sort: Sort): QueryElement<out Any> {
-
         return complete(criteria, sort, root)
     }
 
-    open fun complete(criteria: LogicalCondition<out Any, *>?, sort: Sort, base: QueryElement<out Any>): QueryElement<out Any> {
+    open fun complete(criteria: LogicalCondition<out Any, *>?,
+                      sort: Sort,
+                      base: QueryElement<out Any>): QueryElement<out Any> {
 
         log.trace { "Complete build query ..." }
 
@@ -133,7 +135,7 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
                 LESS_THAN_EQUAL ->
                     expr.lessThanOrEqual(provider.next(part, Comparable::class.java).value)
 
-                IS_NULL -> expr.isNull()
+                IS_NULL -> expr.isNull
 
                 IS_NOT_NULL -> expr.notNull()
 
@@ -169,7 +171,7 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
                         value = value.toUpperCase()
                     }
                     if(!value.startsWith("%") && !value.endsWith("%")) {
-                        value = "%" + value + "%"
+                        value = "%$value%"
                     }
 
                     when(type) {

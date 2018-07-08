@@ -1,19 +1,23 @@
 package org.springframework.data.requery.kotlin.core
 
 import io.requery.TransactionIsolation
+import io.requery.kotlin.*
 import io.requery.meta.Attribute
 import io.requery.meta.EntityModel
-import io.requery.meta.QueryAttribute
-import io.requery.query.*
+import io.requery.query.Expression
+import io.requery.query.Result
+import io.requery.query.Scalar
+import io.requery.query.Tuple
 import io.requery.query.element.QueryElement
 import io.requery.query.function.Count
 import io.requery.sql.EntityContext
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
 import org.springframework.context.ApplicationContext
 import org.springframework.data.requery.kotlin.applyWhereConditions
 import org.springframework.data.requery.kotlin.getEntityContext
 import org.springframework.data.requery.kotlin.getEntityModel
 import org.springframework.data.requery.kotlin.mapping.RequeryMappingContext
+import kotlin.reflect.KClass
 
 /**
  *  Java용 RequeryOperations
@@ -23,7 +27,7 @@ import org.springframework.data.requery.kotlin.mapping.RequeryMappingContext
 interface RequeryOperations {
 
     val applicationContext: ApplicationContext
-    val dataStore: EntityDataStore<Any>
+    val dataStore: KotlinEntityDataStore<Any>
     val mappingContext: RequeryMappingContext
 
     @JvmDefault
@@ -35,20 +39,20 @@ interface RequeryOperations {
         get() = dataStore.getEntityContext()
 
     @JvmDefault
-    fun <E: Any> select(entityType: Class<E>): Selection<out Result<E>> = dataStore.select(entityType)
+    fun <E: Any> select(entityType: KClass<E>): Selection<out Result<E>> = dataStore.select(entityType)
 
     @JvmDefault
-    fun <E: Any> select(entityType: Class<E>, vararg attributes: QueryAttribute<*, *>): Selection<out Result<E>> =
+    fun <E: Any> select(entityType: KClass<E>, vararg attributes: QueryableAttribute<E, *>): Selection<out Result<E>> =
         dataStore.select(entityType, *attributes)
 
     @JvmDefault
     fun select(vararg expressions: Expression<*>): Selection<out Result<Tuple>> = dataStore.select(*expressions)
 
     @JvmDefault
-    fun <E, K> findById(entityType: Class<E>, id: K): E? = dataStore.findByKey(entityType, id)
+    fun <E: Any, K> findById(entityType: KClass<E>, id: K): E? = dataStore.findByKey(entityType, id)
 
     @JvmDefault
-    fun <E: Any> findAll(entityType: Class<E>): List<E> = dataStore.select(entityType).get().toList()
+    fun <E: Any> findAll(entityType: KClass<E>): List<E> = dataStore.select(entityType).get().toList()
 
     @JvmDefault
     fun <E: Any> refresh(entity: E): E = dataStore.refresh(entity)
@@ -79,20 +83,20 @@ interface RequeryOperations {
     fun <E: Any> insert(entity: E): E = dataStore.insert(entity)
 
     @JvmDefault
-    fun <E, K> insert(entity: E, keyClass: Class<K>): K = dataStore.insert(entity, keyClass)
+    fun <E: Any, K: Any> insert(entity: E, keyClass: KClass<K>): K = dataStore.insert(entity, keyClass)
 
     @JvmDefault
-    fun <E: Any> insert(entityType: Class<E>): Insertion<out Result<Tuple>> = dataStore.insert<E>(entityType)
+    fun <E: Any> insert(entityType: KClass<E>): Insertion<out Result<Tuple>> = dataStore.insert<E>(entityType)
 
     @JvmDefault
-    fun <E: Any> insert(entityType: Class<E>, vararg attributes: QueryAttribute<E, *>): InsertInto<out Result<Tuple>> =
+    fun <E: Any> insert(entityType: KClass<E>, vararg attributes: QueryableAttribute<E, *>): InsertInto<out Result<Tuple>> =
         dataStore.insert(entityType, *attributes)
 
     @JvmDefault
     fun <E: Any> insertAll(entities: Iterable<E>): List<E> = dataStore.insert<E>(entities).toList()
 
     @JvmDefault
-    fun <E: Any, K> insertAll(entities: Iterable<E>, keyClass: Class<K>): List<K> =
+    fun <E: Any, K: Any> insertAll(entities: Iterable<E>, keyClass: KClass<K>): List<K> =
         dataStore.insert<K, E>(entities, keyClass).toList()
 
     @JvmDefault
@@ -102,10 +106,7 @@ interface RequeryOperations {
     fun <E: Any> update(entity: E): E = dataStore.update(entity)
 
     @JvmDefault
-    fun <E: Any> update(entity: E, vararg attributes: Attribute<*, *>): E = dataStore.update(entity, *attributes)
-
-    @JvmDefault
-    fun <E: Any> update(entityType: Class<E>): Update<out Scalar<Int>> = dataStore.update<E>(entityType)
+    fun <E: Any> update(entityType: KClass<E>): Update<out Scalar<Int>> = dataStore.update<E>(entityType)
 
     @JvmDefault
     fun <E: Any> updateAll(entities: Iterable<E>): List<E> = dataStore.update<E>(entities).toList()
@@ -114,7 +115,7 @@ interface RequeryOperations {
     fun <E: Any> delete(): Deletion<out Scalar<Int>> = dataStore.delete()
 
     @JvmDefault
-    fun <E: Any> delete(entityType: Class<E>): Deletion<out Scalar<Int>> = dataStore.delete<E>(entityType)
+    fun <E: Any> delete(entityType: KClass<E>): Deletion<out Scalar<Int>> = dataStore.delete<E>(entityType)
 
     @JvmDefault
     fun <E: Any> delete(entity: E) {
@@ -127,21 +128,22 @@ interface RequeryOperations {
     }
 
     @JvmDefault
-    fun <E: Any> deleteAll(entityType: Class<E>): Int = dataStore.delete<E>(entityType).get().value()
+    fun <E: Any> deleteAll(entityType: KClass<E>): Int = dataStore.delete<E>(entityType).get().value()
 
     @JvmDefault
-    fun <E: Any> count(entityType: Class<E>): Selection<out Scalar<Int>> =
+    fun <E: Any> count(entityType: KClass<E>): Selection<out Scalar<Int>> =
         dataStore.count(entityType)
 
     @JvmDefault
-    fun <E: Any> count(vararg attributes: QueryAttribute<*, *>): Selection<out Scalar<Int>> =
+    fun <E: Any> count(vararg attributes: QueryableAttribute<Any, *>): Selection<out Scalar<Int>> =
         dataStore.count(*attributes)
 
 
     @Suppress("UNCHECKED_CAST")
     @JvmDefault
-    fun <E: Any> count(entityType: Class<E>, whereClause: QueryElement<out Result<E>>): Int {
-        val query = select(Count.count(entityType))
+    fun <E: Any> count(entityType: KClass<E>, whereClause: QueryElement<out Result<E>>): Int {
+
+        val query = select(Count.count(entityType.java))
             .applyWhereConditions(whereClause.whereElements)
             .unwrapQuery() as QueryElement<out Result<Tuple>>
 
@@ -150,7 +152,7 @@ interface RequeryOperations {
     }
 
     @JvmDefault
-    fun <E: Any> exists(entityType: Class<E>, whereClause: QueryElement<out Result<E>>): Boolean =
+    fun <E: Any> exists(entityType: KClass<E>, whereClause: QueryElement<out Result<E>>): Boolean =
         whereClause.limit(1).get().firstOrNull() != null
 
     @JvmDefault
@@ -158,7 +160,7 @@ interface RequeryOperations {
         dataStore.raw(query, *parameters)
 
     @JvmDefault
-    fun <E: Any> raw(entityType: Class<E>, query: String, vararg parameters: Any): Result<E> =
+    fun <E: Any> raw(entityType: KClass<E>, query: String, vararg parameters: Any): Result<E> =
         dataStore.raw(entityType, query, *parameters)
 
     @JvmDefault
@@ -166,12 +168,18 @@ interface RequeryOperations {
 
     @JvmDefault
     fun <V> runInTransaction(isolation: TransactionIsolation?, callable: () -> V): V =
-        dataStore.runInTransaction(callable, isolation)
+        when(isolation) {
+            null -> dataStore.withTransaction { callable.invoke() }
+            else -> dataStore.withTransaction(isolation) { callable.invoke() }
+        }
 
     @JvmDefault
-    fun <V> withTransaction(block: (EntityDataStore<Any>) -> V): V = withTransaction(null, block)
+    fun <V> withTransaction(block: (KotlinEntityDataStore<Any>) -> V): V = withTransaction(null, block)
 
     @JvmDefault
-    fun <V> withTransaction(isolation: TransactionIsolation?, block: (EntityDataStore<Any>) -> V): V =
-        runInTransaction(isolation) { block(dataStore) }
+    fun <V> withTransaction(isolation: TransactionIsolation?, block: (KotlinEntityDataStore<Any>) -> V): V =
+        when(isolation) {
+            null -> dataStore.withTransaction { block.invoke(dataStore) }
+            else -> dataStore.withTransaction(isolation) { block.invoke(dataStore) }
+        }
 }

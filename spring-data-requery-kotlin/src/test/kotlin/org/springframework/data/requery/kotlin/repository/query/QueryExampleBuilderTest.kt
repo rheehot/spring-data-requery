@@ -16,11 +16,11 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
 
     @Before
     fun setup() {
-        requeryTemplate.deleteAll(User::class.java)
+        requeryTemplate.deleteAll(User::class)
     }
 
     private fun userQueryByExample(example: Example<User>): QueryElement<out Result<User>> {
-        val base = requeryTemplate.select(User::class.java).unwrap()
+        val base = requeryTemplate.select(User::class).unwrap()
         return QueryByExampleBuilder.getWhereAndOr(base, example)
     }
 

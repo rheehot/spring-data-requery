@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.QueryMethod
 import org.springframework.data.requery.Annotations
 import org.springframework.data.requery.kotlin.annotation.Query
 import java.lang.reflect.Method
+import kotlin.reflect.KClass
 
 /**
  * RequeryQueryMethod
@@ -32,7 +33,7 @@ class RequeryQueryMethod(val method: Method,
         }
     }
 
-    val entityInformation: RequeryEntityMetadata<*> = DefaultRequeryEntityMetadata.of(domainClass)
+    val entityInformation: RequeryEntityMetadata<*> = DefaultRequeryEntityMetadata.of(domainClass.kotlin)
 
     init {
         log.debug {
@@ -97,6 +98,9 @@ class RequeryQueryMethod(val method: Method,
                 else -> query
             }
         }
+
+    val entityKlass: KClass<*>
+        get() = entityInformation.javaType.kotlin
 
     val entityClass: Class<*>
         get() = entityInformation.javaType

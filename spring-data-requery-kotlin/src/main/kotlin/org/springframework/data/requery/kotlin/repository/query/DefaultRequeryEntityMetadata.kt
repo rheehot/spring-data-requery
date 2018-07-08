@@ -3,13 +3,14 @@ package org.springframework.data.requery.kotlin.repository.query
 import io.requery.Entity
 import mu.KotlinLogging
 import org.springframework.core.annotation.AnnotatedElementUtils
+import kotlin.reflect.KClass
 
 /**
  * Default implementation for [RequeryEntityMetadata].
  *
  * @author debop@coupang.com
  */
-class DefaultRequeryEntityMetadata<E: Any>(val domainClass: Class<E>): RequeryEntityMetadata<E> {
+class DefaultRequeryEntityMetadata<E: Any>(override val kotlinType: KClass<E>): RequeryEntityMetadata<E> {
 
     companion object {
         private val log = KotlinLogging.logger { }
@@ -17,21 +18,21 @@ class DefaultRequeryEntityMetadata<E: Any>(val domainClass: Class<E>): RequeryEn
         private const val DEFAULT_MODEL_NAME = "default"
 
         @JvmStatic
-        fun <E: Any> of(domainClass: Class<E>): DefaultRequeryEntityMetadata<E> =
-            DefaultRequeryEntityMetadata(domainClass)
+        fun <E: Any> of(domainKlass: KClass<E>): DefaultRequeryEntityMetadata<E> =
+            DefaultRequeryEntityMetadata(domainKlass)
     }
 
     private val entity: Entity? by lazy {
-        AnnotatedElementUtils.findMergedAnnotation(domainClass, io.requery.Entity::class.java)
+        AnnotatedElementUtils.findMergedAnnotation(kotlinType.java, io.requery.Entity::class.java)
     }
 
     override val entityName: String by lazy {
-        log.trace { "Get entity name ... domainClass=$domainClass, entity=$entity" }
+        log.trace { "Get entity name ... domainClass=$kotlinType, entity=$entity" }
 
         val entity = this.entity
         when {
             entity != null && entity.name.isNotBlank() -> entity.name
-            else -> getEntityName(domainClass.simpleName)
+            else -> getEntityName(kotlinType.java.simpleName)
         }
     }
 
@@ -45,13 +46,13 @@ class DefaultRequeryEntityMetadata<E: Any>(val domainClass: Class<E>): RequeryEn
 
 
     override val modelName: String by lazy {
-        log.trace { "Get model name ... domainClass=$domainClass, entity=$entity" }
+        log.trace { "Get model name ... domainClass=$kotlinType, entity=$entity" }
 
         entity?.let {
             if(it.model.isNotBlank()) it.model else DEFAULT_MODEL_NAME
         } ?: ""
     }
 
-    override fun getJavaType(): Class<E> = domainClass
+    override fun getJavaType(): Class<E> = kotlinType.java
 
 }

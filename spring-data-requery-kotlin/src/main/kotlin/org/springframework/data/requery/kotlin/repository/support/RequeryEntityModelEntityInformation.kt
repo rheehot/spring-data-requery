@@ -7,15 +7,16 @@ import mu.KLogger
 import mu.KotlinLogging
 import org.springframework.beans.BeanWrapper
 import org.springframework.data.util.DirectFieldAccessFallbackBeanWrapper
+import kotlin.reflect.KClass
 
 /**
  * org.springframework.data.requery.repository.support.RequeryEntityModelEntityInformation
  *
  * @author debop
  */
-open class RequeryEntityModelEntityInformation<E: Any, ID: Any>(domainClass: Class<E>,
+open class RequeryEntityModelEntityInformation<E: Any, ID: Any>(kotlinType: KClass<E>,
                                                                 val entityModel: EntityModel)
-    : RequeryEntityInformationSupport<E, ID>(domainClass) {
+    : RequeryEntityInformationSupport<E, ID>(kotlinType) {
 
     companion object {
         private val log: KLogger by lazy { KotlinLogging.logger {} }
@@ -52,16 +53,16 @@ open class RequeryEntityModelEntityInformation<E: Any, ID: Any>(domainClass: Cla
         get() = _entityName ?: super.entityName
 
     init {
-        log.debug { "Create RequeryEntityModelEntityInformation. domainClass=$domainClass, entityModel=${entityModel.name}" }
+        log.debug { "Create RequeryEntityModelEntityInformation. kotinType=$kotlinType, entityModel=${entityModel.name}" }
 
-        val domainType = entityModel.typeOf(domainClass)
+        val domainType = entityModel.typeOf(kotlinType.java)
                          ?: throw IllegalArgumentException("The given domain class can not be found in the given EntityModel! " +
-                                                           "domainClass=$domainClass, entityModel=${entityModel.name}")
+                                                           "kotlinType=$kotlinType, entityModel=${entityModel.name}")
 
         this._entityName = domainType.name
 
         if(domainType.keyAttributes.isEmpty()) {
-            throw IllegalArgumentException("The given domain class does not contains an id attribute! domainClass=$domainClass")
+            throw IllegalArgumentException("The given domain class does not contains an id attribute! kotlinType=$kotlinType")
         }
 
         this.idMetadata = IdMetadata(domainType)
@@ -78,7 +79,7 @@ open class RequeryEntityModelEntityInformation<E: Any, ID: Any>(domainClass: Cla
             return entityWrapper.getPropertyValue(idMetadata.simpleIdAttribute.name) as? ID
         }
 
-        val idWrapper = IdentifierDerivingDirectFieldAccessFallbackBeanWrapper(idMetadata.getType(), entityModel)
+        val idWrapper = IdentifierDerivingDirectFieldAccessFallbackBeanWrapper(idMetadata.getType().kotlin, entityModel)
         var partialValueFound = false
 
         idMetadata.forEach {
@@ -164,9 +165,9 @@ open class RequeryEntityModelEntityInformation<E: Any, ID: Any>(domainClass: Cla
         }
     }
 
-    private class IdentifierDerivingDirectFieldAccessFallbackBeanWrapper(domainClass: Class<out Any>,
+    private class IdentifierDerivingDirectFieldAccessFallbackBeanWrapper(kotlinType: KClass<out Any>,
                                                                          val entityModel: EntityModel)
-        : DirectFieldAccessFallbackBeanWrapper(domainClass) {
+        : DirectFieldAccessFallbackBeanWrapper(kotlinType.java) {
 
         companion object {
             private val log = KotlinLogging.logger { }
@@ -186,9 +187,9 @@ open class RequeryEntityModelEntityInformation<E: Any, ID: Any>(domainClass: Cla
             }
 
             // Derive the identifier from the nested entity that is part of the composite key.
-            val nestedEntityInformation = RequeryEntityModelEntityInformation<Any, Any>(value!!.javaClass, this.entityModel)
+            val nestedEntityInformation = RequeryEntityModelEntityInformation<Any, Any>(Any::class, this.entityModel)
 
-            val nestedIdPropertyValue = DirectFieldAccessFallbackBeanWrapper(value)
+            val nestedIdPropertyValue = DirectFieldAccessFallbackBeanWrapper(value!!)
                 .getPropertyValue(nestedEntityInformation.getRequiredIdAttribute().name)
 
             super.setPropertyValue(propertyName, nestedIdPropertyValue)

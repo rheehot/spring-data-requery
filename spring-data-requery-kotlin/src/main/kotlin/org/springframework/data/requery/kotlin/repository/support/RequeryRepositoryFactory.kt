@@ -12,6 +12,7 @@ import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.data.requery.kotlin.provider.RequeryPersistenceProvider
 import org.springframework.data.requery.kotlin.repository.query.RequeryQueryLookupStrategy
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * Requery specific generic repository factory.
@@ -47,7 +48,8 @@ open class RequeryRepositoryFactory(val operations: RequeryOperations): Reposito
 
         val entityInformation = getEntityInformation<Any, Any>(information.domainType as Class<Any>)
 
-        val repository = getTargetRepositoryViaReflection(information, entityInformation, operations) as? SimpleRequeryRepository<out Any, out Any>
+        val repository =
+            getTargetRepositoryViaReflection(information, entityInformation, operations) as? SimpleRequeryRepository<out Any, out Any>
 
         log.debug { "find target repository. repository=$repository" }
 
@@ -66,7 +68,7 @@ open class RequeryRepositoryFactory(val operations: RequeryOperations): Reposito
     @Suppress("UNCHECKED_CAST")
     override fun <E: Any, ID: Any> getEntityInformation(domainClass: Class<E>): EntityInformation<E, ID> {
 
-        return RequeryEntityInformationSupport.getEntityInformation(domainClass as Class<Persistable<ID>>, operations)
+        return RequeryEntityInformationSupport.getEntityInformation(domainClass.kotlin as KClass<Persistable<ID>>, operations)
             as RequeryEntityInformationSupport<E, ID>
     }
 

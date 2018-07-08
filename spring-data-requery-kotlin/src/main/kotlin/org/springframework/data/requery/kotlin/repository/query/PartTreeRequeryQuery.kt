@@ -52,12 +52,12 @@ open class PartTreeRequeryQuery(queryMethod: RequeryQueryMethod,
         }
     }
 
-    override fun doCreateQuery(values: Array<Any?>): QueryElement<out Any> {
+    override fun doCreateQuery(values: Array<Any>): QueryElement<out Any> {
         return queryPreparer.createQuery(values).unwrap()
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun doCreateCountQuery(values: Array<Any?>): QueryElement<out Result<Int>> {
+    override fun doCreateCountQuery(values: Array<Any>): QueryElement<out Result<Int>> {
         return countQueryPreparer.createQuery(values).unwrap() as QueryElement<out Result<Int>>
     }
 
@@ -71,7 +71,7 @@ open class PartTreeRequeryQuery(queryMethod: RequeryQueryMethod,
 
     protected fun prepareQuery(accessor: RequeryParameterAccessor): QueryElement<out Any> {
 
-        val query = buildWhereClause(operations.select(domainClass).unwrap(), accessor)
+        val query = buildWhereClause(operations.select(domainKlass).unwrap(), accessor)
 
         return when {
 
@@ -114,7 +114,7 @@ open class PartTreeRequeryQuery(queryMethod: RequeryQueryMethod,
             }
         }
 
-        fun createQuery(values: Array<Any?>): QueryElement<out Any> {
+        fun createQuery(values: Array<Any>): QueryElement<out Any> {
             val accessor = RequeryParametersParameterAccessor(parameters, values)
             val creator = createCreator(accessor)!!
 
@@ -174,7 +174,7 @@ open class PartTreeRequeryQuery(queryMethod: RequeryQueryMethod,
 
         }
 
-        private fun getDynamicSort(values: Array<Any?>): Sort = when {
+        private fun getDynamicSort(values: Array<Any>): Sort = when {
             parameters.potentiallySortsDynamically() -> RequeryParametersParameterAccessor(parameters, values).sort
             else -> Sort.unsorted()
         }

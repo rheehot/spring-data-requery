@@ -3,7 +3,7 @@ package org.springframework.data.requery.kotlin.configs
 import io.requery.cache.EmptyEntityCache
 import io.requery.meta.EntityModel
 import io.requery.sql.ConfigurationBuilder
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
 import io.requery.sql.SchemaModifier
 import io.requery.sql.TableCreationMode
 import mu.KotlinLogging
@@ -55,8 +55,8 @@ abstract class AbstractRequeryConfiguration {
     }
 
     @Bean(destroyMethod = "close")
-    fun entityDataStore(): EntityDataStore<Any> {
-        return EntityDataStore<Any>(requeryConfiguration()).apply {
+    fun entityDataStore(): KotlinEntityDataStore<Any> {
+        return KotlinEntityDataStore<Any>(requeryConfiguration()).apply {
             log.info { "Create Requery EntityDataStore instance." }
         }
     }

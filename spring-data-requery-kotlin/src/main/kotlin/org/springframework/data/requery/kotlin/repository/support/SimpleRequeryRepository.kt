@@ -15,6 +15,7 @@ import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * SimpleRequeryRepository
@@ -33,6 +34,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         private val log = KotlinLogging.logger { }
     }
 
+    final val domainKlass: KClass<E> = entityInformation.kotlinType
     final val domainClass: Class<E> = entityInformation.javaType
     final val domainClassName: String = domainClass.simpleName ?: "Unknown"
 
@@ -42,9 +44,9 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         this.crudMethodMetadata = crudMethodMetadata
     }
 
-    fun select(): QueryElement<out Result<E>> = operations.select(domainClass).unwrap()
+    fun select(): QueryElement<out Result<E>> = operations.select(domainKlass).unwrap()
 
-    override fun findAll(): List<E> = operations.findAll(domainClass)
+    override fun findAll(): List<E> = operations.findAll(domainKlass)
 
     override fun findAll(sort: Sort): List<E> {
         return select()
@@ -54,12 +56,12 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
     }
 
     override fun <S: E> findAll(example: Example<S>): List<S> {
-        return example.buildQueryElement(operations, domainClass as Class<S>).get().toList()
+        return example.buildQueryElement(operations, domainKlass as KClass<S>).get().toList()
     }
 
     override fun <S: E> findAll(example: Example<S>, sort: Sort): List<S> {
         return example
-            .buildQueryElement(operations, domainClass)
+            .buildQueryElement(operations, domainKlass)
             .applySort(domainClass, sort)
             .get()
             .toList()
@@ -71,7 +73,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         return when {
             pageable.isPaged -> {
                 val content = select().applyPageable(domainClass, pageable).getAsResultEntity<E>().toList()
-                val totals = operations.count(domainClass).get().value().toLong()
+                val totals = operations.count(domainKlass).get().value().toLong()
 
                 PageImpl(content, pageable, totals)
             }
@@ -86,7 +88,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
 
         log.trace { "Find all [$domainClass] with paging. pageable=$pageable" }
 
-        val queryElement = example.buildQueryElement(operations, domainClass).unwrap()
+        val queryElement = example.buildQueryElement(operations, domainKlass).unwrap()
 
         return when {
             pageable.isPaged -> {
@@ -156,7 +158,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         val keyExpr = domainClass.getKeyExpression<ID>()
 
         return operations
-            .select(domainClass)
+            .select(domainKlass)
             .where(keyExpr.`in`(ids.toSet()))
             .get()
             .toList()
@@ -168,7 +170,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
 
     override fun insert(entity: E): E = operations.insert(entity)
 
-    override fun <K> insert(entity: E, keyClass: Class<K>): K {
+    override fun <K: Any> insert(entity: E, keyClass: KClass<K>): K {
         return operations.insert(entity, keyClass).also {
             log.trace { "Insert entity, new key=$it" }
         }
@@ -178,7 +180,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         return operations.insertAll(entities)
     }
 
-    override fun <K> insertAll(entities: Iterable<E>, keyClass: Class<K>): List<K> {
+    override fun <K: Any> insertAll(entities: Iterable<E>, keyClass: KClass<K>): List<K> {
         return operations.insertAll(entities, keyClass).also {
             log.trace { "Insert entities, new keys=$it" }
         }
@@ -213,11 +215,11 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
     }
 
     override fun deleteAllInBatch(): Int {
-        return operations.deleteAll(domainClass)
+        return operations.deleteAll(domainKlass)
     }
 
     override fun getOne(id: ID): E? {
-        return operations.findById(domainClass, id)
+        return operations.findById(domainKlass, id)
     }
 
     override fun <S: E> save(entity: S): S {
@@ -230,7 +232,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
         val keyExpr = domainClass.getKeyExpression<ID>()
 
         val deletedCount = operations
-            .delete(domainClass)
+            .delete(domainKlass)
             .where(keyExpr.eq(id))
             .get()
             .value()
@@ -244,27 +246,27 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
 
     override fun deleteAll() {
         log.debug { "Delete all entities ... domainClass=$domainClassName" }
-        operations.deleteAll(domainClass)
+        operations.deleteAll(domainKlass)
     }
 
     override fun count(): Long {
-        return operations.count(domainClass).get().value().toLong()
+        return operations.count(domainKlass).get().value().toLong()
     }
 
     override fun <S: E> count(example: Example<S>): Long {
 
-        return count(example.buildQueryElement(operations, domainClass as Class<S>) as QueryElement<out Result<E>>)
+        return count(example.buildQueryElement(operations, domainKlass as KClass<S>) as QueryElement<out Result<E>>)
     }
 
     override fun count(queryElement: QueryElement<out Result<E>>): Long {
-        return operations.count(domainClass, queryElement).toLong()
+        return operations.count(domainKlass, queryElement).toLong()
     }
 
     override fun existsById(id: ID): Boolean {
         val keyExpr = domainClass.getKeyExpression<ID>()
 
         val tuple = operations
-            .select(Count.count(domainClass))
+            .select(Count.count(domainKlass.java))
             .where(keyExpr.eq(id))
             .get()
             .firstOrNull()
@@ -273,7 +275,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
     }
 
     override fun findById(id: ID): Optional<E> {
-        return Optional.ofNullable(operations.findById(domainClass, id))
+        return Optional.ofNullable(operations.findById(domainKlass, id))
     }
 
     override fun delete(entity: E) {
@@ -282,7 +284,7 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
     }
 
     override fun <S: E> findOne(example: Example<S>): Optional<S> {
-        val entity = example.buildQueryElement(operations, domainClass)
+        val entity = example.buildQueryElement(operations, domainKlass)
             .limit(1)
             .get()
             .firstOrNull()
@@ -300,14 +302,14 @@ class SimpleRequeryRepository<E: Any, ID: Any> @Autowired constructor(
 
     override fun <S: E> exists(example: Example<S>): Boolean {
         return example
-            .buildQueryElement(operations, domainClass)
+            .buildQueryElement(operations, domainKlass)
             .limit(1)
             .get()
             .firstOrNull() != null
     }
 
     override fun exists(queryElement: QueryElement<out Result<E>>): Boolean {
-        return operations.exists(domainClass, queryElement)
+        return operations.exists(domainKlass, queryElement)
     }
 
 }

@@ -17,24 +17,24 @@ class DefaultRequeryEntityMetadataTest {
     @Test
     fun `return configured type`() {
 
-        val metadata = DefaultRequeryEntityMetadata(Foo::class.java)
+        val metadata = DefaultRequeryEntityMetadata(Foo::class)
         assertThat(metadata.javaType).isEqualTo(Foo::class.java)
     }
 
     @Test
     fun `return simple class name as entity name by default`() {
 
-        val metadata = DefaultRequeryEntityMetadata(Foo::class.java)
+        val metadata = DefaultRequeryEntityMetadata(Foo::class)
         assertThat(metadata.entityName).isEqualTo(Foo::class.java.simpleName)
     }
 
     @Test
     fun `return customized entity name if configured`() {
 
-        val metadata = DefaultRequeryEntityMetadata(AbstractUser::class.java)
+        val metadata = DefaultRequeryEntityMetadata(AbstractUser::class)
         assertThat(metadata.entityName).isEqualTo("User")
 
-        val metadata2 = DefaultRequeryEntityMetadata(User::class.java)
+        val metadata2 = DefaultRequeryEntityMetadata(User::class)
         assertThat(metadata2.entityName).isEqualTo("User")
     }
 }

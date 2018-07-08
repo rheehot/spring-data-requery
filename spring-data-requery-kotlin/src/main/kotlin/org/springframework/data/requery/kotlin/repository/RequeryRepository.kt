@@ -7,6 +7,7 @@ import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.QueryByExampleExecutor
 import org.springframework.data.requery.kotlin.core.RequeryOperations
+import kotlin.reflect.KClass
 
 /**
  * [Repository] for Requery
@@ -36,11 +37,11 @@ interface RequeryRepository<E: Any, ID: Any>: PagingAndSortingRepository<E, ID>,
      * Entity 추가 후, 발급된 Key 값을 반환합니다.
      * @param entity
      */
-    fun <K> insert(entity: E, keyClass: Class<K>): K
+    fun <K: Any> insert(entity: E, keyClass: KClass<K>): K
 
     fun insertAll(entities: Iterable<E>): List<E>
 
-    fun <K> insertAll(entities: Iterable<E>, keyClass: Class<K>): List<K>
+    fun <K: Any> insertAll(entities: Iterable<E>, keyClass: KClass<K>): List<K>
 
     fun upsert(entity: E): E
 
