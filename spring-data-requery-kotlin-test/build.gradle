@@ -1,0 +1,86 @@
+
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-spring'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-allopen'
+apply plugin: 'kotlin-noarg'
+
+// NOTE: requery 사용 시에는 allOpen, noArg 를 꼭 지정해줘야 합니다.
+allOpen {
+    annotation("io.requery.Entity")
+}
+noArg {
+    annotation("io.requery.Entity")
+    invokeInitializers = true
+}
+
+sourceSets {
+    generated {
+        "${buildDir}/generated/source/kapt/main/"
+    }
+}
+
+idea {
+    module {
+        sourceDirs += file("${buildDir}/generated/source/kapt/main/")
+        testSourceDirs += file("${buildDir}/generated/source/kapt/test/")
+        generatedSourceDirs += file("${buildDir}/generated/source/kapt/main/")
+    }
+}
+
+dependencies {
+
+    compile project(":spring-data-requery-kotlin")
+
+    optional "io.requery:requery-jackson"
+
+    // For Kotlin classes
+    kapt "io.requery:requery-processor"
+    kaptTest "io.requery:requery-processor"
+
+    implementation "javax.inject:javax.inject:1"
+
+    implementation "org.jetbrains:annotations"
+    implementation "com.google.code.findbugs:jsr305"
+
+    optional "org.cache2k:cache2k-all"
+    optional "org.threeten:threetenbp"
+    optional "joda-time:joda-time"
+
+    optional "org.threeten:threetenbp"
+    testImplementation "ch.qos.logback:logback-classic"
+
+}
+
+compileKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs = ["-Xjsr305=strict", "-Xjvm-default=enable", "-Xenable-jvm-default"]
+        javaParameters = true
+        apiVersion = "1.2"
+        languageVersion = "1.2"
+        suppressWarnings = false
+    }
+}
+compileTestKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs = ["-Xjsr305=strict", "-Xjvm-default=enable", "-Xenable-jvm-default"]
+        javaParameters = true
+        apiVersion = "1.2"
+        languageVersion = "1.2"
+        suppressWarnings = false
+    }
+}
+
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
