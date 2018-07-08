@@ -1,0 +1,60 @@
+buildscript {
+
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        // for Java apt
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
+    }
+}
+
+// lombok을 gradle 에서 사용하기 위한 plugin
+plugins {
+    id 'io.franzbecker.gradle-lombok' version '1.14'
+}
+
+// for Java apt
+apply plugin: "java"
+apply plugin: "net.ltgt.apt"
+
+idea {
+    module {
+        sourceDirs += file("${buildDir}/generated/source/apt/main/")
+        testSourceDirs += file("${buildDir}/generated/source/apt/test/")
+        generatedSourceDirs += file("${buildDir}/generated/source/apt/main/")
+    }
+}
+
+dependencies {
+
+    compile project(":spring-data-requery")
+
+    optional "io.requery:requery-jackson"
+
+    // lombok을 gradle 에서 사용하기 위해 annotation process를 설정해주어야 합니다.
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
+
+    // For Java classes
+    annotationProcessor "io.requery:requery-processor"
+    testAnnotationProcessor "io.requery:requery-processor"
+
+    implementation "javax.inject:javax.inject:1"
+
+    implementation "org.jetbrains:annotations"
+    implementation "com.google.code.findbugs:jsr305"
+    
+    optional "org.cache2k:cache2k-all"
+    optional "org.threeten:threetenbp"
+    optional "joda-time:joda-time"
+
+    optional "org.threeten:threetenbp"
+    testImplementation "ch.qos.logback:logback-classic"
+
+    testCompile "org.springframework.boot:spring-boot-starter-test"
+
+}
