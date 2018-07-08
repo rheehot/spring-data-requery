@@ -10,6 +10,7 @@ import org.springframework.data.requery.domain.ToStringBuilder;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * // NOTE: @Embedded property 가 있는 Entity에 생성자를 만들지 말라. 기본생성자에서 Embedded component를 생성한다.
@@ -38,19 +39,19 @@ public abstract class AbstractUser extends AbstractPersistable<Integer> { // imp
     @Column(nullable = false, unique = true)
     protected String emailAddress;
 
-//    @JunctionTable(name = "User_Colleagues")
-//    @ManyToMany
-//    protected Set<AbstractUser> colleagues;
-//
-//    @JunctionTable
-//    @ManyToMany
-//    protected Set<AbstractRole> roles;
-//
-//    @ManyToOne
-//    protected AbstractUser manager;
-//
-//    @Embedded
-//    protected AbstractAddress address;
+    @JunctionTable(name = "User_Colleagues")
+    @ManyToMany
+    protected Set<AbstractUser> colleagues;
+
+    @JunctionTable
+    @ManyToMany
+    protected Set<AbstractRole> roles;
+
+    @ManyToOne
+    protected AbstractUser manager;
+
+    @Embedded
+    protected AbstractAddress address;
 
     @Convert(ByteArrayToBlobConverter.class)
     protected byte[] binaryData;

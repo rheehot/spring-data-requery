@@ -40,6 +40,7 @@ public abstract class AbstractPhone extends AbstractPersistable<Integer> {
     protected String phoneNumber;
     protected boolean normalized;
 
+    @Column
     @Convert(IntArrayListToStringConverter.class)
     protected ArrayList<Integer> extensions;
 

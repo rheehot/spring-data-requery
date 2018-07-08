@@ -39,7 +39,7 @@ public class IntArrayListToStringConverter implements Converter<ArrayList<Intege
                    ? builder.substring(0, builder.length() - 1)
                    : builder.toString();
         }
-        return null;
+        return "";
     }
 
     @Override

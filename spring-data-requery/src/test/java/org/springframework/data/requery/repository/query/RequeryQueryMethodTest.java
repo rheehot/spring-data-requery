@@ -131,12 +131,6 @@ public class RequeryQueryMethodTest {
         new RequeryQueryMethod(sortableTwice, metadata, factory, extractor);
     }
 
-    @Test
-    public void recognizesModifyingMethod() throws Exception {
-
-        RequeryQueryMethod method = getQueryMethod(UserRepository.class, "renameAllUsersTo", String.class);
-        assertThat(method.isModifyingQuery()).isTrue();
-    }
 
     @Test(expected = IllegalArgumentException.class)
     public void rejectsModifyingMethodWithPageable() throws Exception {
