@@ -1,6 +1,7 @@
 package org.springframework.data.requery.kotlin.repository.support
 
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mapping.context.MappingContext
 import org.springframework.data.repository.Repository
 import org.springframework.data.repository.core.support.RepositoryFactorySupport
@@ -22,7 +23,8 @@ open class RequeryRepositoryFactoryBean<T: Repository<E, ID>, E, ID>(repositoryI
 
     private var operations: RequeryOperations? = null
 
-    fun setOperations(operations: RequeryOperations) {
+    @Autowired(required = false)
+    open fun setOperations(operations: RequeryOperations) {
         this.operations = operations
     }
 

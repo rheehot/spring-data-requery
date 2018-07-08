@@ -1,7 +1,7 @@
 package org.springframework.data.requery.kotlin.configs
 
 import io.requery.meta.EntityModel
-import io.requery.sql.EntityDataStore
+import io.requery.sql.KotlinEntityDataStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner
 class RequeryConfigurationTest: AbstractRequeryTest() {
 
     @Autowired
-    lateinit var dataStore: EntityDataStore<Any>
+    lateinit var dataStore: KotlinEntityDataStore<Any>
 
     @Autowired
     lateinit var requeryTemplate: RequeryOperations

@@ -1,7 +1,6 @@
 package org.springframework.data.requery.kotlin.repository.support
 
 import mu.KotlinLogging
-import org.springframework.data.domain.Persistable
 import org.springframework.data.repository.core.EntityInformation
 import org.springframework.data.repository.core.RepositoryInformation
 import org.springframework.data.repository.core.RepositoryMetadata
@@ -12,7 +11,6 @@ import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.data.requery.kotlin.provider.RequeryPersistenceProvider
 import org.springframework.data.requery.kotlin.repository.query.RequeryQueryLookupStrategy
 import java.util.*
-import kotlin.reflect.KClass
 
 /**
  * Requery specific generic repository factory.
@@ -68,7 +66,7 @@ open class RequeryRepositoryFactory(val operations: RequeryOperations): Reposito
     @Suppress("UNCHECKED_CAST")
     override fun <E: Any, ID: Any> getEntityInformation(domainClass: Class<E>): EntityInformation<E, ID> {
 
-        return RequeryEntityInformationSupport.getEntityInformation(domainClass.kotlin as KClass<Persistable<ID>>, operations)
+        return RequeryEntityInformationSupport.getEntityInformation<E, ID>(domainClass.kotlin, operations)
             as RequeryEntityInformationSupport<E, ID>
     }
 

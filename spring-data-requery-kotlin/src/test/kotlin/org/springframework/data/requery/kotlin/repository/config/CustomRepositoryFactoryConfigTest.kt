@@ -24,7 +24,8 @@ import org.springframework.transaction.PlatformTransactionManager
 class CustomRepositoryFactoryConfigTest {
 
     @Configuration
-    @EnableRequeryRepositories(basePackageClasses = [CustomGenericRepository::class],
+    @EnableRequeryRepositories(basePackages = ["org.springframework.data.requery.kotlin.repository.custom"],
+                               basePackageClasses = [CustomGenericRepository::class],
                                repositoryFactoryBeanClass = CustomGenericRequeryRepositoryFactoryBean::class)
     open class TestConfiguration: RequeryTestConfiguration() {
 
@@ -61,6 +62,8 @@ class CustomRepositoryFactoryConfigTest {
 
     @Test
     fun reconfiguresTransactionalMethodWithGenericParameter() {
+
+        assertThat(userRepository.domainKlass).isNotNull
 
         userRepository.findById(1)
 

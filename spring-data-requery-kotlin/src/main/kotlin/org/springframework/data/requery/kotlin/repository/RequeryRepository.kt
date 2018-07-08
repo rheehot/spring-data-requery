@@ -19,6 +19,8 @@ interface RequeryRepository<E: Any, ID: Any>: PagingAndSortingRepository<E, ID>,
                                               QueryByExampleExecutor<E>,
                                               RequeryConditionExecutor<E> {
     val operations: RequeryOperations
+    val domainKlass: KClass<E>
+    val domainClass: Class<E>
 
     @Override
     override fun findAll(): List<E>

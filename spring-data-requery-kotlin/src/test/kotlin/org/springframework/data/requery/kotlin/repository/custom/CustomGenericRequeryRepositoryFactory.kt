@@ -20,6 +20,8 @@ class CustomGenericRequeryRepositoryFactory(operations: RequeryOperations): Requ
     override fun getTargetRepository(metadata: RepositoryInformation): SimpleRequeryRepository<out Any, *> {
 
         val entityMetadata = mock<RequeryEntityInformation<out Any, out Any>>()
+
+        whenever(entityMetadata.kotlinType).doReturn(metadata.domainType.kotlin)
         whenever(entityMetadata.javaType).doReturn(metadata.domainType)
 
         return CustomGenericRequeryRepository(entityMetadata, operations)

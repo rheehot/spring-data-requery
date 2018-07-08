@@ -10,8 +10,7 @@ import kotlin.reflect.KClass
  *
  * @author debop
  */
-class RequeryPersistableEntityInformation<E: Persistable<ID>, ID: Any>(kotlinType: KClass<E>,
-                                                                       entityModel: EntityModel)
+class RequeryPersistableEntityInformation<E: Any, ID: Any>(kotlinType: KClass<E>, entityModel: EntityModel)
     : RequeryEntityModelEntityInformation<E, ID>(kotlinType, entityModel) {
 
     companion object {
@@ -24,12 +23,20 @@ class RequeryPersistableEntityInformation<E: Persistable<ID>, ID: Any>(kotlinTyp
 
     override fun isNew(entity: E): Boolean {
         log.trace { "Is new entity?. entity=$entity" }
-        return entity.isNew
+
+        return when(entity) {
+            is Persistable<*> -> entity.isNew
+            else -> false
+        }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun getId(entity: E): ID? {
         log.trace { "Get identifier of entity. entity=$entity" }
-        return entity.id
+        return when(entity) {
+            is Persistable<*> -> entity.id as? ID
+            else -> null
+        }
     }
 
 }

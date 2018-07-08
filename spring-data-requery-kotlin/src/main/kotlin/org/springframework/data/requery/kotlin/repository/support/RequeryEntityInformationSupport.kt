@@ -20,8 +20,8 @@ abstract class RequeryEntityInformationSupport<E: Any, ID: Any>(override val kot
         private val log = KotlinLogging.logger { }
 
         @JvmStatic
-        fun <E: Persistable<ID>, ID: Any> getEntityInformation(domainKlass: KClass<E>,
-                                                               operations: RequeryOperations): RequeryEntityInformation<E, ID> {
+        fun <E: Any, ID: Any> getEntityInformation(domainKlass: KClass<E>,
+                                                   operations: RequeryOperations): RequeryEntityInformation<E, ID> {
 
             val entityModel = operations.entityModel
 
