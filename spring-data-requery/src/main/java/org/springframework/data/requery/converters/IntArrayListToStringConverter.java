@@ -14,12 +14,12 @@ public class IntArrayListToStringConverter implements Converter<ArrayList<Intege
 
     @Override
     public Class<ArrayList<Integer>> getMappedType() {
-        return null;
+        return (Class) ArrayList.class;
     }
 
     @Override
     public Class<String> getPersistedType() {
-        return null;
+        return String.class;
     }
 
     @Nullable

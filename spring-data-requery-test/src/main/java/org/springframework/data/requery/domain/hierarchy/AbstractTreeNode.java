@@ -1,0 +1,53 @@
+package org.springframework.data.requery.domain.hierarchy;
+
+import io.requery.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.requery.domain.AbstractPersistable;
+import org.springframework.data.requery.domain.ToStringBuilder;
+
+import java.util.Objects;
+import java.util.Set;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "tree_node")
+public abstract class AbstractTreeNode extends AbstractPersistable<Long> {
+
+    private static final long serialVersionUID = -4267441735293906937L;
+
+    @Key
+    @Generated
+    @Column(name = "nodeId")
+    protected Long id;
+
+    @Column(name = "nodeName", length = 48)
+    protected String name;
+
+    @ManyToOne
+    @ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.CASCADE)
+    protected AbstractTreeNode parent;
+
+    @OneToMany(mappedBy = "parent", cascade = { CascadeAction.DELETE, CascadeAction.SAVE })
+    protected Set<AbstractTreeNode> children;
+
+    @OneToMany(mappedBy = "node")
+    protected Set<AbstractNodeAttribute> attributes;
+
+    @Embedded
+    protected NodePosition nodePosition;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+
+    @Transient
+    @Override
+    protected @NotNull ToStringBuilder buildStringHelper() {
+        return super.buildStringHelper()
+            .add("name", name);
+    }
+}

@@ -5,18 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.requery.core.RequeryOperations;
-import org.springframework.data.requery.domain.model.Person;
-import org.springframework.data.requery.domain.sample.CustomAbstractPersistable;
+import org.springframework.data.requery.listeners.LogbackListener;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author Diego on 2018. 6. 12..
  */
 @Slf4j
-public class MappingTest {
+public class MappingSimpleModelTest {
 
     private DataSource dataSource;
     private Configuration configuration;
@@ -32,7 +33,9 @@ public class MappingTest {
             .ignoreFailedDrops(true)
             .build();
 
-        configuration = new ConfigurationBuilder(dataSource, Models.DEFAULT).build();
+        configuration = new ConfigurationBuilder(dataSource, Models.ADMIN)
+            .addStatementListener(new LogbackListener<>())
+            .build();
 
         dataStore = new EntityDataStore<>(configuration);
 
@@ -44,19 +47,11 @@ public class MappingTest {
 
     @Test
     public void verify_mapping_entities() {
-        Person person = new Person();
-        person.setName("person");
-        dataStore.insert(person);
+        Admin admin = new Admin();
+        admin.setName("person");
+        dataStore.insert(admin);
 
-        assertThat(person.getId()).isNotNull();
-    }
-
-    @Test
-    public void entry_has_only_id() {
-        CustomAbstractPersistable custom = new CustomAbstractPersistable();
-        dataStore.insert(custom);
-
-        assertThat(custom.getId()).isNotNull();
+        assertThat(admin.getId()).isNotNull();
     }
 
 }
