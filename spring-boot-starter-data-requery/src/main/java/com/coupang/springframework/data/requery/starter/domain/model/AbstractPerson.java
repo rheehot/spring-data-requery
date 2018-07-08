@@ -10,7 +10,7 @@ import org.kotlinx.objectx.ToStringBuilder;
 import org.springframework.data.requery.kotlin.domain.AbstractPersistable;
 import org.springframework.data.requery.starter.dto.PersonDto;
 
-import static com.coupang.kotlinx.core.HashxKt.hashOf;
+import static org.kotlinx.core.HashxKt.hashOf;
 
 /**
  * @author Diego on 2018. 7. 1..

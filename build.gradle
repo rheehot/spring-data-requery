@@ -163,17 +163,14 @@ subprojects {
         testRuntime "org.junit.platform:junit-platform-launcher:$junit_platform_version"
         testRuntime "org.junit.platform:junit-platform-console-standalone:$junit_platform_version"
 
-        // To avoid compiler warnings about @API annotations in JUnit code
-        // testCompileOnly "org.apiguardian:apiguardian-api:1.0.0"
+        testCompile "org.springframework.boot:spring-boot-starter-jdbc"
+        testCompile "org.springframework.boot:spring-boot-starter-test"
 
-        testImplementation "org.springframework.boot:spring-boot-starter-jdbc"
-        testImplementation "org.springframework.boot:spring-boot-starter-test"
+        testCompile "com.zaxxer:HikariCP"
+        testCompile "mysql:mysql-connector-java"
 
-        testImplementation "com.zaxxer:HikariCP"
-        testImplementation "mysql:mysql-connector-java"
-
-        testImplementation "com.h2database:h2"
-        testImplementation "org.testcontainers:mysql"
+        testCompile "com.h2database:h2"
+        testCompile "org.testcontainers:mysql"
     }
 
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -197,72 +194,14 @@ subprojects {
         jvmArgs "-XX:ReservedCodeCacheSize=2g"
     }
 
-//dokka {
-//    outputFormat = 'html'
-//    outputDirectory = "$buildDir/dokka"
-//    jdkVersion = 8
-//    //reportNotDocumented = false
-//}
-
-//task dokkaJar(type: Jar, dependsOn: dokka) {
-//    classifier = 'javadoc'
-//    from dokka.outputDirectory
-//}
-
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
         from sourceSets.main.allSource
+
     }
 
     artifacts {
         archives sourcesJar
-//    archives dokkaJar
     }
 
-    configurations {
-        published
-    }
-
-    def pomConfig = {
-        licenses {
-            license {
-                name "The Apache Software License, Version 2.0"
-                url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                distribution "repo"
-            }
-        }
-        developers {
-            developer {
-                id "debop"
-                name "Sunghyouk Bae"
-                email "sunghyouk.bae@gmail.com"
-            }
-        }
-
-        scm {
-            url "https://github.com/debop/koda-time"
-        }
-    }
-
-    publishing {
-        publications {
-            bintrayJava(MavenPublication) {
-                from components.java
-                artifact sourcesJar
-//            artifact dokkaJar
-
-                groupId "${project.group}"
-                artifactId "${project.name}"
-                version "${project.version}"
-
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode('description', "Kotlin extension functions for Java 8 Time and joda-time")
-                    root.appendNode('name', "${project.name}")
-                    root.appendNode("url", "https://github.com/debop/koda-time")
-                    root.children().last() + pomConfig
-                }
-            }
-        }
-    }
 }
