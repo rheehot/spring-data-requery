@@ -1,11 +1,14 @@
 package com.coupang.springframework.data.requery.starter.domain.model;
 
-import org.kotlinx.objectx.ToStringBuilder;
-import org.springframework.data.requery.domain.AbstractPersistable;
-import org.springframework.data.requery.starter.dto.PersonDto;
-import io.requery.*;
+import io.requery.Entity;
+import io.requery.Generated;
+import io.requery.Key;
+import io.requery.Transient;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.kotlinx.objectx.ToStringBuilder;
+import org.springframework.data.requery.kotlin.domain.AbstractPersistable;
+import org.springframework.data.requery.starter.dto.PersonDto;
 
 import static com.coupang.kotlinx.core.HashxKt.hashOf;
 

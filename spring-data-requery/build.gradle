@@ -29,6 +29,7 @@ dependencies {
     optional "org.jetbrains.kotlinx:kotlinx-coroutines-core"
 
     compile "io.requery:requery"
+    compile "io.requery:requery-kotlin"
     optional "io.requery:requery-jackson"
 
     // For Kotlin classes
