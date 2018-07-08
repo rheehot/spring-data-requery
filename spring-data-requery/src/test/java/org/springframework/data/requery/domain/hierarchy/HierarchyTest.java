@@ -82,7 +82,7 @@ public class HierarchyTest extends AbstractDomainTest {
         TreeNode child2 = treeNodeOf("child2", root);
 
         requeryTemplate.insert(root);
-        requeryTemplate.refreshAll(root);
+        requeryTemplate.refreshAllProperties(root);
         assertThat(root.getId()).isNotNull();
         assertThat(child1.getId()).isNotNull();
         assertThat(child2.getId()).isNotNull();
@@ -126,7 +126,7 @@ public class HierarchyTest extends AbstractDomainTest {
         requeryTemplate.delete(loadedChild);
 
         // HINT: child가 삭제된 후에는 parent를 refresh 해야 child가 삭제되었음을 안다 (그 전에 parent 에서 child를 제거해되 된다)
-        requeryTemplate.refreshAll(loadedRoot);
+        requeryTemplate.refreshAllProperties(loadedRoot);
         assertThat(loadedRoot.getChildren()).hasSize(1).containsOnly(child2);
 
         // cascade delete

@@ -65,7 +65,7 @@ public class UpsertTest extends AbstractDomainTest {
         assertThat(loaded.getTags()).hasSize(2).containsOnly(tag1, tag2);
 
         requeryTemplate.delete(loaded);
-        requeryTemplate.refreshAll(loaded);
+        requeryTemplate.refreshAllProperties(loaded);
 
         assertThat(requeryTemplate.count(UpsertEvent.class).get().value()).isEqualTo(0);
         assertThat(requeryTemplate.count(UpsertTag.class).get().value()).isEqualTo(0);

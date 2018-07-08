@@ -77,7 +77,7 @@ public interface RequeryOperations {
         return Iterables.toList(getDataStore().refresh(entities, attributes));
     }
 
-    default <E> E refreshAll(@NotNull E entity) {
+    default <E> E refreshAllProperties(@NotNull E entity) {
         return getDataStore().refreshAll(entity);
     }
 

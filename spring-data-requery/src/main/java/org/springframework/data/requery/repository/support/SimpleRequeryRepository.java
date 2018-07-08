@@ -103,7 +103,7 @@ public class SimpleRequeryRepository<T, ID> implements RequeryRepositoryImplemen
     }
 
     public <S extends T> S refreshAll(S entity) {
-        return operations.refreshAll(entity);
+        return operations.refreshAllProperties(entity);
     }
 
     @Transactional

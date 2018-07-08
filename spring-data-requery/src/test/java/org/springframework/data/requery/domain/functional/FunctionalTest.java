@@ -482,7 +482,7 @@ public class FunctionalTest extends AbstractDomainTest {
         person.getPhoneNumbers().add(phone);
 
         requeryTemplate.update(person);
-        requeryTemplate.refreshAll(person);
+        requeryTemplate.refreshAllProperties(person);
 
         assertThat(person.getPhoneNumberList()).contains(phone);
     }
@@ -499,7 +499,7 @@ public class FunctionalTest extends AbstractDomainTest {
         assertThat(count).isEqualTo(people.size());
 
         // refreshAlL 을 각각의 entity에 대해서 호출해줘야 제대로 반영된다.
-        // refreshAll(people)
+        // refreshAllProperties(people)
         // refresh(people, FuncPerson.NAME)
 
         people.forEach(person -> {
