@@ -5,7 +5,7 @@ import io.requery.sql.TableCreationMode
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.requery.kotlin.configs.AbstractRequeryConfiguration
-import org.springframework.data.requery.kotlin.domain.sample.Models
+import org.springframework.data.requery.kotlin.domain.Models
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import org.springframework.transaction.annotation.EnableTransactionManagement

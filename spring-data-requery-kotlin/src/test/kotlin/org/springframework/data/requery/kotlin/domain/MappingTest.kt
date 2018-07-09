@@ -19,7 +19,7 @@ class MappingTest: AbstractDomainTest() {
             emailAddress = "debop@coupang.com"
         }
 
-        requeryTemplate.insert(user)
+        operations.insert(user)
 
         assertThat(user.id).isNotNull()
     }

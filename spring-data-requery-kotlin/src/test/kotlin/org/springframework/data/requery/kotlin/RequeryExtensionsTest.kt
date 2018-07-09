@@ -17,7 +17,7 @@ class RequeryExtensionsTest: AbstractDomainTest() {
         val entityContext = dataStore.getEntityContext()
         assertThat(entityContext).isNotNull
 
-        assertThat(requeryTemplate.entityContext).isEqualTo(entityContext)
+        assertThat(operations.entityContext).isEqualTo(entityContext)
     }
 
     @Test
@@ -26,7 +26,7 @@ class RequeryExtensionsTest: AbstractDomainTest() {
         assertThat(entityModel).isNotNull
         assertThat(entityModel.name).isEqualTo("default")
 
-        assertThat(requeryTemplate.entityModel).isEqualTo(entityModel)
+        assertThat(operations.entityModel).isEqualTo(entityModel)
     }
 
     @Test

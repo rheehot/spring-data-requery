@@ -22,7 +22,7 @@ class ExampleExtensionsTest: AbstractDomainTest() {
 
         val example = Example.of(user, matching().withIgnoreNullValues())
 
-        val queryElement = example.buildQueryElement(requeryTemplate, User::class)
+        val queryElement = example.buildQueryElement(operations, User::class)
 
         assertThat(queryElement).isNotNull
         assertThat(queryElement.whereElements).hasSize(1)

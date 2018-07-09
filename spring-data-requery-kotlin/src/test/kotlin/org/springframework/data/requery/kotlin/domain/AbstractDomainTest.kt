@@ -22,15 +22,15 @@ import java.util.*
 abstract class AbstractDomainTest: AbstractRequeryTest() {
 
     companion object {
-        private val rnd = Random(System.currentTimeMillis())
+        val rnd = Random(System.currentTimeMillis())
     }
 
     @Autowired lateinit var dataStore: KotlinEntityDataStore<Any>
-    @Autowired lateinit var requeryTemplate: RequeryOperations
+    @Autowired lateinit var operations: RequeryOperations
 
     @Test
     fun `context loading`() {
         assertThat(dataStore).isNotNull
-        assertThat(requeryTemplate).isNotNull
+        assertThat(this.operations).isNotNull
     }
 }

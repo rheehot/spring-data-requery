@@ -16,11 +16,11 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
 
     @Before
     fun setup() {
-        requeryTemplate.deleteAll(User::class)
+        operations.deleteAll(User::class)
     }
 
     private fun userQueryByExample(example: Example<User>): QueryElement<out Result<User>> {
-        val base = requeryTemplate.select(User::class).unwrap()
+        val base = operations.select(User::class).unwrap()
         return QueryByExampleBuilder.getWhereAndOr(base, example)
     }
 
@@ -28,7 +28,7 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
     fun `firstname equals example`() {
 
         val user = User().apply { firstname = "example"; emailAddress = "debop@example.com" }
-        requeryTemplate.insert(user)
+        operations.insert(user)
 
         val exampleUser = User().apply { firstname = user.firstname }
         val example = Example.of(exampleUser)
@@ -43,7 +43,7 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
     fun `firstname and email equals example`() {
 
         val user = User().apply { firstname = "example"; emailAddress = "debop@example.com" }
-        requeryTemplate.insert(user)
+        operations.insert(user)
 
         val exampleUser = User().apply { firstname = user.firstname; emailAddress = user.emailAddress }
         val example = Example.of(exampleUser)
@@ -58,7 +58,7 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
     fun `firstname startsWith example`() {
 
         val user = User().apply { firstname = "example"; emailAddress = "debop@example.com" }
-        requeryTemplate.insert(user)
+        operations.insert(user)
 
         val exampleUser = User().apply { firstname = "EXA" }
 
