@@ -77,4 +77,58 @@ class HierarchyTest: AbstractDomainTest() {
         assertThat(operations.count(NodeAttribute::class).get().value()).isEqualTo(0)
         assertThat(operations.count(TreeNode::class).get().value()).isEqualTo(0)
     }
+
+    @Test
+    fun `insert hierarchy nodes`() {
+
+        val root = treeNodeOf("root")
+        val child1 = treeNodeOf("child1", root)
+        val child2 = treeNodeOf("child2", root)
+
+        operations.insert(root)
+
+        val loadedRoot = operations.findById(TreeNode::class, root.id)!!
+        assertThat(loadedRoot).isEqualTo(root)
+        assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
+
+        operations.delete(loadedRoot)
+
+        assertThat(operations.count(NodeAttribute::class).get().value()).isEqualTo(0)
+        assertThat(operations.count(TreeNode::class).get().value()).isEqualTo(0)
+    }
+
+    @Test
+    fun `insert 3 generation hierarchy nodes`() {
+
+        val root = treeNodeOf("root")
+        val child1 = treeNodeOf("child1", root)
+        val child2 = treeNodeOf("child2", root)
+
+        val grandchild11 = treeNodeOf("grandChild11", child1)
+        val grandchild12 = treeNodeOf("grandChild12", child1)
+
+        val grandChild21 = treeNodeOf("grandChild21", child2)
+
+        operations.insert(root)
+
+        val loadedRoot = operations.findById(TreeNode::class, root.id)!!
+        assertThat(loadedRoot).isEqualTo(root)
+        assertThat(loadedRoot.children).hasSize(2).containsOnly(child1, child2)
+
+        val childLoaded = operations.findById(TreeNode::class, child1.id)!!
+        assertThat(childLoaded).isEqualTo(child1)
+        assertThat(childLoaded.children).hasSize(2).containsOnly(grandchild11, grandchild12)
+
+        // child1 삭제
+        operations.delete(childLoaded)
+        assertThat(operations.count(TreeNode::class).get().value()).isEqualTo(3)
+
+        operations.refresh(loadedRoot)
+        assertThat(loadedRoot.children).hasSize(1).contains(child2)
+
+        operations.delete(loadedRoot)
+
+        assertThat(operations.count(NodeAttribute::class).get().value()).isEqualTo(0)
+        assertThat(operations.count(TreeNode::class).get().value()).isEqualTo(0)
+    }
 }
