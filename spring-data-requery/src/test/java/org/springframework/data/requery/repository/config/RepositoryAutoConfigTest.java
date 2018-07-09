@@ -13,7 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 public class RepositoryAutoConfigTest extends AbstractRepositoryConfigTest {
 
     @Configuration
-    @EnableRequeryRepositories(basePackages = { "com.coupang.springframework.data.requery.**.repository.sample.basic" })
+    @EnableRequeryRepositories(basePackages = { "org.springframework.data.requery.**.repository.sample.basic" })
     static class TestConfiguration extends InfrastructureConfig {
 
     }
