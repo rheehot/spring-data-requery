@@ -6,4 +6,5 @@ include 'spring-data-requery-test'
 include 'spring-data-requery-kotlin-test'
 
 // include 'spring-boot-starter-data-requery'
+include 'spring-data-jpa-benchmark'
 

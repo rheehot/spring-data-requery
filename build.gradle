@@ -21,7 +21,7 @@ plugins {
     id "com.jfrog.bintray" version "1.7.3"
 }
 
-group = 'com.coupang'
+group = 'org.springframework.data'
 version = '2.0.0-SNAPSHOT'
 
 allprojects {

@@ -14,6 +14,7 @@ buildscript {
 // lombok을 gradle 에서 사용하기 위한 plugin
 plugins {
     id 'io.franzbecker.gradle-lombok' version '1.14'
+    id "me.champeau.gradle.jmh" version "0.4.5"
 }
 
 // for Java apt
@@ -57,4 +58,20 @@ dependencies {
 
     testCompile "org.springframework.boot:spring-boot-starter-test"
 
+    jmh "io.requery:requery"
+    jmh "io.requery:requery-processor"
+    jmh "org.projectlombok:lombok"
+}
+
+jmh {
+    jmhVersion = '1.20' // Specifies JMH version
+    benchmarkMode = ['avgt']
+    // Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]
+    fork = 1
+    iterations = 10
+    profilers = ['gc']
+    warmup = '1s'
+    warmupBatchSize = 1
+    warmupIterations = 3
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
 }
