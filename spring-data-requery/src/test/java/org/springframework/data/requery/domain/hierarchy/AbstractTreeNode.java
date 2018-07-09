@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * com.coupang.springframework.data.requery.domain.hierarchy.AbstractTreeNode
+ * org.springframework.data.requery.domain.hierarchy.AbstractTreeNode
  *
  * @author debop
  * @since 18. 6. 4

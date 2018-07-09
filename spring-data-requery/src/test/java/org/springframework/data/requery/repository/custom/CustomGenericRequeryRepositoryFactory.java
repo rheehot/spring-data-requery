@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * com.coupang.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactory
+ * org.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactory
  *
  * @author debop
  * @since 18. 6. 9

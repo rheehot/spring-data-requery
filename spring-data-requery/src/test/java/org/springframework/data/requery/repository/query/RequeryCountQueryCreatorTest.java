@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.RequeryCountQueryCreatorTest
+ * org.springframework.data.requery.repository.query.RequeryCountQueryCreatorTest
  *
  * @author debop
  * @since 18. 6. 26

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * com.coupang.springframework.data.requery.domain.model.AbstractBasicGroup
+ * org.springframework.data.requery.domain.model.AbstractBasicGroup
  *
  * @author debop
  * @since 18. 6. 4

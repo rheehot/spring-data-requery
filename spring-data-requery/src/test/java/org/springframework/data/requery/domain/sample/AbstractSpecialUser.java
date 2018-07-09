@@ -4,7 +4,7 @@ import io.requery.Entity;
 import io.requery.Table;
 
 /**
- * com.coupang.springframework.data.requery.domain.sample.AbstractSpecialUser
+ * org.springframework.data.requery.domain.sample.AbstractSpecialUser
  *
  * @author debop
  * @since 18. 6. 14

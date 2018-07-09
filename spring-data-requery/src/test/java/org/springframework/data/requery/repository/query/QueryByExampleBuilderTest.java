@@ -16,7 +16,7 @@ import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatc
 import static org.springframework.data.domain.ExampleMatcher.matching;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.QueryByExampleBuilderTest
+ * org.springframework.data.requery.repository.query.QueryByExampleBuilderTest
  *
  * @author debop
  * @since 18. 6. 19

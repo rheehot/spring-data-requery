@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.RequeryQueryMethodTest
+ * org.springframework.data.requery.repository.query.RequeryQueryMethodTest
  *
  * @author debop
  * @since 18. 6. 14

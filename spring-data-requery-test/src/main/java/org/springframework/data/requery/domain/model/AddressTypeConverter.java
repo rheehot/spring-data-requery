@@ -3,7 +3,7 @@ package org.springframework.data.requery.domain.model;
 import io.requery.converter.EnumStringConverter;
 
 /**
- * com.coupang.springframework.data.requery.domain.model.AddressTypeConverter
+ * org.springframework.data.requery.domain.model.AddressTypeConverter
  *
  * @author debop
  * @since 18. 6. 4

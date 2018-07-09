@@ -10,7 +10,7 @@ import org.springframework.data.requery.domain.ToStringBuilder;
 import java.util.Objects;
 
 /**
- * com.coupang.springframework.data.requery.domain.sample.AbstractRole
+ * AbstractRole
  *
  * @author debop
  * @since 18. 6. 14

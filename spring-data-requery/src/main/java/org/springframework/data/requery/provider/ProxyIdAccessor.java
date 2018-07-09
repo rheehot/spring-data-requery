@@ -3,7 +3,7 @@ package org.springframework.data.requery.provider;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * com.coupang.springframework.data.requery.provider.ProxyIdAccessor
+ * org.springframework.data.requery.provider.ProxyIdAccessor
  *
  * @author debop
  * @since 18. 6. 7

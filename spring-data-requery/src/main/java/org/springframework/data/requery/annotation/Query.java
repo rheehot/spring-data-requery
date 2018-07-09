@@ -5,7 +5,7 @@ import org.springframework.data.annotation.QueryAnnotation;
 import java.lang.annotation.*;
 
 /**
- * com.coupang.springframework.data.requery.annotation.Query
+ * org.springframework.data.requery.annotation.Query
  *
  * @author debop
  * @since 18. 6. 6

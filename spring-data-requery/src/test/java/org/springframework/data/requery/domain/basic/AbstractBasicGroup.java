@@ -7,7 +7,7 @@ import org.springframework.data.requery.converters.ByteArrayToBlobConverter;
 import org.springframework.data.requery.domain.AbstractPersistable;
 
 /**
- * com.coupang.springframework.data.requery.domain.basic.AbstractBasicGroup
+ * org.springframework.data.requery.domain.basic.AbstractBasicGroup
  *
  * @author debop
  * @since 18. 6. 4

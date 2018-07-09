@@ -44,6 +44,8 @@ dependencies {
     kapt "io.requery:requery-processor"
     kaptTest "io.requery:requery-processor"
 
+    compile "io.github.microutils:kotlin-logging"
+
     implementation "org.jetbrains:annotations"
     implementation "com.google.code.findbugs:jsr305"
 

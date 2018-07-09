@@ -17,7 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * com.coupang.springframework.data.requery.repository.config.QueryLookupStrategyTest
+ * org.springframework.data.requery.repository.config.QueryLookupStrategyTest
  *
  * @author debop
  * @since 18. 6. 24

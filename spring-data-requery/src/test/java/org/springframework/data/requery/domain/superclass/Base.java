@@ -8,7 +8,7 @@ import io.requery.Superclass;
 import java.util.List;
 
 /**
- * com.coupang.springframework.data.requery.domain.superclass.Base
+ * org.springframework.data.requery.domain.superclass.Base
  *
  * @author debop
  * @since 18. 6. 4

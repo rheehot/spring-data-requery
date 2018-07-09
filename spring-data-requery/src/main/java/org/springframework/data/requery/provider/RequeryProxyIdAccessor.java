@@ -8,7 +8,7 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.requery.utils.RequeryUtils;
 
 /**
- * com.coupang.springframework.data.requery.provider.RequeryProxyIdAccessor
+ * org.springframework.data.requery.provider.RequeryProxyIdAccessor
  *
  * @author debop
  * @since 18. 6. 7

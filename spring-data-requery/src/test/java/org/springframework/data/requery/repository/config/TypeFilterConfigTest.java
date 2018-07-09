@@ -21,7 +21,7 @@ public class TypeFilterConfigTest extends AbstractRepositoryConfigTest {
 
     @Configuration
     @EnableRequeryRepositories(
-        basePackages = { "com.coupang.springframework.data.requery.**.repository.sample.basic" },
+        basePackages = { "org.springframework.data.requery.**.repository.sample.basic" },
         excludeFilters = { @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { BasicLocationRepository.class }) })
     static class TestConfiguration extends InfrastructureConfig {
 

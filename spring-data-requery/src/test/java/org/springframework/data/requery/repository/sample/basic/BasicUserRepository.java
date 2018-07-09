@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * com.coupang.springframework.data.requery.repository.sample.basic.BasicUserRepository
+ * org.springframework.data.requery.repository.sample.basic.BasicUserRepository
  *
  * @author debop
  * @since 18. 6. 9

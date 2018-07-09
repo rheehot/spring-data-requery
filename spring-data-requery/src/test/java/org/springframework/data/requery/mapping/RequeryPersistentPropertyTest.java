@@ -19,7 +19,7 @@ import javax.persistence.AccessType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * com.coupang.springframework.data.requery.mapping.RequeryPersistentPropertyTest
+ * org.springframework.data.requery.mapping.RequeryPersistentPropertyTest
  *
  * @author debop
  * @since 18. 6. 8

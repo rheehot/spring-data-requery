@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * com.coupang.springframework.data.requery.domain.model2.AbstractBasicUser
+ * org.springframework.data.requery.domain.model2.AbstractBasicUser
  *
  * @author debop
  * @since 18. 6. 4

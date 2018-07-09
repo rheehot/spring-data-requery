@@ -9,7 +9,7 @@ import org.springframework.util.Assert;
 import java.util.Collection;
 
 /**
- * com.coupang.springframework.data.requery.provider.RequeryPersistenceProvider
+ * org.springframework.data.requery.provider.RequeryPersistenceProvider
  *
  * @author debop
  * @since 18. 6. 9

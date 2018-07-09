@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * com.coupang.springframework.data.requery.domain.model.AbstractPerson
+ * org.springframework.data.requery.domain.model.AbstractPerson
  *
  * @author debop
  * @since 18. 6. 4

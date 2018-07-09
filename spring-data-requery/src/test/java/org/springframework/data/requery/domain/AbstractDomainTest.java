@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * com.coupang.springframework.data.requery.domain.AbstractDomainTest
+ * org.springframework.data.requery.domain.AbstractDomainTest
  *
  * @author debop
  * @since 18. 6. 4

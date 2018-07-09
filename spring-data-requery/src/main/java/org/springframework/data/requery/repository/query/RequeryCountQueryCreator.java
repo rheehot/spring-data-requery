@@ -13,7 +13,7 @@ import org.springframework.data.requery.core.RequeryOperations;
 import static org.springframework.data.requery.utils.RequeryUtils.unwrap;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.RequeryCountQueryCreator
+ * org.springframework.data.requery.repository.query.RequeryCountQueryCreator
  *
  * @author debop
  * @since 18. 6. 21

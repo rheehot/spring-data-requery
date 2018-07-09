@@ -10,7 +10,7 @@ import org.springframework.data.requery.domain.AbstractPersistable;
 import java.time.LocalDateTime;
 
 /**
- * com.coupang.springframework.data.requery.domain.stateless.AbstractEntry
+ * org.springframework.data.requery.domain.stateless.AbstractEntry
  *
  * @author debop
  * @since 18. 6. 4

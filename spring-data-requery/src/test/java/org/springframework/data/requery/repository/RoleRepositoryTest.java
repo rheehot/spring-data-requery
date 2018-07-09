@@ -61,6 +61,9 @@ public class RoleRepositoryTest {
 
     @Test
     public void shouldUseImplicitCountQuery() {
+
+        repository.deleteAll();
+
         Role reference = new Role("ADMIN");
         repository.save(reference);
 

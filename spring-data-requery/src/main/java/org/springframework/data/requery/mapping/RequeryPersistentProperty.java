@@ -3,7 +3,7 @@ package org.springframework.data.requery.mapping;
 import org.springframework.data.mapping.PersistentProperty;
 
 /**
- * com.coupang.springframework.data.requery.mapping.RequeryPersistentProperty
+ * org.springframework.data.requery.mapping.RequeryPersistentProperty
  *
  * @author debop
  * @since 18. 6. 7

@@ -12,7 +12,7 @@ import javax.inject.Inject;
 import java.util.List;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.AbstractRequeryQueryTest
+ * org.springframework.data.requery.repository.query.AbstractRequeryQueryTest
  *
  * @author debop
  * @since 18. 6. 14

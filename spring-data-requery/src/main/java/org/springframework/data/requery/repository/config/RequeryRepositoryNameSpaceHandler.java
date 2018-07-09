@@ -5,7 +5,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.data.repository.config.RepositoryBeanDefinitionParser;
 
 /**
- * com.coupang.springframework.data.requery.repository.config.RequeryRepositoryNameSpaceHandler
+ * org.springframework.data.requery.repository.config.RequeryRepositoryNameSpaceHandler
  *
  * @author debop
  * @since 18. 6. 6

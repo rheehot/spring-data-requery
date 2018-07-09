@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * com.coupang.springframework.data.requery.domain.model.AbstractBasicLocation
+ * org.springframework.data.requery.domain.model.AbstractBasicLocation
  *
  * @author debop
  * @since 18. 6. 4

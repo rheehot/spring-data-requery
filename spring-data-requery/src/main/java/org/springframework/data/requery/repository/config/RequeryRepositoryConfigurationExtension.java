@@ -20,7 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
- * com.coupang.springframework.data.requery.repository.config.RequeryRepositoryConfigurationExtension
+ * org.springframework.data.requery.repository.config.RequeryRepositoryConfigurationExtension
  *
  * @author debop
  * @since 18. 6. 6

@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * com.coupang.springframework.data.requery.domain.model2.AbstractModel2Event
+ * org.springframework.data.requery.domain.model2.AbstractModel2Event
  *
  * @author debop
  * @since 18. 6. 4

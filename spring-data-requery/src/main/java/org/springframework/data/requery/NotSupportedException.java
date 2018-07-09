@@ -1,7 +1,7 @@
 package org.springframework.data.requery;
 
 /**
- * com.coupang.springframework.data.requery.NotSupportedException
+ * org.springframework.data.requery.NotSupportedException
  *
  * @author debop
  * @since 18. 6. 22

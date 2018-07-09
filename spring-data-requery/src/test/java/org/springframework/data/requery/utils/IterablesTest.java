@@ -10,7 +10,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * com.coupang.springframework.data.requery.utils.IterablesTest
+ * org.springframework.data.requery.utils.IterablesTest
  *
  * @author debop
  * @since 18. 6. 20

@@ -8,7 +8,7 @@ import org.springframework.data.requery.repository.support.RequeryRepositoryFact
 import java.io.Serializable;
 
 /**
- * com.coupang.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactoryBean
+ * org.springframework.data.requery.repository.custom.CustomGenericRequeryRepositoryFactoryBean
  *
  * @author debop
  * @since 18. 6. 9

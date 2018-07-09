@@ -8,7 +8,7 @@ import lombok.Getter;
 import org.springframework.data.requery.domain.AbstractPersistable;
 
 /**
- * com.coupang.springframework.data.requery.domain.basic.AbstractKeywords
+ * org.springframework.data.requery.domain.basic.AbstractKeywords
  *
  * @author debop
  * @since 18. 6. 4

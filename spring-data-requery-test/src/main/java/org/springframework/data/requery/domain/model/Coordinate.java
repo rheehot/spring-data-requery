@@ -5,7 +5,7 @@ import io.requery.Lazy;
 import io.requery.Superclass;
 
 /**
- * com.coupang.springframework.data.requery.domain.model.Coordinate
+ * org.springframework.data.requery.domain.model.Coordinate
  *
  * @author debop
  * @since 18. 6. 4

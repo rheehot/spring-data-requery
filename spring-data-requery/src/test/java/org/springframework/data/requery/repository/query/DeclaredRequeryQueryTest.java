@@ -23,7 +23,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.DeclaredRequeryQueryTest
+ * org.springframework.data.requery.repository.query.DeclaredRequeryQueryTest
  *
  * @author debop
  * @since 18. 6. 16

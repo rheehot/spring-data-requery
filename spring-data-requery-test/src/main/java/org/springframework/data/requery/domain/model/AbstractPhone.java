@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * com.coupang.springframework.data.requery.domain.model.AbstractPhone
+ * org.springframework.data.requery.domain.model.AbstractPhone
  *
  * @author debop
  * @since 18. 6. 4

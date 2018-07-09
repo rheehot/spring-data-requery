@@ -7,7 +7,7 @@ import org.springframework.data.requery.domain.basic.AbstractBasicUser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * com.coupang.springframework.data.requery.repository.query.DefaultRequeryEntityMetadataTest
+ * org.springframework.data.requery.repository.query.DefaultRequeryEntityMetadataTest
  *
  * @author debop
  * @since 18. 6. 8

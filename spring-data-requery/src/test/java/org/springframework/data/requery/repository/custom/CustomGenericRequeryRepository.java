@@ -6,7 +6,7 @@ import org.springframework.data.requery.repository.support.RequeryEntityInformat
 import org.springframework.data.requery.repository.support.SimpleRequeryRepository;
 
 /**
- * com.coupang.springframework.data.requery.repository.custom.CustomGenericRequeryRepository
+ * org.springframework.data.requery.repository.custom.CustomGenericRequeryRepository
  *
  * @author debop
  * @since 18. 6. 9

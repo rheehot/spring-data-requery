@@ -7,7 +7,7 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * com.coupang.springframework.data.requery.mapping.RequeryMappingContextTest
+ * org.springframework.data.requery.mapping.RequeryMappingContextTest
  *
  * @author debop
  * @since 18. 6. 8

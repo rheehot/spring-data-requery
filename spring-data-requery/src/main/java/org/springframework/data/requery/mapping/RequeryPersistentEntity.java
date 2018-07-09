@@ -6,7 +6,7 @@ import org.springframework.data.mapping.PersistentEntity;
 import java.util.Collection;
 
 /**
- * com.coupang.springframework.data.requery.mapping.RequeryPersistentEntity
+ * org.springframework.data.requery.mapping.RequeryPersistentEntity
  *
  * @author debop
  * @since 18. 6. 7

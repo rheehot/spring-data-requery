@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * com.coupang.springframework.data.requery.utils.Iterables
+ * org.springframework.data.requery.utils.Iterables
  *
  * @author debop
  * @since 18. 6. 20

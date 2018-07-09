@@ -16,7 +16,7 @@ public class RepositoryConfigTest extends AbstractRepositoryConfigTest {
 
 
     @Configuration
-    @EnableRequeryRepositories(basePackages = { "com.coupang.**.repository.sample.basic" })
+    @EnableRequeryRepositories(basePackages = { "org.springframework.data.requery.repository.sample.basic" })
     static class TestConfiguration extends InfrastructureConfig {
 
         @Bean
