@@ -7,6 +7,7 @@ import org.springframework.data.jpa.benchmark.model.FullLog;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.persistence.EntityManager;
@@ -41,16 +42,18 @@ public class JpaUtilsTest {
     }
 
     private EntityManager em;
+    private TransactionStatus ts;
 
     @Before
     public void setup() {
-        tm.getTransaction(transactionDefinition);
+        ts = tm.getTransaction(transactionDefinition);
         em = emf.createEntityManager();
         em.joinTransaction();
     }
 
     @After
     public void tearDown() {
+        tm.commit(ts);
         if (em != null) {
             em.close();
         }
