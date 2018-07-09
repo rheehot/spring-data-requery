@@ -11,7 +11,7 @@ interface BasicGroup: Persistable, Serializable {
 
     @get:Key
     @get:Generated
-    var id: Int
+    val id: Int
 
     @get:Column(unique = true)
     var name: String

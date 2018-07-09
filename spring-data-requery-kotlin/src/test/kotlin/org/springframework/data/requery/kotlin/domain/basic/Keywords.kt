@@ -14,7 +14,7 @@ interface Keywords: Persistable, Serializable {
 
     @get:Key
     @get:Generated
-    var id: Int
+    val id: Int
 
     var isNotJvmKeywords: String
 

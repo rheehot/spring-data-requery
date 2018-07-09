@@ -6,13 +6,16 @@ import java.net.URL
 import java.time.LocalDate
 import java.util.*
 
+/**
+ * NOTE: kotlin 언어로 requery를 사용하려면 entity는 interface로 정의해야 합니다.
+ */
 @Entity
 @Table(name = "basic_user")
 interface BasicUser: Persistable, Serializable {
 
     @get:Key
     @get:Generated
-    var id: Int
+    val id: Int
 
     var name: String
     var email: String

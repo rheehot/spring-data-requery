@@ -10,7 +10,7 @@ interface BasicLocation: io.requery.Persistable, Serializable {
 
     @get:Key
     @get:Generated
-    var id: Long
+    val id: Long
 
     var line1: String
     var line2: String
