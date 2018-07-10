@@ -24,7 +24,7 @@ BulkInsertBenchmark.ins10_000:·gc.churn.PS_Survivor_Space           avgt   10  
 BulkInsertBenchmark.ins10_000:·gc.churn.PS_Survivor_Space.norm      avgt   10   1711198.994 ±  4073607.020    B/op
 BulkInsertBenchmark.ins10_000:·gc.count                             avgt   10        33.000                 counts
 BulkInsertBenchmark.ins10_000:·gc.time                              avgt   10      8357.000                     ms
-BulkInsertBenchmark.ins1_000                                        avgt   10       165.903 ±       32.374   ms/op
+BulkInsertBenchmark.ins1_000                                        avgt   10       151.903 ±       32.374   ms/op
 BulkInsertBenchmark.ins1_000:·gc.alloc.rate                         avgt   10       268.210 ±       93.248  MB/sec
 BulkInsertBenchmark.ins1_000:·gc.alloc.rate.norm                    avgt   10   5521697.363 ±   232271.433    B/op
 BulkInsertBenchmark.ins1_000:·gc.churn.Compressed_Class_Space       avgt   10         0.002 ±        0.010  MB/sec
@@ -37,7 +37,7 @@ BulkInsertBenchmark.ins1_000:·gc.churn.PS_Survivor_Space            avgt   10  
 BulkInsertBenchmark.ins1_000:·gc.churn.PS_Survivor_Space.norm       avgt   10     84884.790 ±   394692.141    B/op
 BulkInsertBenchmark.ins1_000:·gc.count                              avgt   10         6.000                 counts
 BulkInsertBenchmark.ins1_000:·gc.time                               avgt   10      1000.000                     ms
-BulkInsertBenchmark.ins5_000                                        avgt   10       761.402 ±      161.913   ms/op
+BulkInsertBenchmark.ins5_000                                        avgt   10       377.402 ±      161.913   ms/op
 BulkInsertBenchmark.ins5_000:·gc.alloc.rate                         avgt   10       363.065 ±       55.305  MB/sec
 BulkInsertBenchmark.ins5_000:·gc.alloc.rate.norm                    avgt   10  29699623.726 ±   600784.517    B/op
 BulkInsertBenchmark.ins5_000:·gc.churn.Compressed_Class_Space       avgt   10         0.001 ±        0.007  MB/sec
@@ -65,6 +65,8 @@ BulkInsertBenchmark.insTen:·gc.time                                 avgt   10  
 @Threads(Threads.MAX)
 @State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Warmup(iterations = 10)
+@Measurement(iterations = 10)
 @Fork(1)
 public class BulkInsertBenchmark {
 
@@ -93,7 +95,7 @@ public class BulkInsertBenchmark {
 
     @Setup
     public void setup() {
-        dataStore = RequerySetupUtils.getDataStore();
+        dataStore = RequerySetupUtils.dataStore;
     }
 
 

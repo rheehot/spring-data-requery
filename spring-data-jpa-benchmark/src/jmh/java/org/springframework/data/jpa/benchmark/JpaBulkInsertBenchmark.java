@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 
 /*
 Benchmark                                                            Mode  Cnt         Score          Error   Units
-JpaBulkInsertBenchmark.ins1_000                                      avgt   10       268.743 ±      313.365   ms/op
+JpaBulkInsertBenchmark.ins1_000                                      avgt   10      2013.185 ±      313.365   ms/op
 JpaBulkInsertBenchmark.ins1_000:·gc.alloc.rate                       avgt   10       443.366 ±      178.477  MB/sec
 JpaBulkInsertBenchmark.ins1_000:·gc.alloc.rate.norm                  avgt   10  14405982.383 ± 16311185.602    B/op
 JpaBulkInsertBenchmark.ins1_000:·gc.churn.PS_Eden_Space              avgt   10       426.484 ±      223.767  MB/sec
@@ -28,7 +28,7 @@ JpaBulkInsertBenchmark.ins1_000:·gc.churn.PS_Survivor_Space          avgt   10 
 JpaBulkInsertBenchmark.ins1_000:·gc.churn.PS_Survivor_Space.norm     avgt   10    356634.530 ±  1097785.436    B/op
 JpaBulkInsertBenchmark.ins1_000:·gc.count                            avgt   10        16.000                 counts
 JpaBulkInsertBenchmark.ins1_000:·gc.time                             avgt   10      3497.000                     ms
-JpaBulkInsertBenchmark.ins5_000                                      avgt   10      1406.002 ±     1597.808   ms/op
+JpaBulkInsertBenchmark.ins5_000                                      avgt   10     45977.002 ±     1597.808   ms/op
 JpaBulkInsertBenchmark.ins5_000:·gc.alloc.rate                       avgt   10       377.794 ±      176.990  MB/sec
 JpaBulkInsertBenchmark.ins5_000:·gc.alloc.rate.norm                  avgt   10  55202521.812 ± 67518291.770    B/op
 JpaBulkInsertBenchmark.ins5_000:·gc.churn.PS_Eden_Space              avgt   10       392.609 ±      232.984  MB/sec
@@ -37,7 +37,7 @@ JpaBulkInsertBenchmark.ins5_000:·gc.churn.PS_Survivor_Space          avgt   10 
 JpaBulkInsertBenchmark.ins5_000:·gc.churn.PS_Survivor_Space.norm     avgt   10   3073810.792 ±  5279224.907    B/op
 JpaBulkInsertBenchmark.ins5_000:·gc.count                            avgt   10        37.000                 counts
 JpaBulkInsertBenchmark.ins5_000:·gc.time                             avgt   10     12583.000                     ms
-JpaBulkInsertBenchmark.insTen                                        avgt   10        15.392 ±        5.673   ms/op
+JpaBulkInsertBenchmark.insTen                                        avgt   10        22.866 ±        5.673   ms/op
 JpaBulkInsertBenchmark.insTen:·gc.alloc.rate                         avgt   10       494.445 ±       85.738  MB/sec
 JpaBulkInsertBenchmark.insTen:·gc.alloc.rate.norm                    avgt   10   1084455.585 ±   555689.086    B/op
 JpaBulkInsertBenchmark.insTen:·gc.churn.Compressed_Class_Space       avgt   10         0.002 ±        0.011  MB/sec
@@ -55,6 +55,8 @@ JpaBulkInsertBenchmark.insTen:·gc.time                               avgt   10 
 @Threads(Threads.MAX)
 @State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Warmup(iterations = 10)
+@Measurement(iterations = 10)
 @Fork(1)
 public class JpaBulkInsertBenchmark {
 
@@ -131,9 +133,12 @@ public class JpaBulkInsertBenchmark {
 
     private void insertLogs(int count) {
         List<FullLog> fullLogs = randomFullLogs(count);
-        for (FullLog fullLog : fullLogs) {
-            em.persist(fullLog);
+
+        for (int i = 0; i < fullLogs.size(); i++) {
+            em.persist(fullLogs.get(i));
+            if (i % 50 == 0) {
+                em.flush();
+            }
         }
-        em.flush();
     }
 }

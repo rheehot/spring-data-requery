@@ -15,7 +15,7 @@ import java.util.Objects;
  * @author debop@coupang.com
  */
 @Getter
-@Entity(model = "Benchmark")
+@Entity(model = "Benchmark", stateless = true)
 public abstract class AbstractFullLog extends AbstractPersistable<Long> {
 
     private static final long serialVersionUID = 4099799937231270510L;

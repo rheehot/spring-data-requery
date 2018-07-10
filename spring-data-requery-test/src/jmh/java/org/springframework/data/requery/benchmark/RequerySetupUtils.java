@@ -18,6 +18,10 @@ import javax.sql.DataSource;
 @UtilityClass
 public class RequerySetupUtils {
 
+    private static DataSource dataSource = getDataSource();
+    private static Configuration configuration = getConfiguration();
+    static EntityDataStore<Object> dataStore = getDataStore();
+
     @NotNull
     public static DataSource getDataSource() {
         return new EmbeddedDatabaseBuilder()
@@ -28,7 +32,7 @@ public class RequerySetupUtils {
 
     @NotNull
     private static Configuration getConfiguration() {
-        return new ConfigurationBuilder(getDataSource(), Models.BENCHMARK)
+        return new ConfigurationBuilder(dataSource, Models.BENCHMARK)
             .setBatchUpdateSize(100)
             .setStatementCacheSize(1024)
             .setEntityCache(new EmptyEntityCache())
@@ -38,11 +42,8 @@ public class RequerySetupUtils {
     @NotNull
     public static EntityDataStore<Object> getDataStore() {
 
-        Configuration configuration = getConfiguration();
-
         SchemaModifier schemaModifier = new SchemaModifier(configuration);
         schemaModifier.createTables(TableCreationMode.CREATE_NOT_EXISTS);
-
 
         return new EntityDataStore<>(configuration);
     }
