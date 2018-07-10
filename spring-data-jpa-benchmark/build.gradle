@@ -47,6 +47,7 @@ dependencies {
     testCompile "org.springframework.boot:spring-boot-starter-test"
 
     jmh "org.projectlombok:lombok"
+    jmh "org.openjdk.jmh:jmh-generator-annprocess:1.20"
 }
 
 jmh {

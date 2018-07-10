@@ -61,6 +61,7 @@ dependencies {
     jmh "io.requery:requery"
     jmh "io.requery:requery-processor"
     jmh "org.projectlombok:lombok"
+    jmh "org.openjdk.jmh:jmh-generator-annprocess:1.20"
 }
 
 jmh {
