@@ -33,7 +33,6 @@ dependencies {
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile "org.jetbrains.kotlin:kotlin-reflect"
-
     optional "org.jetbrains.kotlinx:kotlinx-coroutines-core"
 
     compile "io.requery:requery"
