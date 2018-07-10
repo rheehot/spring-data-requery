@@ -9,21 +9,28 @@ class ClassExtensionsTest: AbstractRequeryTest() {
     @Test
     fun `is requery entity class`() {
 
-        assertThat(User::class.java.isRequeryEntity).isFalse()
-        assertThat(AbstractUser::class.java.isRequeryEntity).isTrue()
+        assertThat(UserEntity::class.java.isRequeryEntity).isFalse()
+        assertThat(User::class.java.isRequeryEntity).isTrue()
 
-        assertThat(Role::class.java.isRequeryEntity).isFalse()
-        assertThat(AbstractRole::class.java.isRequeryEntity).isTrue()
+        assertThat(RoleEntity::class.java.isRequeryEntity).isFalse()
+        assertThat(Role::class.java.isRequeryEntity).isTrue()
+    }
+
+    @Test
+    fun `find requery entity`() {
+
+        assertThat(UserEntity::class.java.findRequeryEntity()).isEqualTo(User::class.java)
+        assertThat(RoleEntity::class.java.findRequeryEntity()).isEqualTo(Role::class.java)
     }
 
     @Test
     fun `retrieve key property from User entity`() {
 
-        val keyExpr = User::class.java.getKeyExpression<Int>()
+        val keyExpr = UserEntity::class.java.getKeyExpression<Int>()
 
         assertThat(keyExpr).isNotNull
         assertThat(keyExpr.name).isEqualTo("id")
-        assertThat(keyExpr.classType).isEqualTo(Integer::class.java)
+        assertThat(keyExpr.classType).isEqualTo(Int::class.java)
 
         val keyExpr2 = User::class.java.getKeyExpression<Int>()
         assertThat(keyExpr2).isEqualTo(keyExpr)
@@ -36,7 +43,7 @@ class ClassExtensionsTest: AbstractRequeryTest() {
 
         assertThat(keyExpr).isNotNull
         assertThat(keyExpr.name).isEqualTo("id")
-        assertThat(keyExpr.classType).isEqualTo(Integer::class.java)
+        assertThat(keyExpr.classType).isEqualTo(Int::class.java)
 
         val keyExpr2 = Role::class.java.getKeyExpression<Int>()
         assertThat(keyExpr2).isEqualTo(keyExpr)

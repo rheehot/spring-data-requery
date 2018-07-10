@@ -10,7 +10,6 @@ import org.junit.Test
 import org.springframework.data.requery.kotlin.domain.AbstractDomainTest
 import org.springframework.data.requery.kotlin.domain.RandomData
 import org.springframework.data.requery.kotlin.domain.RandomData.randomBasicUser
-import org.springframework.data.requery.kotlin.domain.RandomData.randomUser
 import org.springframework.data.requery.kotlin.domain.basic.BasicGroup
 import org.springframework.data.requery.kotlin.domain.basic.BasicLocation
 import org.springframework.data.requery.kotlin.domain.basic.BasicUser
@@ -37,12 +36,12 @@ class KotlinCoroutineTemplateTest: AbstractDomainTest() {
 
     @Test
     fun `async insert`() = runBlocking<Unit> {
-        val user = randomUser()
+        val user = randomBasicUser()
         with(coroutineTemplate) {
-            val savedUser = async(Unconfined) { insert(user) }
+            val savedUser = insert(user)
 
             val loaded = async(Unconfined) {
-                select(BasicUser::class).where(BasicUserEntity.ID.eq(savedUser.await().id)).get().firstOrNull()
+                select(BasicUser::class).where(BasicUserEntity.ID.eq(savedUser.id)).get().firstOrNull()
             }
             assertThat(loaded.await()).isEqualTo(user)
         }
@@ -88,7 +87,7 @@ class KotlinCoroutineTemplateTest: AbstractDomainTest() {
         with(coroutineTemplate) {
             withContext(Unconfined) {
                 insert(user)
-                insert(randomUser().apply { age = 10 })
+                insert(randomBasicUser().apply { age = 10 })
             }
 
             val affectedCount = async(Unconfined) {

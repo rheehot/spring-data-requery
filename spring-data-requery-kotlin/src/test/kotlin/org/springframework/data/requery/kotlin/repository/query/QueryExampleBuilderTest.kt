@@ -10,6 +10,7 @@ import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.st
 import org.springframework.data.domain.ExampleMatcher.matching
 import org.springframework.data.requery.kotlin.domain.AbstractDomainTest
 import org.springframework.data.requery.kotlin.domain.sample.User
+import org.springframework.data.requery.kotlin.domain.sample.UserEntity
 import org.springframework.data.requery.kotlin.unwrap
 
 class QueryExampleBuilderTest: AbstractDomainTest() {
@@ -19,18 +20,18 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
         operations.deleteAll(User::class)
     }
 
-    private fun userQueryByExample(example: Example<User>): QueryElement<out Result<User>> {
-        val base = operations.select(User::class).unwrap()
+    private fun userQueryByExample(example: Example<UserEntity>): QueryElement<out Result<UserEntity>> {
+        val base = operations.select(UserEntity::class).unwrap()
         return QueryByExampleBuilder.getWhereAndOr(base, example)
     }
 
     @Test
     fun `firstname equals example`() {
 
-        val user = User().apply { firstname = "example"; emailAddress = "debop@example.com" }
+        val user = UserEntity().apply { firstname = "example"; emailAddress = "debop@example.com" }
         operations.insert(user)
 
-        val exampleUser = User().apply { firstname = user.firstname }
+        val exampleUser = UserEntity().apply { firstname = user.firstname }
         val example = Example.of(exampleUser)
 
         val query = userQueryByExample(example)
@@ -42,10 +43,10 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
     @Test
     fun `firstname and email equals example`() {
 
-        val user = User().apply { firstname = "example"; emailAddress = "debop@example.com" }
+        val user = UserEntity().apply { firstname = "example"; emailAddress = "debop@example.com" }
         operations.insert(user)
 
-        val exampleUser = User().apply { firstname = user.firstname; emailAddress = user.emailAddress }
+        val exampleUser = UserEntity().apply { firstname = user.firstname; emailAddress = user.emailAddress }
         val example = Example.of(exampleUser)
 
         val query = userQueryByExample(example)
@@ -57,10 +58,10 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
     @Test
     fun `firstname startsWith example`() {
 
-        val user = User().apply { firstname = "example"; emailAddress = "debop@example.com" }
+        val user = UserEntity().apply { firstname = "example"; emailAddress = "debop@example.com" }
         operations.insert(user)
 
-        val exampleUser = User().apply { firstname = "EXA" }
+        val exampleUser = UserEntity().apply { firstname = "EXA" }
 
         val example = Example.of(exampleUser,
                                  matching()

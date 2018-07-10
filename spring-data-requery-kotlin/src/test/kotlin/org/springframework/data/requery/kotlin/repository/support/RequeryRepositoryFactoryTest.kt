@@ -16,6 +16,7 @@ import org.springframework.data.repository.core.support.RepositoryComposition
 import org.springframework.data.repository.query.QueryLookupStrategy
 import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.data.requery.kotlin.domain.sample.User
+import org.springframework.data.requery.kotlin.domain.sample.UserEntity
 import org.springframework.data.requery.kotlin.repository.RequeryRepository
 import org.springframework.transaction.annotation.Transactional
 import java.io.IOException
@@ -127,9 +128,9 @@ class RequeryRepositoryFactoryTest {
 
     private interface SampleRepository: RequeryRepository<User, Int>, SampleCustomRepository {
 
-        fun findByEmail(email: String): User? = User().also { it.emailAddress = email }
+        fun findByEmail(email: String): User? = UserEntity().also { it.emailAddress = email }
 
-        fun customMethod(id: Long?): User? = User()
+        fun customMethod(id: Long?): User? = UserEntity()
     }
 
     class CustomRequeryRepository<T: Any, ID: Any>(

@@ -10,7 +10,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework.data.requery" level="TRACE"/>
+    <logger name="org.springframework.data.requery.kotlin" level="TRACE"/>
 
     <logger name="io.requery.sql" level="WARN"/>
     <logger name="requery" level="WARN"/>

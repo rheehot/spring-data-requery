@@ -4,7 +4,7 @@ import mu.KotlinLogging
 import org.springframework.data.requery.kotlin.domain.basic.BasicGroupEntity
 import org.springframework.data.requery.kotlin.domain.basic.BasicLocationEntity
 import org.springframework.data.requery.kotlin.domain.basic.BasicUserEntity
-import org.springframework.data.requery.kotlin.domain.sample.User
+import org.springframework.data.requery.kotlin.domain.sample.UserEntity
 import java.time.LocalDate
 import java.util.*
 
@@ -23,9 +23,9 @@ object RandomData {
     private val lastnames = arrayOf("Smith", "Lee", "Jones", "Bae", "Ahn", "Park", "Jeon", "Nam")
     private val companies = arrayOf("example", "coupang", "korea", "gmail")
 
-    fun randomUser(): User {
+    fun randomUser(): UserEntity {
         try {
-            return User().apply {
+            return UserEntity().apply {
                 firstname = firstnames[rnd.nextInt(firstnames.size)]
                 lastname = lastnames[rnd.nextInt(lastnames.size)]
                 emailAddress = "$firstname.$lastname@${companies[rnd.nextInt(companies.size)]}.org"
@@ -40,8 +40,8 @@ object RandomData {
         }
     }
 
-    fun randomUsers(count: Int): Set<User> {
-        val users = mutableSetOf<User>()
+    fun randomUsers(count: Int): Set<UserEntity> {
+        val users = mutableSetOf<UserEntity>()
         var userCount = 0
         while(userCount < count) {
             val user = randomUser()

@@ -14,8 +14,8 @@ import java.util.*
  * @author debop@coupang.com
  * @since 18. 5. 14
  */
-@Entity
-@Table(name = "Time_Users")
+@Entity(name = "TimedUser")
+@Table(name = "TimedUser")
 interface User: Persistable, Serializable {
 
     @get:Key

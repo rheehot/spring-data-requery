@@ -2,7 +2,6 @@ package org.springframework.data.requery.kotlin.repository.query
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.springframework.data.requery.kotlin.domain.sample.AbstractUser
 import org.springframework.data.requery.kotlin.domain.sample.User
 
 /**
@@ -31,7 +30,7 @@ class DefaultRequeryEntityMetadataTest {
     @Test
     fun `return customized entity name if configured`() {
 
-        val metadata = DefaultRequeryEntityMetadata(AbstractUser::class)
+        val metadata = DefaultRequeryEntityMetadata(User::class)
         assertThat(metadata.entityName).isEqualTo("User")
 
         val metadata2 = DefaultRequeryEntityMetadata(User::class)

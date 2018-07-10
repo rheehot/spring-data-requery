@@ -23,7 +23,7 @@ class TimeConversionTest: AbstractDomainTest() {
             val offsetDateTimeNow = OffsetDateTime.now()
             val zonedDateTimeNow = ZonedDateTime.now()
 
-            val event = EventEntity().apply {
+            val event = TimedEvent().apply {
                 id = eventId
                 localDate = localDateNow
                 localDateTime = localDateTimeNow
@@ -33,7 +33,7 @@ class TimeConversionTest: AbstractDomainTest() {
             }
             insert(event)
 
-            val loaded = findById(EventEntity::class, eventId)
+            val loaded = findById(TimedEvent::class, eventId)
             assertThat(loaded).isNotNull
             assertThat(loaded?.localDate).isEqualTo(localDateNow)
             // LocalDateTime 의 nano 값이 제대로 저장 안된다.

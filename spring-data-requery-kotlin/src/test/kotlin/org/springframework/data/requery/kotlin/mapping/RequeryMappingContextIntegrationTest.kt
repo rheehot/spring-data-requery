@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.FilterType
 import org.springframework.data.requery.kotlin.configs.RequeryTestConfiguration
 import org.springframework.data.requery.kotlin.core.RequeryOperations
-import org.springframework.data.requery.kotlin.domain.sample.AbstractUser
+import org.springframework.data.requery.kotlin.domain.sample.User
 import org.springframework.data.requery.kotlin.repository.config.EnableRequeryRepositories
 import org.springframework.data.requery.kotlin.repository.sample.UserRepository
 import org.springframework.test.context.ContextConfiguration
@@ -42,7 +42,7 @@ class RequeryMappingContextIntegrationTest {
     @Test
     fun `setup mapping context correctly`() {
 
-        val entity = context.getRequiredPersistentEntity(AbstractUser::class.java)
+        val entity = context.getRequiredPersistentEntity(User::class.java)
         assertThat(entity).isNotNull
     }
 }

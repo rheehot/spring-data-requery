@@ -7,6 +7,7 @@ import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher.matching
 import org.springframework.data.requery.kotlin.domain.AbstractDomainTest
 import org.springframework.data.requery.kotlin.domain.sample.User
+import org.springframework.data.requery.kotlin.domain.sample.UserEntity
 
 /**
  * org.springframework.data.requery.ExampleExtensionsTest
@@ -18,7 +19,7 @@ class ExampleExtensionsTest: AbstractDomainTest() {
     @Test
     fun `build whereclause from Example instance`() {
 
-        val user = User().apply { lastname = "Bae" }
+        val user = UserEntity().apply { lastname = "Bae" }
 
         val example = Example.of(user, matching().withIgnoreNullValues())
 

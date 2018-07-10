@@ -15,8 +15,8 @@ import java.util.*
  * @author debop@coupang.com
  * @since 18. 5. 14
  */
-@Entity
-@Table(name = "Events")
+@Entity(name = "TimedEvent")
+@Table(name = "TimedEvent")
 interface Event: Persistable {
 
     @get:Key

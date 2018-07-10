@@ -1,6 +1,6 @@
 package org.springframework.data.requery.kotlin.repository.sample
 
-import org.springframework.boot.autoconfigure.security.SecurityProperties
+import org.springframework.data.requery.kotlin.domain.sample.User
 import org.springframework.data.requery.kotlin.repository.RequeryRepository
 
 /**
@@ -9,9 +9,9 @@ import org.springframework.data.requery.kotlin.repository.RequeryRepository
  * @author debop@coupang.com
  */
 @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-interface UserRepository: RequeryRepository<SecurityProperties.User, Int>, UserRepositoryCustom {
+interface UserRepository: RequeryRepository<User, Int>, UserRepositoryCustom {
 
     @JvmDefault
-    fun findByLastname(lastname: String): List<SecurityProperties.User>
+    fun findByLastname(lastname: String): List<User>
 
 }

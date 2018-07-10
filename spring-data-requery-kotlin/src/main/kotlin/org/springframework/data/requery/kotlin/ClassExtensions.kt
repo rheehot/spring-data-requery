@@ -79,7 +79,9 @@ fun Class<*>.findFirstField(predicate: (Field) -> Boolean): Field? {
 
     var targetClass: Class<*>? = findRequeryEntity()
 
-    while(targetClass != null && targetClass.isRequeryEntity) {
+    log.trace { "Target Requery entity class. targetClass=$targetClass" }
+
+    while(targetClass != null && !targetClass.isAnyClass /*targetClass.isRequeryEntity*/) {
         val field = targetClass.declaredFields.find { predicate(it) }
         if(field != null)
             return field
@@ -131,7 +133,7 @@ fun Class<*>.findFirstMethod(predicate: (Method) -> Boolean): Method? {
 
     var targetClass: Class<*>? = findRequeryEntity()
 
-    while(targetClass != null && targetClass.isRequeryEntity) {
+    while(targetClass != null && !targetClass.isAnyClass /*targetClass.isRequeryEntity*/) {
         val method = targetClass.declaredMethods.find { predicate(it) }
         if(method != null)
             return method
@@ -149,8 +151,18 @@ val Class<*>.isRequeryEntity: Boolean
     get() = declaredAnnotations.find { it.annotationClass == io.requery.Entity::class } != null
 
 fun Class<*>.findRequeryEntity(): Class<*>? {
+
+    val entityName = this.getRequeryEntityName()
+    val found = interfaces.find { it.name == entityName }
+    log.trace { "Find Requery entity in interfaces. target=$this, found=$found" }
+    if(found != null) {
+        return found
+    }
+
     var current: Class<*>? = this
-    while(current != null) {
+
+    while(current != null && !current.isAnyClass) {
+        log.trace { "Find Requery entity. current=$current" }
         if(current.isRequeryEntity)
             return current
 
@@ -239,6 +251,14 @@ fun Class<*>.getExpression(propertyName: String): NamedExpression<*>? {
             }
             else -> NamedExpression.of(field.name, field.type)
         }
+    }
+}
+
+fun Class<*>.getRequeryEntityName(): String {
+    return when {
+        simpleName.contains("Abstract") -> name.removePrefix("Abstract")
+        simpleName.contains("Entity") -> name.removeSuffix("Entity")
+        else -> simpleName
     }
 }
 

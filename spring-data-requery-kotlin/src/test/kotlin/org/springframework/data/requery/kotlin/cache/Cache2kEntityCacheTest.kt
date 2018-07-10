@@ -3,7 +3,9 @@ package org.springframework.data.requery.kotlin.cache
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.springframework.data.requery.kotlin.domain.RandomData
 import org.springframework.data.requery.kotlin.domain.sample.Role
+import org.springframework.data.requery.kotlin.domain.sample.RoleEntity
 import org.springframework.data.requery.kotlin.domain.sample.User
 
 /**
@@ -23,7 +25,7 @@ class Cache2kEntityCacheTest {
     @Test
     fun `instancing Cache2kEntityCache`() {
 
-        val user = User()
+        val user = RandomData.randomUser()
         val userId = 1
 
         assertThat(entityCache.contains(User::class.java, userId)).isFalse()
@@ -39,7 +41,7 @@ class Cache2kEntityCacheTest {
     @Test
     fun `invalidate cache item`() {
 
-        val user = User()
+        val user = RandomData.randomUser()
         val userId = 1
 
         entityCache.put(User::class.java, userId, user)
@@ -52,10 +54,10 @@ class Cache2kEntityCacheTest {
     @Test
     fun `invalidate all`() {
 
-        val user = User()
+        val user = RandomData.randomUser()
         val userId = 1
 
-        val user2 = User()
+        val user2 = RandomData.randomUser()
         val user2Id = 2
 
         entityCache.put(User::class.java, userId, user)
@@ -71,10 +73,10 @@ class Cache2kEntityCacheTest {
     @Test
     fun `various entity type caching`() {
 
-        val user = User()
+        val user = RandomData.randomUser()
         val userId = 1
 
-        val role = Role()
+        val role = RoleEntity()
         val roleId = 1
 
         entityCache.put(User::class.java, userId, user)
