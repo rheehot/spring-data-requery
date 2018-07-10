@@ -25,7 +25,7 @@ class QueryElementExtensionsTest: AbstractDomainTest() {
 
         val sort = Sort.by(Sort.Order.desc("firstname"), Sort.Order.asc("lastname"))
 
-        val query = dataStore.select(User::class).applySort(User::class.java, sort)
+        val query = kotlinDataStore.select(User::class).applySort(User::class.java, sort)
 
         assertThat(query.orderByExpressions).hasSize(2)
         assertThat(query.orderByExpressions.map { it.name }).containsOnly("firstname", "lastname")
@@ -37,7 +37,7 @@ class QueryElementExtensionsTest: AbstractDomainTest() {
 
         val pageable = PageRequest.of(1, 3, Sort.by(Sort.Direction.DESC, "firstname", "lastname"))
 
-        val query = dataStore.select(User::class).applyPageable(User::class.java, pageable)
+        val query = kotlinDataStore.select(User::class).applyPageable(User::class.java, pageable)
 
         assertThat(query).isInstanceOf(QueryElement::class.java)
         assertThat(query).isInstanceOf(Limit::class.java)

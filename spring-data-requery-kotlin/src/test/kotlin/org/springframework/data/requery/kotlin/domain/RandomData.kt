@@ -21,14 +21,14 @@ object RandomData {
 
     private val firstnames = arrayOf("Alice", "Bob", "Carol", "Debop", "Diego", "Jinie", "Nickoon", "Aiden")
     private val lastnames = arrayOf("Smith", "Lee", "Jones", "Bae", "Ahn", "Park", "Jeon", "Nam")
-    private val companies = arrayOf("example", "coupang", "korea", "gmail")
+    private val companies = arrayOf("example", "coupang", "korea", "gmail", "naver", "yahoo", "test", "daum", "hotmail", "amazon")
 
     fun randomUser(): UserEntity {
         try {
             return UserEntity().apply {
                 firstname = firstnames[rnd.nextInt(firstnames.size)]
                 lastname = lastnames[rnd.nextInt(lastnames.size)]
-                emailAddress = "$firstname.$lastname@${companies[rnd.nextInt(companies.size)]}.org"
+                emailAddress = "$firstname.$lastname${rnd.nextInt(10000)}@${companies[rnd.nextInt(companies.size)]}.org"
                 dateOfBirth = Calendar.Builder()
                     .setDate(1900 + rnd.nextInt(90), rnd.nextInt(11) + 1, rnd.nextInt(27) + 1)
                     .build()

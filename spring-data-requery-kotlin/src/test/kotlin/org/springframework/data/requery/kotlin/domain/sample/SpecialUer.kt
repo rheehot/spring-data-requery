@@ -10,5 +10,5 @@
 // */
 //@Entity
 //@Table(name="SpecialUser")
-//interface SpecialUer : User {
+//interface SpecialUer : TimedUser {
 //}

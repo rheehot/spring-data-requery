@@ -23,7 +23,7 @@ class TimeConversionTest: AbstractDomainTest() {
             val offsetDateTimeNow = OffsetDateTime.now()
             val zonedDateTimeNow = ZonedDateTime.now()
 
-            val event = TimedEvent().apply {
+            val event = TimedEventEntity().apply {
                 id = eventId
                 localDate = localDateNow
                 localDateTime = localDateTimeNow

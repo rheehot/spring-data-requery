@@ -28,7 +28,7 @@ class ReactiveTest: AbstractDomainTest() {
 
     @Before
     fun setup() {
-        reactiveStore = KotlinReactiveEntityStore(dataStore)
+        reactiveStore = KotlinReactiveEntityStore(kotlinDataStore)
 
         operations.deleteAll(BasicLocationEntity::class)
         operations.deleteAll(BasicGroupEntity::class)

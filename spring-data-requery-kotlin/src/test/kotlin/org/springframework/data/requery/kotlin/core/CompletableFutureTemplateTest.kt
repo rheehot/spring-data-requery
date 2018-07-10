@@ -3,7 +3,7 @@ package org.springframework.data.requery.kotlin.core
 import io.requery.async.KotlinCompletableEntityStore
 import io.requery.kotlin.eq
 import mu.KotlinLogging
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.springframework.data.requery.kotlin.domain.AbstractDomainTest
@@ -24,7 +24,7 @@ class CompletableFutureTemplateTest: AbstractDomainTest() {
     }
 
     private val asyncEntityStore: KotlinCompletableEntityStore<Any> by lazy {
-        KotlinCompletableEntityStore(dataStore, ForkJoinPool.commonPool())
+        KotlinCompletableEntityStore(kotlinDataStore, ForkJoinPool.commonPool())
     }
 
     @Before
@@ -40,10 +40,10 @@ class CompletableFutureTemplateTest: AbstractDomainTest() {
     fun `async insert`() {
         val user = RandomData.randomBasicUser()
         asyncEntityStore.insert(user).thenAccept { u ->
-            Assertions.assertThat(u.id).isNotNull()
+            assertThat(u.id).isNotNull()
 
             val loaded = asyncEntityStore.select(BasicUser::class).where(BasicUser::id eq user.id).get().first()
-            Assertions.assertThat(loaded).isEqualTo(user)
+            assertThat(loaded).isEqualTo(user)
         }.join()
     }
 
@@ -55,7 +55,7 @@ class CompletableFutureTemplateTest: AbstractDomainTest() {
 
             insert(user)
                 .thenAccept { savedUser ->
-                    Assertions.assertThat(savedUser.id).isNotNull()
+                    assertThat(savedUser.id).isNotNull()
                 }
                 .thenCompose {
                     count(BasicUser::class).get().toCompletableFuture()
@@ -81,13 +81,13 @@ class CompletableFutureTemplateTest: AbstractDomainTest() {
                 }
                 .get()
 
-            Assertions.assertThat(user.groups).hasSize(1)
+            assertThat(user.groups).hasSize(1)
         }
     }
 
     @Test
     fun `async query update`() {
-        val user = RandomData.randomUser().apply { age = 100 }
+        val user = RandomData.randomBasicUser().apply { age = 100 }
 
         with(asyncEntityStore) {
             insert(user)
@@ -98,8 +98,8 @@ class CompletableFutureTemplateTest: AbstractDomainTest() {
                         .where(BasicUserEntity.AGE eq user.age)
                         .get()
                         .toCompletableFuture(Executors.newSingleThreadExecutor())
-                }.thenApplyAsync { rowCount ->
-                    Assertions.assertThat(rowCount).isEqualTo(1)
+                }.thenApply { rowCount ->
+                    assertThat(rowCount).isEqualTo(1)
                 }
                 .get()
         }
@@ -107,9 +107,9 @@ class CompletableFutureTemplateTest: AbstractDomainTest() {
 
     @Test
     fun `async to blocking`() {
-        val user = RandomData.randomUser()
+        val user = RandomData.randomBasicUser()
         asyncEntityStore.toBlocking().insert(user)
-        Assertions.assertThat(user.id).isNotNull()
+        assertThat(user.id).isNotNull()
     }
 
     @Test
@@ -127,7 +127,7 @@ class CompletableFutureTemplateTest: AbstractDomainTest() {
                     .stream()
                     .map { user -> user }
 
-            Assertions.assertThat(loadedUsers.count()).isEqualTo(100L)
+            assertThat(loadedUsers.count()).isEqualTo(100L)
         }
     }
 }

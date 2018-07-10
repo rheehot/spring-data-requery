@@ -14,7 +14,7 @@ import org.springframework.data.requery.kotlin.domain.PersistableObject
 interface Account: PersistableObject {
 
     @get:Key
-    val id: Long
+    val id: Long?
 
     @get:Column(name = "account_name")
     var name: String?

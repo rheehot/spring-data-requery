@@ -15,6 +15,7 @@ import org.springframework.data.util.DirectFieldAccessFallbackBeanWrapper
 import org.springframework.util.LinkedMultiValueMap
 import java.lang.reflect.Field
 
+private val log = KotlinLogging.logger { }
 
 /**
  * Query by {@link org.springframework.data.domain.Example} 을 수행하기 위해,
@@ -24,6 +25,8 @@ import java.lang.reflect.Field
  */
 @Suppress("UNCHECKED_CAST")
 fun <E: Any> QueryElement<out Any>.applyExample(example: Example<E>): QueryElement<out Any> {
+
+    log.debug { "Apply example to query element. exampe=$example" }
 
     val matcher = example.matcher
     val conditions = QueryByExampleBuilder.buildConditions(example, ExampleMatcherAccessor(matcher))
@@ -47,7 +50,7 @@ object QueryByExampleBuilder {
 
     // TODO : rename to applyExample
     @Suppress("UNCHECKED_CAST")
-    fun <E: Any> getWhereAndOr(base: QueryElement<out Result<E>>, example: Example<E>): QueryElement<out Result<E>> {
+    fun <E: Any> build(base: QueryElement<out Result<E>>, example: Example<E>): QueryElement<out Result<E>> {
 
         val matcher = example.matcher
         val conditions = buildConditions(example, ExampleMatcherAccessor(matcher))
@@ -67,23 +70,29 @@ object QueryByExampleBuilder {
     fun <E: Any> buildConditions(example: Example<E>,
                                  accessor: ExampleMatcherAccessor): List<Condition<E, *>> {
 
+        log.debug { "Build conditions... example=$example" }
+
         val conditions = arrayListOf<Condition<E, *>>()
 
         val beanWrapper = DirectFieldAccessFallbackBeanWrapper(example.probe as Any)
-        val fields = example.probeType.findEntityFields()
 
-        fields
+        val methods = example.probeType.findEntityMethods()
+
+        log.trace { "entity methods size=${methods.size}" }
+
+        methods
             .filterNot {
                 // Query By Example 에서 지원하지 못하는 Field 들은 제외합니다.
-                it.isAssociationField() || it.isEmbeddedField() || it.isTransientField()
+                // NOTE: Kotlin interface entity 는 get annotation을 사용하므로 method에 대해서도 처리해야 한다.
+                it.isKeyAnnoatedElement() || it.isAssociatedAnnotatedElement() || it.isEmbeddedAnnoatedElement() || it.isTransientAnnotatedElement()
             }
-            .filterNot { accessor.isIgnoredPath(it.name) }
+            .filterNot { accessor.isIgnoredPath(it.extractGetterSetter()) }
             .forEach {
-                val fieldName = it.name
-                val fieldType = it.type as Class<Any>
+                val fieldName = it.extractGetterSetter()
+                val fieldType = it.returnType as Class<Any>
                 val fieldValue = beanWrapper.getPropertyValue(fieldName)
 
-                log.trace { "Get condition from Example. field name=$fieldName, value=$fieldValue" }
+                log.trace { "Get condition from Example. method name=$fieldName, value=$fieldValue" }
 
                 val expr: NamedExpression<Any> = namedExpressionOf(fieldName, fieldType)
 

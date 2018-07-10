@@ -26,13 +26,13 @@ class ClassExtensionsTest: AbstractRequeryTest() {
     @Test
     fun `retrieve key property from User entity`() {
 
-        val keyExpr = UserEntity::class.java.getKeyExpression<Int>()
+        val keyExpr = User::class.java.getKeyExpression<Int>()
 
         assertThat(keyExpr).isNotNull
         assertThat(keyExpr.name).isEqualTo("id")
-        assertThat(keyExpr.classType).isEqualTo(Int::class.java)
+        assertThat(keyExpr.classType).isEqualTo(Integer::class.java)
 
-        val keyExpr2 = User::class.java.getKeyExpression<Int>()
+        val keyExpr2 = UserEntity::class.java.getKeyExpression<Int>()
         assertThat(keyExpr2).isEqualTo(keyExpr)
     }
 
@@ -43,12 +43,51 @@ class ClassExtensionsTest: AbstractRequeryTest() {
 
         assertThat(keyExpr).isNotNull
         assertThat(keyExpr.name).isEqualTo("id")
-        assertThat(keyExpr.classType).isEqualTo(Int::class.java)
+        assertThat(keyExpr.classType).isEqualTo(Integer::class.java)
 
         val keyExpr2 = Role::class.java.getKeyExpression<Int>()
         assertThat(keyExpr2).isEqualTo(keyExpr)
 
         val accountsKeyExpr = Accounts::class.java.getKeyExpression<Long>()
         assertThat(accountsKeyExpr).isNotEqualTo(keyExpr)
+    }
+
+    @Test
+    fun `field is associated`() {
+
+        // Kotlin 에서는 @get:Annotation 이므로 get이 붙어야 합니다.
+        val method = User::class.java.getDeclaredMethod("getRoles")
+        log.debug { "Method=$method" }
+        log.debug { "Declared Annotations size=${method.declaredAnnotations.size}" }
+        log.debug { "Annotations size=${method.annotations.size}" }
+
+        assertThat(method.isAnnotationPresent(io.requery.ManyToMany::class.java)).isTrue()
+
+        val methods = User::class.java.findEntityMethods()
+
+        log.debug { "methods size=${methods.size}" }
+        methods.forEach {
+            log.debug { "method=$it" }
+            log.debug { "method is requery entity method = ${it.isRequeryEntityMethod()}" }
+            log.debug { "method is requery generated method = ${it.isRequeryGeneratedMethod()}" }
+        }
+    }
+
+    @Test
+    fun `is annotated property`() {
+
+        val methods = UserEntity::class.java.findEntityMethods()
+
+        methods.forEach { m ->
+            log.debug {
+                """
+                    | "method name=${m.name}"
+                    |    is Key = ${m.isKeyAnnoatedElement()}
+                    |    is Assoicated = ${m.isAssociatedAnnotatedElement()}
+                    |    is Embedded = ${m.isEmbeddedAnnoatedElement()}
+                    |    is Transient = ${m.isTransientAnnotatedElement()}
+                """.trimMargin()
+            }
+        }
     }
 }

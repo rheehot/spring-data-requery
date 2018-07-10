@@ -1,11 +1,15 @@
 package org.springframework.data.requery.kotlin.domain.time
 
 
-import io.requery.*
+import io.requery.Column
+import io.requery.Convert
+import io.requery.Entity
+import io.requery.Key
 import org.springframework.data.requery.kotlin.converters.LocalDateTimeToLongConverter
 import org.springframework.data.requery.kotlin.converters.LocalTimeToLongConverter
 import org.springframework.data.requery.kotlin.converters.OffsetDateTimeToStringConverter
 import org.springframework.data.requery.kotlin.converters.ZonedDateTimeToStringConverter
+import org.springframework.data.requery.kotlin.domain.PersistableObject
 import java.time.*
 import java.util.*
 
@@ -15,9 +19,8 @@ import java.util.*
  * @author debop@coupang.com
  * @since 18. 5. 14
  */
-@Entity(name = "TimedEvent")
-@Table(name = "TimedEvent")
-interface Event: Persistable {
+@Entity
+interface TimedEvent: PersistableObject {
 
     @get:Key
     var id: UUID

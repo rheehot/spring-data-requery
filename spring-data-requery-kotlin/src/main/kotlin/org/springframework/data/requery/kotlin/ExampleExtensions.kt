@@ -15,6 +15,8 @@ private val log = KotlinLogging.logger { }
 @Suppress("UNCHECKED_CAST")
 fun <S: E, E: Any> Example<S>.buildQueryElement(operations: RequeryOperations, domainClass: KClass<E>): QueryElement<out Result<S>> {
 
+    log.debug { "Build query element from Example. domainClass=$domainClass" }
+
     val root = operations.select(domainClass).unwrap()
     return root.applyExample(this) as QueryElement<out Result<S>>
 }

@@ -94,6 +94,7 @@ class DeclaredRequeryQueryTest {
     fun `query with limit`() {
 
         val users = RandomData.randomUsers(10)
+
         repository.saveAll(users)
         assertThat(repository.count()).isGreaterThan(0)
 
@@ -118,7 +119,7 @@ class DeclaredRequeryQueryTest {
     @Test
     fun `query tuples`() {
 
-        val users = RandomData.randomUsers(10)
+        val users = RandomData.randomUsers(4)
         repository.saveAll(users)
         assertThat(repository.count()).isGreaterThan(0)
 

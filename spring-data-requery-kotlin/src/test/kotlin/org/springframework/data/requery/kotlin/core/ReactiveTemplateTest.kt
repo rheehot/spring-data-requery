@@ -32,7 +32,7 @@ class ReactiveTemplateTest: AbstractDomainTest() {
     }
 
     private val reactiveStore: KotlinReactiveEntityStore<Any> by lazy {
-        KotlinReactiveEntityStore(dataStore)
+        KotlinReactiveEntityStore(kotlinDataStore)
     }
 
     @Before
@@ -164,14 +164,14 @@ class ReactiveTemplateTest: AbstractDomainTest() {
         val count = AtomicInteger(0)
 
         with(reactiveStore) {
-            val disposable = select(BasicUser::class).limit(2).get().observableResult()
+            val disposable = select(BasicUserEntity::class).limit(2).get().observableResult()
                 .flatMap { user -> user.observable() }
                 .subscribe {
                     count.incrementAndGet()
                 }
 
-            insert(RandomData.randomUser()).blockingGet()
-            insert(RandomData.randomUser()).blockingGet()
+            insert(RandomData.randomBasicUser()).blockingGet()
+            insert(RandomData.randomBasicUser()).blockingGet()
 
             assertThat(count.get()).isEqualTo(3)
             disposable.dispose()
@@ -183,12 +183,12 @@ class ReactiveTemplateTest: AbstractDomainTest() {
         val count = AtomicInteger()
 
         with(reactiveStore) {
-            val disposable = select(BasicUser::class).get().observableResult()
+            val disposable = select(BasicUserEntity::class).get().observableResult()
                 .subscribe {
                     count.incrementAndGet()
                 }
 
-            val user = RandomData.randomUser()
+            val user = RandomData.randomBasicUser()
 
             insert(user).blockingGet()
             delete(user).blockingGet()
@@ -203,17 +203,17 @@ class ReactiveTemplateTest: AbstractDomainTest() {
         val count = AtomicInteger()
 
         with(reactiveStore) {
-            val disposable = select(BasicUser::class).get().observableResult()
+            val disposable = select(BasicUserEntity::class).get().observableResult()
                 .subscribe {
                     count.incrementAndGet()
                 }
 
-            val user = RandomData.randomUser()
+            val user = RandomData.randomBasicUser()
 
             insert(user).blockingGet()
             assertThat(count.get()).isEqualTo(2)
 
-            val rows = delete<BasicUser>(BasicUser::class).get().value()
+            val rows = delete<BasicUserEntity>(BasicUserEntity::class).get().value()
             assertThat(count.get()).isEqualTo(3)
             assertThat(rows).isEqualTo(1)
             disposable.dispose()
@@ -239,12 +239,12 @@ class ReactiveTemplateTest: AbstractDomainTest() {
             group.members.add(user)
             //            user.groups.add(group)
             user.about = "new about"
-            update(group).blockingGet()
+            insert(group).blockingGet()
             update(user).blockingGet()
-            assertThat(count.get()).isEqualTo(3)
+            assertThat(count.get()).isEqualTo(4)
 
             delete(user).blockingGet()
-            assertThat(count.get()).isEqualTo(4)
+            assertThat(count.get()).isEqualTo(5)
 
             disposable.dispose()
         }
@@ -283,7 +283,7 @@ class ReactiveTemplateTest: AbstractDomainTest() {
 
             assertThat(count(BasicUser::class).get().value()).isEqualTo(0)
 
-            val user2 = RandomData.randomUser()
+            val user2 = RandomData.randomBasicUser()
 
             withTransaction<Unit> {
                 insert(user2)

@@ -17,7 +17,7 @@ import org.springframework.data.requery.kotlin.domain.basic.BasicUserEntity
 
 class KotlinCoroutineTemplateTest: AbstractDomainTest() {
 
-    private val coroutineTemplate by lazy { KotlinCoroutineRequeryTemplate(dataStore) }
+    private val coroutineTemplate by lazy { KotlinCoroutineRequeryTemplate(kotlinDataStore) }
 
     @Before
     fun setup() {

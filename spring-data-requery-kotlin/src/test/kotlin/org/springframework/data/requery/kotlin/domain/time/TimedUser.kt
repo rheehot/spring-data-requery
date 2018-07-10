@@ -2,21 +2,18 @@ package org.springframework.data.requery.kotlin.domain.time
 
 import io.requery.Entity
 import io.requery.Key
-import io.requery.Persistable
-import io.requery.Table
-import java.io.Serializable
+import org.springframework.data.requery.kotlin.domain.PersistableObject
 import java.net.URL
 import java.util.*
 
 /**
- * User
+ * TimedUser
  *
  * @author debop@coupang.com
  * @since 18. 5. 14
  */
-@Entity(name = "TimedUser")
-@Table(name = "TimedUser")
-interface User: Persistable, Serializable {
+@Entity
+interface TimedUser: PersistableObject {
 
     @get:Key
     var id: UUID

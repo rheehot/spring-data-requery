@@ -17,7 +17,7 @@ interface Role: PersistableObject {
 
     @get:Key
     @get:Generated
-    val id: Int
+    val id: Int?
 
     var name: String
 }

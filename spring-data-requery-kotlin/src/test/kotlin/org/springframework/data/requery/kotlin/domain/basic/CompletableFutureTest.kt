@@ -22,7 +22,7 @@ class CompletableFutureTest: AbstractDomainTest() {
     @Before
     fun setup() {
 
-        asyncEntityStore = KotlinCompletableEntityStore(dataStore, ForkJoinPool.commonPool())
+        asyncEntityStore = KotlinCompletableEntityStore(kotlinDataStore, ForkJoinPool.commonPool())
 
         operations.deleteAll(BasicLocationEntity::class)
         operations.deleteAll(BasicGroupEntity::class)

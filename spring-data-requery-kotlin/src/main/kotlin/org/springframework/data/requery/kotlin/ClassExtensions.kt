@@ -5,6 +5,7 @@ package org.springframework.data.requery.kotlin
 import io.requery.query.NamedExpression
 import mu.KotlinLogging
 import org.springframework.util.LinkedMultiValueMap
+import java.lang.reflect.AnnotatedElement
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -35,8 +36,8 @@ fun <T> T?.asOptional(): Optional<T> = Optional.ofNullable(this)
 private val classFieldCache = ConcurrentHashMap<String, Field?>()
 private val classMethodCache = ConcurrentHashMap<String, Method?>()
 
-private val entityFields = LinkedMultiValueMap<Class<*>, Field>()
-private val entityMethods = LinkedMultiValueMap<Class<*>, Method>()
+private val entityFieldCache = LinkedMultiValueMap<Class<*>, Field>()
+private val entityMethodCache = LinkedMultiValueMap<Class<*>, Method>()
 
 fun Class<*>.findField(fieldName: String): Field? {
 
@@ -60,9 +61,9 @@ fun Class<*>.findField(fieldName: String): Field? {
     }
 }
 
-fun Class<*>.findFields(predicate: (Field) -> Boolean): List<Field> {
+fun Class<*>.findFields(predicate: (Field) -> Boolean): Set<Field> {
 
-    val foundFields = mutableListOf<Field>()
+    val foundFields = mutableSetOf<Field>()
     var targetClass: Class<*>? = this
 
     while(targetClass != null && !targetClass.isAnyClass) {
@@ -113,9 +114,9 @@ fun Class<*>.findMethod(methodName: String, vararg paramTypes: Class<*>): Method
     }
 }
 
-fun Class<*>.findMethods(predicate: (Method) -> Boolean): List<Method> {
+fun Class<*>.findMethods(predicate: (Method) -> Boolean): MutableSet<Method> {
 
-    val foundMethods = mutableListOf<Method>()
+    val foundMethods = mutableSetOf<Method>()
     var targetClass: Class<*>? = this
 
     while(targetClass != null && !targetClass.isAnyClass) {
@@ -173,29 +174,46 @@ fun Class<*>.findRequeryEntity(): Class<*>? {
 
 fun Class<*>.findEntityFields(): List<Field> {
 
-    return entityFields.computeIfAbsent(this) { clazz ->
-        clazz.findFields(Field::isRequeryEntityField)
+    return entityFieldCache.computeIfAbsent(this) { clazz ->
+        val klazz = clazz.findRequeryEntity()
+        klazz?.findFields(Field::isRequeryEntityField)?.toList()
+    }
+}
+
+fun Class<*>.findEntityMethods(): List<Method> {
+    return entityMethodCache.computeIfAbsent(this) { clazz ->
+        val klazz = clazz.findRequeryEntity()
+        klazz?.findMethods { it.isRequeryEntityMethod() }?.toList()
     }
 }
 
 fun Field.isRequeryEntityField(): Boolean {
-    return !isRequeryGeneratedField()
+    return !this.isRequeryGeneratedField()
+}
+
+fun Method.isRequeryEntityMethod(): Boolean {
+    return !this.isRequeryGeneratedMethod() && !this.isDefault
 }
 
 fun Field.isRequeryGeneratedField(): Boolean {
-
     return (modifiers and Modifier.STATIC) > 0 ||
            (name == "\$proxy") ||
            (name.startsWith("\$") && name.endsWith("_state"))
 }
 
-fun Field.isKeyField(): Boolean = isAnnotationPresent(io.requery.Key::class.java)
+fun Method.isRequeryGeneratedMethod(): Boolean {
+    return (modifiers and Modifier.STATIC) > 0 ||
+           this.isVarArgs ||
+           this.parameterCount > 0
+}
 
-fun Field.isTransientField(): Boolean = isAnnotationPresent(io.requery.Transient::class.java)
+fun AnnotatedElement.isKeyAnnoatedElement(): Boolean = isAnnotationPresent(io.requery.Key::class.java)
 
-fun Field.isEmbeddedField(): Boolean = isAnnotationPresent(io.requery.Embedded::class.java)
+fun AnnotatedElement.isTransientAnnotatedElement(): Boolean = isAnnotationPresent(io.requery.Transient::class.java)
 
-fun Field.isAssociationField(): Boolean =
+fun AnnotatedElement.isEmbeddedAnnoatedElement(): Boolean = isAnnotationPresent(io.requery.Embedded::class.java)
+
+fun AnnotatedElement.isAssociatedAnnotatedElement(): Boolean =
     isAnnotationPresent(io.requery.OneToOne::class.java) ||
     isAnnotationPresent(io.requery.OneToMany::class.java) ||
     isAnnotationPresent(io.requery.ManyToOne::class.java) ||
@@ -222,7 +240,7 @@ fun <V: Any> Class<*>.getKeyExpression(): NamedExpression<V> {
                         log.debug { "Not found @Key property. class=${this.simpleName} " }
                         UNKNOWN_KEY_EXPRESSION
                     }
-                    else -> namedExpressionOf(method.extractFieldname(), method.returnType)
+                    else -> namedExpressionOf(method.extractGetterSetter(), method.returnType)
                 }
             }
             else -> namedExpressionOf(field.name, field.type)
@@ -243,10 +261,10 @@ fun Class<*>.getExpression(propertyName: String): NamedExpression<*>? {
         val field = this.findFirstField { it.name == propertyName }
         when(field) {
             null -> {
-                val method = this.findFirstMethod { it.extractFieldname() == propertyName }
+                val method = this.findFirstMethod { it.extractGetterSetter() == propertyName }
                 when(method) {
                     null -> null
-                    else -> NamedExpression.of(method.extractFieldname(), method.returnType)
+                    else -> NamedExpression.of(method.extractGetterSetter(), method.returnType)
                 }
             }
             else -> NamedExpression.of(field.name, field.type)
@@ -265,10 +283,10 @@ fun Class<*>.getRequeryEntityName(): String {
 /**
  * Getter method로부터 field name을 추출합니다.
  */
-fun Method.extractFieldname(): String {
+fun Method.extractGetterSetter(): String {
     return when {
-        name.contains("get") -> name.removePrefix("get").decapitalize()
-        name.contains("set") -> name.removePrefix("set").decapitalize()
+        name.startsWith("get") -> name.removePrefix("get").decapitalize()
+        name.startsWith("set") -> name.removePrefix("set").decapitalize()
         else -> name.decapitalize()
     }
 }

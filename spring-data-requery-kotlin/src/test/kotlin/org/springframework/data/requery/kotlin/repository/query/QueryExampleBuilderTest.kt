@@ -22,7 +22,7 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
 
     private fun userQueryByExample(example: Example<UserEntity>): QueryElement<out Result<UserEntity>> {
         val base = operations.select(UserEntity::class).unwrap()
-        return QueryByExampleBuilder.getWhereAndOr(base, example)
+        return QueryByExampleBuilder.build(base, example)
     }
 
     @Test
@@ -30,6 +30,7 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
 
         val user = UserEntity().apply { firstname = "example"; emailAddress = "debop@example.com" }
         operations.insert(user)
+        assertThat(user.id).isNotNull().isGreaterThan(0)
 
         val exampleUser = UserEntity().apply { firstname = user.firstname }
         val example = Example.of(exampleUser)
@@ -37,7 +38,8 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
         val query = userQueryByExample(example)
 
         val foundUser = query.get().firstOrNull()
-        assertThat(foundUser).isNotNull.isEqualTo(user)
+        assertThat(foundUser).isNotNull
+        assertThat(foundUser.id).isEqualTo(user.id)
     }
 
     @Test
@@ -45,6 +47,7 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
 
         val user = UserEntity().apply { firstname = "example"; emailAddress = "debop@example.com" }
         operations.insert(user)
+        assertThat(user.id).isNotNull().isGreaterThan(0)
 
         val exampleUser = UserEntity().apply { firstname = user.firstname; emailAddress = user.emailAddress }
         val example = Example.of(exampleUser)
@@ -52,7 +55,8 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
         val query = userQueryByExample(example)
 
         val foundUser = query.get().firstOrNull()
-        assertThat(foundUser).isNotNull.isEqualTo(user)
+        assertThat(foundUser).isNotNull
+        assertThat(foundUser.id).isEqualTo(user.id)
     }
 
     @Test
@@ -60,6 +64,7 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
 
         val user = UserEntity().apply { firstname = "example"; emailAddress = "debop@example.com" }
         operations.insert(user)
+        assertThat(user.id).isNotNull().isGreaterThan(0)
 
         val exampleUser = UserEntity().apply { firstname = "EXA" }
 
@@ -67,11 +72,12 @@ class QueryExampleBuilderTest: AbstractDomainTest() {
                                  matching()
                                      .withMatcher("firstname", startsWith().ignoreCase())
                                      .withIgnoreNullValues()
-                                     .withIgnorePaths("lastname", "emailAddress"))
+                                     .withIgnorePaths("lastname", "emailAddress", "roles"))
 
         val query = userQueryByExample(example)
 
         val foundUser = query.get().firstOrNull()
-        assertThat(foundUser).isNotNull.isEqualTo(user)
+        assertThat(foundUser).isNotNull
+        assertThat(foundUser.id).isEqualTo(user.id)
     }
 }

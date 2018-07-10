@@ -6,7 +6,6 @@ import org.junit.Test
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher.matching
 import org.springframework.data.requery.kotlin.domain.AbstractDomainTest
-import org.springframework.data.requery.kotlin.domain.sample.User
 import org.springframework.data.requery.kotlin.domain.sample.UserEntity
 
 /**
@@ -23,7 +22,7 @@ class ExampleExtensionsTest: AbstractDomainTest() {
 
         val example = Example.of(user, matching().withIgnoreNullValues())
 
-        val queryElement = example.buildQueryElement(operations, User::class)
+        val queryElement = example.buildQueryElement(operations, UserEntity::class)
 
         assertThat(queryElement).isNotNull
         assertThat(queryElement.whereElements).hasSize(1)
