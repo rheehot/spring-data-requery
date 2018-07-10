@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.QueryMethod
 import org.springframework.data.repository.query.RepositoryQuery
 import org.springframework.data.repository.query.ReturnedType
 import org.springframework.data.requery.kotlin.core.RequeryOperations
-import org.springframework.data.requery.utils.RequeryMetamodel
+import org.springframework.data.requery.kotlin.utils.RequeryMetamodel
 
 /**
  * Abstract base class to implement [RepositoryQuery]s.

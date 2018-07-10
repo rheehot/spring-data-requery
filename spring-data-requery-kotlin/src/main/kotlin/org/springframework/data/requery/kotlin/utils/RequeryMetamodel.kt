@@ -1,4 +1,4 @@
-package org.springframework.data.requery.utils
+package org.springframework.data.requery.kotlin.utils
 
 import io.requery.meta.EntityModel
 

@@ -12,8 +12,8 @@ import kotlin.reflect.KClass
 
 /**
  * Kotlin Coroutines를 활용한 [RequeryOperations] 입니다.
+
  * @author debop
- * @since 18. 6. 2
  */
 interface KotlinCoroutineRequeryOperations {
 
