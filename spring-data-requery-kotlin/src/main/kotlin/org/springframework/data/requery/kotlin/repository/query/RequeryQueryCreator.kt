@@ -17,6 +17,7 @@ import org.springframework.data.requery.kotlin.applySort
 import org.springframework.data.requery.kotlin.core.RequeryOperations
 import org.springframework.data.requery.kotlin.unwrap
 import org.springframework.data.requery.query.Expressions
+import java.util.*
 
 /**
  * Query creator to create a [QueryElement] from a [PartTree].
@@ -227,6 +228,7 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
 
         fun shouldIgnoreCase(): Boolean = part.shouldIgnoreCase() != Part.IgnoreCaseType.NEVER
 
-        fun Any.toUpperCase(): String = this.toString().toUpperCase()
+        fun Any.toUpperCase(): String = this.toString().toUpperCase(Locale.getDefault())
+
     }
 }
