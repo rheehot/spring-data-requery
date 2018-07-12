@@ -8,6 +8,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.requery.kotlin.configs.RequeryTestConfiguration
 import org.springframework.data.requery.kotlin.domain.sample.RoleEntity
 import org.springframework.data.requery.kotlin.domain.sample.UserEntity
@@ -101,5 +102,60 @@ class UserRepositoryFinderTest {
 
         val user = userRepository.findByEmailAddress("foobar")
         assertThat(user).isNull()
+    }
+
+    @Test
+    fun `where with and or finder`() {
+
+        val users = userRepository.findByEmailAddressAndLastnameOrFirstname("dave@dmband.com", "Matthews", "Carter")
+
+        assertThat(users)
+            .hasSize(2)
+            .containsOnly(dave, carter)
+    }
+
+    @Test
+    fun `executes paging method to page correctly`() {
+
+        val users = userRepository.findByFirstname("Carter", PageRequest.of(0, 1))
+        assertThat(users).hasSize(1)
+    }
+
+    @Test
+    fun `execute In keyword for page`() {
+
+        val page = userRepository.findByFirstnameIn(PageRequest.of(0, 1), "Dave", "Oliver Auguest")
+
+        assertThat(page.numberOfElements).isEqualTo(1)
+        assertThat(page.totalElements).isEqualTo(2L)
+        assertThat(page.totalPages).isEqualTo(2)
+    }
+
+    @Test
+    fun `execute NotIn query`() {
+
+        val result = userRepository.findByFirstnameNotIn(arrayListOf("Dave", "Carter"))
+        assertThat(result).hasSize(1).containsOnly(oliver)
+    }
+
+    @Test
+    fun `find by lastname ignoring case`() {
+
+        val result = userRepository.findByLastnameIgnoringCase("BeAUfoRd")
+        assertThat(result).hasSize(1).containsOnly(carter)
+    }
+
+    @Test
+    fun `find by lastname ignoring case like`() {
+
+        val result = userRepository.findByLastnameIgnoringCaseLike("BeAUfo%")
+        assertThat(result).hasSize(1).containsOnly(carter)
+    }
+
+    @Test
+    fun `find by lastname and firstname all ignoring case`() {
+
+        val result = userRepository.findByLastnameAndFirstnameAllIgnoringCase("MaTTheWs", "DaVe")
+        assertThat(result).hasSize(1).containsOnly(dave)
     }
 }

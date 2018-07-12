@@ -179,7 +179,8 @@ internal class PagedExecution(val parameters: RequeryParameters): RequeryQueryEx
 
         selection.unwrap().whereElements.addAll(queryElement.whereElements)
 
-        return RequeryResultConverter.convert(selection.get().firstOrNull(), 0L) as Long
+        val result = RequeryResultConverter.convert(selection.get().firstOrNull(), 0L) as Int
+        return result.toLong()
     }
 }
 
