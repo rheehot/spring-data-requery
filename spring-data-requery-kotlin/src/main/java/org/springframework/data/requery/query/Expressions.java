@@ -19,7 +19,6 @@ public final class Expressions {
 
     private Expressions() {}
 
-
     @SuppressWarnings("unchecked")
     public static <V> LogicalCondition<? extends Expression<V>, Collection<V>> in(@NotNull FieldExpression<V> expression,
                                                                                   @NotNull Collection<V> values) {
