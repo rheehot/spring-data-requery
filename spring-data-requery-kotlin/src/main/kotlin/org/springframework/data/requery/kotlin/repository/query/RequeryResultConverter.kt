@@ -17,7 +17,7 @@ object RequeryResultConverter {
             when(result) {
                 is Tuple ->
                     when {
-                        result.count() == 1 -> result.get(0)
+                        result.count() == 1 -> result.get(0) as Int
                         else -> result
                     }
                 else -> result
