@@ -20,15 +20,8 @@ plugins {
 apply plugin: "java"
 apply plugin: "net.ltgt.apt"
 
-//sourceSets {
-//    generated {
-//        "${buildDir}/generated/source/apt/main/"
-//    }
-//}
-
 idea {
     module {
-//        sourceDirs += file("${buildDir}/generated/source/apt/main/")
         testSourceDirs += file("${buildDir}/generated/source/apt/test/")
         generatedSourceDirs += file("${buildDir}/generated/source/apt/main/")
     }

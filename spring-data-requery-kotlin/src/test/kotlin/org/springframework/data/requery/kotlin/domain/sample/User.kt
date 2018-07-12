@@ -31,17 +31,17 @@ interface User: PersistableObject {
     @get:Column(nullable = false, unique = true)
     var emailAddress: String
 
-    //    @get:JunctionTable(name = "User_Colleagues", columns = [Column(name = "userId"), Column(name = "friendId")])
-    //    @get:ManyToMany
-    //    val colleagues: MutableSet<User>
+    @get:JunctionTable(name = "User_Colleagues", columns = [Column(name = "userId"), Column(name = "friendId")])
+    @get:ManyToMany
+    val colleagues: MutableSet<User>
 
     @get:JunctionTable
     @get:ManyToMany
     val roles: MutableSet<Role>
 
-    //    @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.CASCADE)
-    //    @get:ManyToOne
-    //    var manager: User?
+    @get:ForeignKey(delete = ReferentialAction.SET_NULL, update = ReferentialAction.CASCADE)
+    @get:ManyToOne
+    var manager: User?
 
     @get:Embedded
     val address: Address?
