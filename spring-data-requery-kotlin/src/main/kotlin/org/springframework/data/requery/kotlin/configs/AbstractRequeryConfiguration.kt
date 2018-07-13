@@ -33,10 +33,6 @@ abstract class AbstractRequeryConfiguration {
         private val log = KotlinLogging.logger { }
     }
 
-    @Autowired lateinit var applicationContext: ApplicationContext
-
-    @Autowired lateinit var dataSource: DataSource
-
     @Bean
     abstract fun getEntityModel(): EntityModel
 
@@ -45,8 +41,8 @@ abstract class AbstractRequeryConfiguration {
     }
 
     @Bean
-    fun requeryConfiguration(): io.requery.sql.Configuration {
-        return ConfigurationBuilder(dataSource, getEntityModel())
+    fun requeryConfiguration(dataSource: DataSource, entityModel: EntityModel): io.requery.sql.Configuration {
+        return ConfigurationBuilder(dataSource, entityModel)
             .setEntityCache(EmptyEntityCache())
             .setStatementCacheSize(1024)
             .setBatchUpdateSize(100)
@@ -55,28 +51,32 @@ abstract class AbstractRequeryConfiguration {
     }
 
     @Bean(destroyMethod = "close")
-    fun entityDataStore(): KotlinEntityDataStore<Any> {
-        return KotlinEntityDataStore<Any>(requeryConfiguration()).apply {
+    fun entityDataStore(configuration: io.requery.sql.Configuration): KotlinEntityDataStore<Any> {
+        return KotlinEntityDataStore<Any>(configuration).apply {
             log.info { "Create Requery EntityDataStore instance." }
         }
     }
 
     @Bean
-    fun requeryOperations(): RequeryOperations {
+    fun requeryOperations(entityDataStore: KotlinEntityDataStore<Any>, mappingContext: RequeryMappingContext): RequeryOperations {
         log.info { "Create RequeryOperations instance." }
-        return RequeryTemplate(applicationContext, entityDataStore(), requeryMappingContext())
+        return RequeryTemplate(entityDataStore, mappingContext)
     }
 
-    fun requeryMappingContext(): RequeryMappingContext {
+    @Bean
+    fun requeryMappingContext(applicationContext: ApplicationContext): RequeryMappingContext {
         return RequeryMappingContext().apply {
             setApplicationContext(applicationContext)
         }
     }
 
     @Bean
-    fun transactionManager(): PlatformTransactionManager {
-        return RequeryTransactionManager(entityDataStore(), dataSource)
+    fun transactionManager(entityDataStore: KotlinEntityDataStore<Any>, dataSource: DataSource): PlatformTransactionManager {
+        return RequeryTransactionManager(entityDataStore, dataSource)
     }
+
+    @Autowired
+    lateinit var configuration: io.requery.sql.Configuration
 
     /**
      * DB Schema 생성이 필요할 경우, Application 시작 시, 존재하지 않는 TABLE을 생성하도록 해줍니다.
@@ -85,7 +85,7 @@ abstract class AbstractRequeryConfiguration {
     protected fun buildSchema() {
         log.info { "Create Database Schema..." }
         try {
-            val schema = SchemaModifier(requeryConfiguration())
+            val schema = SchemaModifier(configuration)
             log.debug { schema.createTablesString(getTableCreationMode()) }
             schema.createTables(getTableCreationMode())
             log.info { "Success to create database schema" }

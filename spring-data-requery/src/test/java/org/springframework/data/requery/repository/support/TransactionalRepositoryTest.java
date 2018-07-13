@@ -1,5 +1,6 @@
 package org.springframework.data.requery.repository.support;
 
+import io.requery.sql.EntityDataStore;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -7,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.requery.configs.RequeryTestConfiguration;
 import org.springframework.data.requery.domain.RandomData;
@@ -19,6 +21,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
+import javax.sql.DataSource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -30,9 +34,10 @@ public class TransactionalRepositoryTest {
     @EnableRequeryRepositories(basePackageClasses = { BasicUserRepository.class })
     static class TestConfiguration extends RequeryTestConfiguration {
 
+        @Bean
         @Override
-        public PlatformTransactionManager transactionManager() {
-            return new DelegatingTransactionManager(super.transactionManager());
+        public PlatformTransactionManager transactionManager(EntityDataStore<Object> entityDataStore, DataSource dataSource) {
+            return new DelegatingTransactionManager(super.transactionManager(entityDataStore, dataSource));
         }
     }
 

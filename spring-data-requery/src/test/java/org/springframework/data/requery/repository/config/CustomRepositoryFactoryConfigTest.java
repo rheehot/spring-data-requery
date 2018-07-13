@@ -1,9 +1,11 @@
 package org.springframework.data.requery.repository.config;
 
+import io.requery.sql.EntityDataStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.requery.configs.RequeryTestConfiguration;
 import org.springframework.data.requery.repository.custom.CustomGenericRequeryRepository;
@@ -13,6 +15,8 @@ import org.springframework.data.requery.repository.support.TransactionalReposito
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,12 +36,11 @@ public class CustomRepositoryFactoryConfigTest {
                                repositoryFactoryBeanClass = CustomGenericRequeryRepositoryFactoryBean.class)
     static class TestConfiguration extends RequeryTestConfiguration {
 
+        @Bean
         @Override
-        public PlatformTransactionManager transactionManager() {
-            return new DelegatingTransactionManager(super.transactionManager());
+        public PlatformTransactionManager transactionManager(EntityDataStore<Object> entityDataStore, DataSource dataSource) {
+            return new DelegatingTransactionManager(super.transactionManager(entityDataStore, dataSource));
         }
-
-
     }
 
     @Autowired(required = false) UserCustomExtendedRepository userRepository;

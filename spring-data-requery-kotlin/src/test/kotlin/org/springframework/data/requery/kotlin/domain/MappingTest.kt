@@ -13,6 +13,9 @@ class MappingTest: AbstractDomainTest() {
 
     @Test
     fun `verify mapping entities`() {
+
+        operations.deleteAll(UserEntity::class)
+
         val user = UserEntity().apply {
             firstname = "Debop"
             lastname = "Bae"

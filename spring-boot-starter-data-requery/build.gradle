@@ -29,18 +29,16 @@ idea {
 
 dependencies {
 
-    compile project(":spring-data-requery")
+    optional project(":spring-data-requery")
 
-    // lombok을 gradle 에서 사용하기 위해 annotation process를 설정해주어야 합니다.
-    compileOnly "org.projectlombok:lombok"
-    annotationProcessor "org.projectlombok:lombok"
+    optional "org.springframework.boot:spring-boot-autoconfigure"
+    optional "org.springframework.boot:spring-boot-autoconfigure-processor"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
     testAnnotationProcessor "org.projectlombok:lombok"
-
-    annotationProcessor "io.requery:requery-processor"
     testAnnotationProcessor "io.requery:requery-processor"
 
-    compile("mysql:mysql-connector-java")
-
     // spring framework
-    compile("org.springframework.boot:spring-boot-starter-web")
+    testImplementation("org.springframework.boot:spring-boot-starter-jdbc")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

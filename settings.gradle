@@ -2,9 +2,12 @@ rootProject.name = 'spring-data-requery-parent'
 
 include 'spring-data-requery'
 include 'spring-data-requery-kotlin'
-include 'spring-data-requery-test'
-include 'spring-data-requery-kotlin-test'
+include 'spring-boot-starter-data-requery'
 
-//include 'spring-boot-starter-data-requery'
-include 'spring-data-jpa-benchmark'
+// for example
+//include 'spring-data-requery-test'
+//include 'spring-data-requery-kotlin-test'
+
+// for benchmark
+// include 'spring-data-jpa-benchmark'
 

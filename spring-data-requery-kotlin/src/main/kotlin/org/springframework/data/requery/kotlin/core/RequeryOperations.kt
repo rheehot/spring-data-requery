@@ -12,7 +12,6 @@ import io.requery.query.element.QueryElement
 import io.requery.query.function.Count
 import io.requery.sql.EntityContext
 import io.requery.sql.KotlinEntityDataStore
-import org.springframework.context.ApplicationContext
 import org.springframework.data.requery.kotlin.applyWhereConditions
 import org.springframework.data.requery.kotlin.getEntityContext
 import org.springframework.data.requery.kotlin.getEntityModel
@@ -26,7 +25,6 @@ import kotlin.reflect.KClass
  */
 interface RequeryOperations {
 
-    val applicationContext: ApplicationContext
     val dataStore: KotlinEntityDataStore<Any>
     val mappingContext: RequeryMappingContext
 

@@ -51,7 +51,7 @@ public class RequeryRepositoryFactoryBean<T extends Repository<S, ID>, S, ID>
 
     @Override
     public void afterPropertiesSet() {
-        Assert.state(operations != null, "RequeryOperations must not be null!");
+//        Assert.state(operations != null, "RequeryOperations must not be null!");
 
         log.debug("Before afterPropertiesSet");
         try {

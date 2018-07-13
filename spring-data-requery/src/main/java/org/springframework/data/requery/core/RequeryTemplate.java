@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.requery.mapping.RequeryMappingContext;
 import org.springframework.util.Assert;
 
@@ -23,19 +22,19 @@ import java.util.function.Function;
 @Getter
 public class RequeryTemplate implements RequeryOperations {
 
-    private final ApplicationContext applicationContext;
+    //    private final ApplicationContext applicationContext;
     private final EntityDataStore<Object> dataStore;
     private final RequeryMappingContext mappingContext;
 
-    public RequeryTemplate(@NotNull ApplicationContext applicationContext,
+    public RequeryTemplate(/*@NotNull ApplicationContext applicationContext,*/
                            @NotNull EntityDataStore<Object> dataStore,
                            @NotNull RequeryMappingContext mappingContext) {
 
-        Assert.notNull(applicationContext, "applicationContext must not be null");
+//        Assert.notNull(applicationContext, "applicationContext must not be null");
         Assert.notNull(dataStore, "dataStore must not be null");
         Assert.notNull(mappingContext, "mappingContext must not be null");
 
-        this.applicationContext = applicationContext;
+//        this.applicationContext = applicationContext;
         this.dataStore = dataStore;
         this.mappingContext = mappingContext;
     }

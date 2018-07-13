@@ -10,7 +10,6 @@ import io.requery.query.function.Count;
 import io.requery.sql.EntityContext;
 import io.requery.sql.EntityDataStore;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.requery.mapping.RequeryMappingContext;
 import org.springframework.data.requery.utils.Iterables;
 import org.springframework.data.requery.utils.RequeryUtils;
@@ -30,7 +29,7 @@ import static org.springframework.data.requery.utils.RequeryUtils.unwrap;
  */
 public interface RequeryOperations {
 
-    ApplicationContext getApplicationContext();
+//    ApplicationContext getApplicationContext();
 
     EntityDataStore<Object> getDataStore();
 

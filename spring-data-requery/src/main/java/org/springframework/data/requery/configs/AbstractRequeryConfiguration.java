@@ -32,12 +32,6 @@ import javax.sql.DataSource;
 @Configuration
 public abstract class AbstractRequeryConfiguration {
 
-    @Autowired
-    ApplicationContext applicationContext;
-
-    @Autowired
-    DataSource dataSource;
-
     /**
      * Requery용 EntityModel 을 지정해주셔야 합니다. 기본적으로 Models.DEFAULT 를 지정해주시면 됩니다.
      */
@@ -54,11 +48,11 @@ public abstract class AbstractRequeryConfiguration {
     }
 
     @Bean
-    public io.requery.sql.Configuration requeryConfiguration() {
+    public io.requery.sql.Configuration requeryConfiguration(DataSource dataSource, EntityModel entityModel) {
         Assert.notNull(dataSource, "dataSource must not be null");
         Assert.notNull(getEntityModel(), "enittymodel must not be null");
 
-        return new ConfigurationBuilder(dataSource, getEntityModel())
+        return new ConfigurationBuilder(dataSource, entityModel)
             // .useDefaultLogging()
             .setEntityCache(new EmptyEntityCache())
             .setStatementCacheSize(1024)
@@ -68,30 +62,32 @@ public abstract class AbstractRequeryConfiguration {
     }
 
     @Bean(destroyMethod = "close")
-    public EntityDataStore<Object> entityDataStore() {
+    public EntityDataStore<Object> entityDataStore(io.requery.sql.Configuration configuration) {
         log.info("Create EntityDataStore instance.");
-        return new EntityDataStore<>(requeryConfiguration());
+        return new EntityDataStore<>(configuration);
     }
 
     @Bean
-    public RequeryOperations requeryOperations() {
+    public RequeryOperations requeryOperations(EntityDataStore<Object> entityDataStore, RequeryMappingContext mappingContext) {
         log.info("Create RequeryTemplate instance.");
-        return new RequeryTemplate(applicationContext, entityDataStore(), requeryMappingContext());
+        return new RequeryTemplate(entityDataStore, mappingContext);
     }
 
     // TODO: 꼭 필요한 Class 인지 다시 판단해보자.
     @Bean
-    public RequeryMappingContext requeryMappingContext() {
+    public RequeryMappingContext requeryMappingContext(ApplicationContext applicationContext) {
         RequeryMappingContext context = new RequeryMappingContext();
         context.setApplicationContext(applicationContext);
         return context;
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager() {
-        return new RequeryTransactionManager(entityDataStore(), dataSource);
+    public PlatformTransactionManager transactionManager(EntityDataStore<Object> entityDataStore, DataSource dataSource) {
+        return new RequeryTransactionManager(entityDataStore, dataSource);
     }
 
+
+    @Autowired io.requery.sql.Configuration configuration;
     /**
      * 사용할 Database에 Requery Entity에 해당하는 Schema 를 생성하는 작업을 수행합니다.
      */
@@ -100,7 +96,7 @@ public abstract class AbstractRequeryConfiguration {
         log.info("Setup Requery Database Schema... mode={}", getTableCreationMode());
 
         try {
-            SchemaModifier schema = new SchemaModifier(requeryConfiguration());
+            SchemaModifier schema = new SchemaModifier(configuration);
             log.debug(schema.createTablesString(getTableCreationMode()));
             schema.createTables(getTableCreationMode());
             log.info("Success to setup database schema!!!");
