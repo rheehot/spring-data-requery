@@ -143,20 +143,63 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
                 NOT_IN, IN -> {
                     val values = provider.next(part, Collection::class.java).value
 
-                    log.debug { "IN, NOT IN values type=${values.javaClass}, values=$values" }
+                    log.debug { "IN, NOT IN values type=${values?.javaClass?.simpleName}, values=${values}" }
 
-                    when(values) {
-                        is Iterable<*> ->
-                            if(type == IN) Expressions.`in`(expr, values.toList())
-                            else Expressions.notIn(expr, values.toList())
+                    values?.let {
+                        when(values) {
+                            is Iterable<*> -> {
+                                log.trace { "value is iterable. values=${values.toList()}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
 
-                        is Array<*> ->
-                            if(type == IN) Expressions.`in`(expr, values.toList())
-                            else Expressions.notIn(expr, values.toList())
+                            is Array<*> -> {
+                                log.trace { "value is array. values=${values.toList()}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
 
-                        else ->
-                            if(type == IN) expr.`in`(values) else expr.notIn(values)
-                    }
+                        // TODO: Kotlin Primitive Array 인지 다 추가해주어야 합니다.
+
+                            is IntArray -> {
+                                log.trace { "value is array. values=${values}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
+                            is LongArray -> {
+                                log.trace { "value is array. values=${values}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
+                            is ShortArray -> {
+                                log.trace { "value is array. values=${values}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
+                            is CharArray -> {
+                                log.trace { "value is array. values=${values}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
+                            is ByteArray -> {
+                                log.trace { "value is array. values=${values}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
+                            is FloatArray -> {
+                                log.trace { "value is array. values=${values}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
+                            is DoubleArray -> {
+                                log.trace { "value is array. values=${values}" }
+                                if(type == IN) Expressions.`in`(expr, values.toList())
+                                else Expressions.notIn(expr, values.toList())
+                            }
+                            else ->
+                                if(type == IN) expr.`in`(values) else expr.notIn(values)
+                        }
+                    } ?: error("Not provided in columns")
                 }
 
                 STARTING_WITH -> expr.like(provider.next(part, String::class.java).value.toString() + "%")
