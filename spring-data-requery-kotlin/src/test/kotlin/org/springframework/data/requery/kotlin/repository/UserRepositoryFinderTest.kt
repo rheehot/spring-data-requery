@@ -79,6 +79,8 @@ class UserRepositoryFinderTest {
 
     @Before
     fun setup() {
+        roleRepository.deleteAll()
+        userRepository.deleteAll()
 
         drummer = roleRepository.save(RoleEntity().apply { name = "DRUMMER" })
         guitarist = roleRepository.save(RoleEntity().apply { name = "GUITARIST" })
@@ -138,7 +140,6 @@ class UserRepositoryFinderTest {
 
     @Test
     fun `execute NotIn query`() {
-
         val result = userRepository.findByFirstnameNotIn(arrayListOf("Dave", "Carter"))
         assertThat(result).hasSize(1).containsOnly(oliver)
     }

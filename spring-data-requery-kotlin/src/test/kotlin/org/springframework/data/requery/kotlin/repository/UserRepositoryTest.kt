@@ -662,14 +662,14 @@ class UserRepositoryTest {
     fun executesFinderWithAfterKeywordCorrectly() {
 
         flushTestUsers()
-        assertThat(repository.findByCreatedAtAfter(secondUser.createdAt)).containsOnly(thirdUser, fourthUser)
+        assertThat(repository.findByCreatedAtAfter(secondUser.createdAt!!)).containsOnly(thirdUser, fourthUser)
     }
 
     @Test
     fun executesFinderWithBeforeKeywordCorrectly() {
 
         flushTestUsers()
-        assertThat(repository.findByCreatedAtBefore(thirdUser.createdAt)).containsOnly(firstUser, secondUser)
+        assertThat(repository.findByCreatedAtBefore(thirdUser.createdAt!!)).containsOnly(firstUser, secondUser)
     }
 
     @Test

@@ -24,9 +24,9 @@ interface User: PersistableObject {
     var lastname: String
 
     var age: Int?
-    var active: Boolean
+    var active: Boolean?
 
-    var createdAt: Timestamp
+    var createdAt: Timestamp?
 
     @get:Column(nullable = false, unique = true)
     var emailAddress: String
