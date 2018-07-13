@@ -58,7 +58,7 @@ object QueryByExampleBuilder {
         val condition = when {
             matcher.isAllMatching -> conditions.foldConditions(LogicalOperator.AND)
             matcher.isAnyMatching -> conditions.foldConditions(LogicalOperator.OR)
-            else -> null
+            else -> conditions.foldConditions(LogicalOperator.AND)
         }
 
         return condition?.let {
@@ -92,7 +92,7 @@ object QueryByExampleBuilder {
                 val fieldType = it.returnType as Class<Any>
                 val fieldValue = beanWrapper.getPropertyValue(fieldName)
 
-                log.trace { "Get condition from Example. method name=$fieldName, value=$fieldValue" }
+                log.trace { "Get condition from Example. method name=$fieldName, value=$fieldValue, type=$fieldType" }
 
                 val expr: NamedExpression<Any> = namedExpressionOf(fieldName, fieldType)
 
@@ -108,11 +108,14 @@ object QueryByExampleBuilder {
                                                             fieldName,
                                                             fieldValue as String))
 
-                    else ->
+                    else -> {
+
                         conditions.add(expr.eq(fieldValue) as Condition<E, *>)
+                    }
                 }
             }
 
+        log.debug { "Build up conditions. conditions size=${conditions.size}" }
         return conditions
     }
 

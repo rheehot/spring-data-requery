@@ -146,31 +146,36 @@ fun Class<out Any>.getOrderingExpressions(sort: Sort): Array<OrderingExpression<
     }.toTypedArray()
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <E: Any> Iterable<Condition<E, *>>.foldConditions(): LogicalCondition<E, *>? {
 
     var result: LogicalCondition<E, *>? = null
 
     this.forEach { cond ->
-        when(result) {
-            null -> result = cond as? LogicalCondition<E, *>
+        log.trace { "Fold conditions. cond=$cond" }
+        result = when(result) {
+            null -> cond as? LogicalCondition<E, *>
             else -> result!!.and(cond)
-        }
+        } as LogicalCondition<E, *>
     }
+
     return result
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <E: Any> Iterable<Condition<E, *>>.foldConditions(operator: LogicalOperator): LogicalCondition<E, *>? {
 
     var result: LogicalCondition<E, *>? = null
 
     this.forEach { cond ->
-        when(result) {
-            null -> result = cond as? LogicalCondition<E, *>
+        log.trace { "Fold conditions. cond=${cond.leftOperand}, ${cond.operator}, ${cond.rightOperand}" }
+        result = when(result) {
+            null -> cond as? LogicalCondition<E, *>
             else -> when(operator) {
                 LogicalOperator.AND -> result!!.and(cond)
                 LogicalOperator.OR -> result!!.or(cond)
                 LogicalOperator.NOT -> result!!.and(cond).not()
-            }
+            } as LogicalCondition<E, *>
         }
     }
 
