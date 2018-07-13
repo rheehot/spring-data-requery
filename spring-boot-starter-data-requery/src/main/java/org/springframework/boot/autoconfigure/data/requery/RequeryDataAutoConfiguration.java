@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.requery.core.RequeryOperations;
 import org.springframework.data.requery.core.RequeryTemplate;
 import org.springframework.data.requery.mapping.RequeryMappingContext;
-import org.springframework.data.requery.repository.support.RequeryRepositoryFactoryBean;
 
 import javax.sql.DataSource;
 
@@ -23,9 +21,7 @@ import javax.sql.DataSource;
  * @author debop
  */
 @Configuration
-@ConditionalOnBean(DataSource.class)
-@ConditionalOnClass({ EntityDataStore.class, RequeryOperations.class })
-@ConditionalOnMissingBean({ RequeryRepositoryFactoryBean.class })
+@ConditionalOnBean({ DataSource.class, EntityDataStore.class })
 @AutoConfigureAfter(RequeryAutoConfiguration.class)
 public class RequeryDataAutoConfiguration {
 
