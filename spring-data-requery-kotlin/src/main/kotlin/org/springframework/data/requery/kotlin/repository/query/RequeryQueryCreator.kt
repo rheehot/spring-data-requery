@@ -143,6 +143,8 @@ open class RequeryQueryCreator(val operations: RequeryOperations,
                 NOT_IN, IN -> {
                     val values = provider.next(part, Collection::class.java).value
 
+                    log.debug { "IN, NOT IN values type=${values.javaClass}, values=$values" }
+
                     when(values) {
                         is Iterable<*> ->
                             if(type == IN) Expressions.`in`(expr, values.toList())

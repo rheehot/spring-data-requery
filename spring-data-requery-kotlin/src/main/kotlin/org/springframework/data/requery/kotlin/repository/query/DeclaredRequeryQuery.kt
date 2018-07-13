@@ -46,11 +46,11 @@ class DeclaredRequeryQuery(queryMethod: RequeryQueryMethod, operations: RequeryO
             pageable.isPaged -> {
                 val values = removePageable(accessor, parameters)
                 val countQuery = "select count(cnt_tbl.*) from ($query) as cnt_tbl"
-                val totals = operations.raw(countQuery, values).first().get<Int>(0)
+                val totals = operations.raw(countQuery, *values).first().get<Long>(0)
 
                 val contentQuery = "$query offset ${pageable.offset} limit ${pageable.pageSize}"
 
-                runNativeQuery(contentQuery, values).castResult(pageable, totals.toLong())
+                runNativeQuery(contentQuery, values).castResult(pageable, totals)
             }
             else -> runNativeQuery(query, parameters).castResult()
         }

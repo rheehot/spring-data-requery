@@ -17,7 +17,13 @@ object RequeryResultConverter {
             when(result) {
                 is Tuple ->
                     when {
-                        result.count() == 1 -> result.get(0) as Int
+                        result.count() == 1 -> {
+                            val column = result.get<Any>(0)
+                            when(column) {
+                                is Number -> column.toInt()
+                                else -> column.toString()
+                            }
+                        }
                         else -> result
                     }
                 else -> result

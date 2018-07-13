@@ -22,7 +22,7 @@ import java.util.stream.Stream
 @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
 interface UserRepository: RequeryRepository<UserEntity, Int>, UserRepositoryCustom {
 
-    fun findByLastname(lastname: String): List<UserEntity>
+    fun findByLastname(lastname: String?): List<UserEntity>
 
     @Transactional
     override fun findById(primaryKey: Int): Optional<UserEntity>
@@ -135,8 +135,8 @@ interface UserRepository: RequeryRepository<UserEntity, Int>, UserRepositoryCust
     fun findColleaguesFor(userId: Int?): List<UserEntity> {
         return operations
             .select(UserEntity::class)
-            .join(User_Colleagues::class).on(UserEntity::id eq User_Colleagues.FRIEND_ID)
-            .where(User_Colleagues.USER_ID.eq(userId))
+            .join(User_Colleagues::class).on(UserEntity::id eq User_Colleagues.USER_ID)
+            .where(User_Colleagues.FRIEND_ID.eq(userId))
             .get()
             .toList()
     }

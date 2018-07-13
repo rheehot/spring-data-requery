@@ -4,11 +4,15 @@ import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort.Direction.ASC
+import org.springframework.data.domain.Sort.Direction.DESC
+import org.springframework.data.domain.Sort.by
 import org.springframework.data.requery.kotlin.configs.RequeryTestConfiguration
 import org.springframework.data.requery.kotlin.domain.sample.RoleEntity
 import org.springframework.data.requery.kotlin.domain.sample.UserEntity
@@ -17,6 +21,7 @@ import org.springframework.data.requery.kotlin.repository.sample.RoleRepository
 import org.springframework.data.requery.kotlin.repository.sample.UserRepository
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.sql.Timestamp
 import java.time.LocalDateTime
@@ -157,5 +162,65 @@ class UserRepositoryFinderTest {
 
         val result = userRepository.findByLastnameAndFirstnameAllIgnoringCase("MaTTheWs", "DaVe")
         assertThat(result).hasSize(1).containsOnly(dave)
+    }
+
+    @Test
+    fun `respects pageable order on query generate from method name`() {
+
+        val ascending = userRepository.findByLastnameIgnoringCase(PageRequest.of(0, 10, by(ASC, "firstname")),
+                                                                  "Matthews")
+
+        val descending = userRepository.findByLastnameIgnoringCase(PageRequest.of(0, 10, by(DESC, "firstname")),
+                                                                   "Matthews")
+
+        assertThat(ascending.totalElements).isEqualTo(2L)
+        assertThat(descending.totalElements).isEqualTo(2L)
+
+        assertThat(ascending.content[0].firstname).isNotEqualTo(descending.content[0].firstname)
+        assertThat(ascending.content[1].firstname).isEqualTo(descending.content[0].firstname)
+    }
+
+    @Test
+    fun `executes query to slice`() {
+
+        val slice = userRepository.findSliceByLastname("Matthews",
+                                                       PageRequest.of(0, 1, ASC, "firstname"))
+
+        assertThat(slice.content).contains(dave)
+        assertThat(slice.hasNext()).isTrue()
+    }
+
+    @Test
+    fun `executes method with not containing on string correctly`() {
+        val users = userRepository.findByLastnameNotContaining("u")
+        assertThat(users).containsOnly(dave, oliver)
+    }
+
+    @Test
+    fun `translates contains to member of`() {
+
+        val singers = userRepository.findByRolesContaining(singer)
+
+        assertThat(singers).hasSize(2).contains(dave, carter)
+
+        assertThat(userRepository.findByRolesContaining(drummer)).contains(carter)
+    }
+
+    @Test
+    fun `translates not contains to member of`() {
+        assertThat(userRepository.findByRolesNotContaining(drummer)).contains(dave, oliver)
+    }
+
+    @Ignore("Transanction propagation 이 NOT_SUPPORTED 일때 예외를 발생해야 한다.")
+    @Test // (expected = InvalidDataAccessApiUsageException.class) // DATAJPA-1023, DATACMNS-959
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    fun rejectsStreamExecutionIfNoSurroundingTransactionActive() {
+        userRepository.findAllByCustomQueryAndStream()
+    }
+
+    @Ignore("Not support Named query")
+    @Test // DATAJPA-1334
+    fun executesNamedQueryWithConstructorExpression() {
+        userRepository.findByNamedQueryWithConstructorExpression()
     }
 }

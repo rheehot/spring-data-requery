@@ -1,6 +1,7 @@
 package org.springframework.data.requery.kotlin.repository.query
 
 import io.requery.PersistenceException
+import io.requery.query.Result
 import io.requery.query.element.QueryElement
 import io.requery.query.function.Count
 import mu.KotlinLogging
@@ -94,7 +95,8 @@ internal class CollectionExecution: RequeryQueryExecution() {
     }
 
     override fun doExecute(query: AbstractRequeryQuery, values: Array<Any>): List<*> {
-        return query.createQueryElement(values).getAsResult().toList()
+        val result = query.createQueryElement(values).get() as Result<*>
+        return result.toList()
     }
 }
 
