@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.data.requery")
 public class RequeryProperties {
 
-    private String modelName = "default";
+    private String modelName = "";
 
     private Integer batchUpdateSize = 100;
 

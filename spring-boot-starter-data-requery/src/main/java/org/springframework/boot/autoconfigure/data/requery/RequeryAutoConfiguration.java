@@ -18,9 +18,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.requery.core.RequeryTransactionManager;
 import org.springframework.data.requery.listeners.LogbackListener;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 
 /**
  * org.springframework.boot.autoconfigure.data.requery.RequeryAutoConfiguration
@@ -41,19 +43,26 @@ public class RequeryAutoConfiguration {
         this.properties = properties;
     }
 
-//    @Bean
-//    @ConditionalOnMissingBean
-//    public EntityModel getEntityModel() {
-//        String modelName = properties.getModelName();
-//        log.debug("Entity model name={}", modelName);
-//
-//        try {
-//            Class<?> clazz = Class.forName(properties.getModelName());
-//            return (EntityModel) clazz.newInstance();
-//        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-//            throw new IllegalArgumentException("Not found model name. model name=" + properties.getModelName());
-//        }
-//    }
+    @Bean
+    @ConditionalOnMissingBean
+    public EntityModel getEntityModel() {
+        try {
+            String modelFullName = properties.getModelName();
+            if (StringUtils.isEmpty(modelFullName)) {
+                throw new IllegalArgumentException("Not provide spring.data.requery.modelName property");
+            }
+            String className = StringUtils.stripFilenameExtension(modelFullName);
+            String modelName = StringUtils.getFilenameExtension(modelFullName);
+            log.debug("Entity model name={}", modelFullName);
+
+            Class<?> clazz = Class.forName(className);
+            Field field = clazz.getField(modelName);
+            return (EntityModel) field.get(null);
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Not found model name. model name=" + properties.getModelName());
+        }
+    }
 
     @Bean
     @ConditionalOnMissingBean

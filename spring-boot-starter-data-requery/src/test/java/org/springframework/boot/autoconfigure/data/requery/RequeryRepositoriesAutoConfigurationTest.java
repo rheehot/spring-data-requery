@@ -1,18 +1,14 @@
 package org.springframework.boot.autoconfigure.data.requery;
 
-import io.requery.meta.EntityModel;
 import io.requery.sql.EntityDataStore;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.requery.domain.CityRepository;
-import org.springframework.boot.autoconfigure.data.requery.domain.Models;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.requery.core.RequeryOperations;
 import org.springframework.data.requery.repository.config.EnableRequeryRepositories;
@@ -37,13 +33,8 @@ public class RequeryRepositoriesAutoConfigurationTest {
     @Configuration
     @EnableAutoConfiguration
     static class TestConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean
-        public EntityModel entityModel() {
-            return Models.DEFAULT;
-        }
     }
+
 
     @Autowired
     private ApplicationContext context;

@@ -32,6 +32,8 @@ public class RequeryDataAutoConfiguration {
     @ConditionalOnBean(EntityDataStore.class)
     public RequeryOperations requeryOperations(EntityDataStore<Object> entityDataStore,
                                                RequeryMappingContext mappingContext) {
+
+        log.info("Create RequeryOperations ...");
         try {
             return new RequeryTemplate(entityDataStore, mappingContext);
         } catch (Exception ex) {
