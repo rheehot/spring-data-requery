@@ -27,13 +27,6 @@ version = '2.0.0-SNAPSHOT'
 allprojects {
 
     repositories {
-        maven {
-            credentials {
-                username "$nexusUser"
-                password "$nexusPassword"
-            }
-            url "http://nexus.coupang.net/content/groups/public"
-        }
         mavenLocal()
         mavenCentral()
         jcenter()
